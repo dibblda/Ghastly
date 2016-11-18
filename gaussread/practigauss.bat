@@ -1,0 +1,1 @@
+java -Dbluecove.stack=widcomm -cp ".;lwjgl-2.8.3\jar\lwjgl.jar;lwjgl-2.8.3\jar\lwjgl_util.jar;lwjgl-2.8.3\jar\slick-util.jar;wiigee\wiigee-lib-1.5.6.jar;wiigee\wiigee-plugin-wiimote-1.5.6.jar;wiigee\avetanaBluetooth.jar;" -Djava.library.path=lwjgl-2.8.3\native\windows PractiGauss
