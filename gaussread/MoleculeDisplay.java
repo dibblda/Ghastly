@@ -112,12 +112,7 @@ public void PassMoleculeGeometry(double [][] atomArray, int [][] bondArray, floa
 }
 
 
-public void PassCameraCoordinates(cameraDisplay coordinates){
-	cameraCoordinates = coordinates;
-        //System.out.println("Made it here2 camera");
-	cameraCoordinatesLoaded = true;
-	return;
-}
+
 
 
 
@@ -138,21 +133,12 @@ public void start() {
 		// Don't do anything until the geometry has been loaded
 	}
 
-	while(!cameraCoordinatesLoaded){
-             try{
-            Thread.sleep(1);
-            }catch(Exception e){
-                
-            }
-		// Don't do anything until the camera has been loaded
-	}
+	
         
 	// start up the display
 	init();
 
-	// set the eye X, Y, Z and origin X, Y, Z and the defaults at the same time
- 	cameraCoordinates.setCoordinates(0.0f, 0.0f, 15.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-
+	
  	
 
 
@@ -201,12 +187,7 @@ public void start() {
 private void doResize(int newWidth, int newHeight){
 float aspectRatio = (float)newWidth / (float)newHeight;
 
-  //GL11.glViewport(0, 0, newWidth, newHeight);
-  //GL11.glMatrixMode(GL11.GL_PROJECTION);
-  //GL11.glPushMatrix();
-  //GL11.glLoadIdentity();
-  //GLU.gluPerspective(40.0f, (float)aspectRatio, 0.1f, 100.0f);  
-  //GL11.glPopMatrix();
+ 
   
   GL11.glMatrixMode(GL11.GL_PROJECTION);
   GL11.glLoadIdentity();

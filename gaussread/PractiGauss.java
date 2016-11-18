@@ -13,8 +13,7 @@ public class PractiGauss extends JFrame implements ActionListener{
 JFrame moleculeControlFrame;
 
 static MoleculeDisplay molecule;
-//static RemoteControl RC = null; 
-cameraDisplay cameraCoordinates = new cameraDisplay();
+
 GaussFile moleculeData = null;
 boolean moleculeDataLoaded = false;
 
@@ -68,20 +67,12 @@ private void loadFile () {
 			moleculeDataLoaded = true;
 			
 			// temporarily here
-			cameraCoordinates.originMarker(true);
-			cameraCoordinates.useSpherical(false);
+			
 			molecule.PassMoleculeGeometry(moleculeData.AtomicCoordinates(), moleculeData.BondArray(), moleculeData.BondGeometry());
-			molecule.PassCameraCoordinates(cameraCoordinates);
+			
                         //molecule.start();
                         
-                        //System.out.println("Made it here");
-                        // load interface to interact wih molecule
-			moleculeControlFrame = new JFrame("Molecule Control Panel");
-			moleculeControlFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-			moleculeControlFrame.setSize(650, 250);
-			moleculeControlFrame.setLocation(200, 200);
-			moleculeControlFrame.setContentPane(new MoleculeViewInterface(cameraCoordinates));
-			moleculeControlFrame.setVisible(true);
+                       
 
 		}
  		return;
