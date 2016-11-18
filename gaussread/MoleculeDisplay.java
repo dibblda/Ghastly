@@ -68,10 +68,7 @@ private double [] CovalentRadii = {0.00,0.32,0.28,1.29,0.96,0.84,0.76,0.71,0.66,
 
 
 private int SINGLE_BOND = 10;
-private int DOUBLE_BOND = 20;
-private int TRIPLE_BOND = 30;
-private int DATIVE_BOND = 5;
-private int DOUBLE_RESONANCE_BOND = 15;
+
 
 private float atomScaling = 0.5f; 
 private float atomSelectScaling = 0.7f;
@@ -441,20 +438,11 @@ private void SelectionInterface(){
 
 
 private void RenderMolecule(){
-// Clear the screen and depth buffer
 
-		
-
-	
 	RenderAtoms();
 	RenderBonds();
-	//MarkOrigin();
 
 	DrawSelectedCursor();
-
-
-	
-
 
 	return;
 
