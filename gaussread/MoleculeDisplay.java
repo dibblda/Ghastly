@@ -47,8 +47,7 @@ private FloatBuffer matSpecular;
 // variable for the opengl window width and height
 float windowWidth, windowHeight;
 float pickScale = 1.0f;
-private cameraDisplay cameraCoordinates;
-private boolean cameraCoordinatesLoaded = false;
+
 
 // for arc ball camera 
 
@@ -134,7 +133,7 @@ public void start() {
 	}
 
 	
-        
+       
 	// start up the display
 	init();
 
@@ -151,10 +150,13 @@ public void start() {
 		
             SelectionInterface();
 
-		
-            CameraLocation();
+            
+            // default look for now
+            GLU.gluLookAt(0.0f, 0.0f, 15.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);  
+					  
+            
 
-            RotateAxis();
+          
             GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);          
 
             GL11.glEnable(GL11.GL_COLOR_MATERIAL);
@@ -165,7 +167,7 @@ public void start() {
 
             GL11.glPopMatrix();
 
-            UndoRotateAxis();
+  
 
             Display.update();
             //check for a resize event and do it
@@ -299,11 +301,8 @@ private void initOpenGl(){
 
 
 private void CameraLocation(){
-	//GL11.glLoadIdentity();
-	//GL11.glTranslatef(0.0f, 0.0f, 0.0f);
-		GLU.gluLookAt(cameraCoordinates.eyeX(),cameraCoordinates.eyeY(), cameraCoordinates.eyeZ(), 
-					  cameraCoordinates.originX(), cameraCoordinates.originY(), cameraCoordinates.originZ(), 
-					  0.0f, 1.0f, 0.0f);
+	// default look for now
+           GLU.gluLookAt(0.0f, 0.0f, 15.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);  
 	return;
 }
 
@@ -375,14 +374,11 @@ private void SelectionInterface(){
     				   	   100.0f);
 		CameraLocation();
 
-		RotateAxis();
-
 	
 
 
 		RenderMolecule();
-		UndoRotateAxis();
-
+		
 		GL11.glPopMatrix();
 
 		
@@ -439,31 +435,10 @@ private void SelectionInterface(){
 
 
 
-private void RotateAxis(){
-		//do extra rotations if not using spherical coordinates facillity
-	if(!cameraCoordinates.isSphericalCoordinates()){
-		// x rotation
-		GL11.glRotatef(cameraCoordinates.RotX(), 1.0f, 0.0f, 0.0f);
-		// y rotation
-		GL11.glRotatef(cameraCoordinates.RotY(), 0.0f, 1.0f, 0.0f);
-		// Z rotation
-		GL11.glRotatef(cameraCoordinates.RotZ(), 0.0f, 0.0f, 1.0f);
-	}
-}
 
 
-private void UndoRotateAxis(){
-// rotate back
-	if(!cameraCoordinates.isSphericalCoordinates()){
-		// Z rotation
-		GL11.glRotatef(-1.0f * cameraCoordinates.RotZ(), 0.0f, 0.0f, 1.0f);
-		// y rotation
-		GL11.glRotatef(-1.0f * cameraCoordinates.RotY(), 0.0f, 1.0f, 0.0f);
-		// x rotation
-		GL11.glRotatef(-1.0f * cameraCoordinates.RotX(), 1.0f, 0.0f, 0.0f);
 
-	}
-}
+
 
 private void RenderMolecule(){
 // Clear the screen and depth buffer
@@ -664,32 +639,7 @@ private void RenderSingleBonds(){
 }
 
 
-private void MarkOrigin(){
 
-	if(cameraCoordinates.isOriginMarked()){
-
-	
-		// temporary move farther into the scene to make it visible 
-		
-   		GL11.glTranslatef(cameraCoordinates.originX(), 
-   					  	  cameraCoordinates.originY(), 
-   					  	  cameraCoordinates.originZ());
-
-		GL11.glColor4f(1.0f, 1.0f, 0.0f, 0.5f);
-		Sphere s = new Sphere();
-
-   		s.draw((float)(originScaling * CovalentRadii[1]), 16, 16);
-
-   		// go back to where you started for next atom addition
-		GL11.glTranslatef(-1.0f * cameraCoordinates.originX(), 
-   					  	  -1.0f * cameraCoordinates.originY(), 
-   					  	  -1.0f * cameraCoordinates.originZ());
-
-   		
-
-
-	}
-}
 
 private void DrawSelectedCursor(){
 	
