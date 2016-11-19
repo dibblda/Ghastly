@@ -15,6 +15,7 @@ import org.lwjgl.input.Mouse;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
+import org.joml.Matrix4f;
 import org.joml.camera.ArcBallCamera;
 
 
@@ -130,45 +131,69 @@ public void start() {
 	}
 
 	
+        // code borrowed from ArcBallCameraDemo to use mouse to rotate the molecule
+        // Remember the current time.
+        long lastTime = System.nanoTime();
+
+        Matrix4f mat = new Matrix4f();
+        // FloatBuffer for transferring matrices to OpenGL
+        FloatBuffer fb = BufferUtils.createFloatBuffer(16);
+
+        cam.setAlpha((float) Math.toRadians(-20));
+        cam.setBeta((float) Math.toRadians(20));
+        
+        
+        
        
 	// start up the display
 	init();
 
 	
- 	
+            
+        // everything set up
+        // loop and determine if moving model or selecting model
+        // if selecting, enter selection mode then render mode
+        // example:
+        // http://relativity.net.au/gaming/java/ObjectSelection.html
+        // 
 
 
 	while (!Display.isCloseRequested()) {
  	
+             //check for a resize event and do it
+            if (Display.wasResized())doResize(Display.getWidth(), Display.getHeight());
             
             
-            // render OpenGL here
+             // render OpenGL here
             GL11.glLoadIdentity();
 		
-            SelectionInterface();
-
+            // OK, now read mouse input and decide if a rotaion is going to happen or a atom picking
+            // picking an atom should be a mouse click less then 100 msec
+            
+            
+             // only select if mouse button was clicked
+            if(Mouse.isButtonDown(0) && !lastMouseDown){
+                SelectionInterface(Mouse.getX(), Mouse.getY());
+            };
+            lastMouseDown = Mouse.isButtonDown(0);
             
             // default look for now
             GLU.gluLookAt(0.0f, 0.0f, 15.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);  
 					  
             
-
           
             GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);          
 
             GL11.glEnable(GL11.GL_COLOR_MATERIAL);
-            GL11.glPushMatrix();
-
-            RenderMolecule();
-		
-
-            GL11.glPopMatrix();
+                                                                                                
+            //GL11.glPushMatrix();
+            RenderMolecule();		
+            //GL11.glPopMatrix();
 
   
 
             Display.update();
-            //check for a resize event and do it
-            if (Display.wasResized())doResize(Display.getWidth(), Display.getHeight());
+           
             
             
 	}
@@ -265,10 +290,7 @@ private void initOpenGl(){
 
     windowWidth = displayMode.getWidth();
     windowHeight = displayMode.getHeight();
-    GLU.gluPerspective(45.0f,
-    				    windowWidth / windowHeight,
-    				   0.1f,
-    				   100.0f);
+    GLU.gluPerspective(45.0f,windowWidth / windowHeight, 0.1f, 100.0f);
     GL11.glMatrixMode(GL11.GL_MODELVIEW); // Select The Modelview Matrix
 
     // Really Nice Perspective Calculations
@@ -277,22 +299,22 @@ private void initOpenGl(){
 
 
     // adjust lighting
-	GL11.glMaterial(GL11.GL_FRONT, GL11.GL_SPECULAR, matSpecular);
-        GL11.glMaterialf(GL11.GL_FRONT, GL11.GL_SHININESS, shininess);       
-	GL11.glLight(GL11.GL_LIGHT0, GL11.GL_AMBIENT, ambientLight);
-	GL11.glLight(GL11.GL_LIGHT0, GL11.GL_DIFFUSE, diffuseLight);
-	GL11.glLight(GL11.GL_LIGHT0, GL11.GL_SPECULAR, specularLight);
-	GL11.glLight(GL11.GL_LIGHT0, GL11.GL_POSITION, positionLight);
+    GL11.glMaterial(GL11.GL_FRONT, GL11.GL_SPECULAR, matSpecular);
+    GL11.glMaterialf(GL11.GL_FRONT, GL11.GL_SHININESS, shininess);       
+    GL11.glLight(GL11.GL_LIGHT0, GL11.GL_AMBIENT, ambientLight);
+    GL11.glLight(GL11.GL_LIGHT0, GL11.GL_DIFFUSE, diffuseLight);
+    GL11.glLight(GL11.GL_LIGHT0, GL11.GL_SPECULAR, specularLight);
+    GL11.glLight(GL11.GL_LIGHT0, GL11.GL_POSITION, positionLight);
 
 
     // enable lighting
     GL11.glEnable(GL11.GL_LIGHTING);
-	GL11.glEnable(GL11.GL_LIGHT0);
+    GL11.glEnable(GL11.GL_LIGHT0);
 
 
-	// enable transparency blending
-	GL11.glEnable (GL11.GL_BLEND); 
-	GL11.glBlendFunc (GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+    // enable transparency blending
+    GL11.glEnable (GL11.GL_BLEND); 
+    GL11.glBlendFunc (GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
 }
 
@@ -317,75 +339,67 @@ private void CameraLocation(){
 
 
 
-private void SelectionInterface(){
-	int mouse_x = Mouse.getX(); 
-	int mouse_y = Mouse.getY();
-	int choice, depth;
-	IntBuffer selBuffer = ByteBuffer.allocateDirect(1024).order(ByteOrder.nativeOrder()).asIntBuffer();
-	int buffer[] = new int[256];
-		
-	IntBuffer vpBuffer = ByteBuffer.allocateDirect(64).order(ByteOrder.nativeOrder()).asIntBuffer();
-	// The size of the viewport. [0] Is <x>, [1] Is <y>, [2] Is <width>, [3] Is <height>
+private void SelectionInterface(int mouse_x, int mouse_y){
+	
+    int choice, depth;
+    IntBuffer selBuffer = ByteBuffer.allocateDirect(1024).order(ByteOrder.nativeOrder()).asIntBuffer();
+    int buffer[] = new int[256];
+
+    IntBuffer vpBuffer = ByteBuffer.allocateDirect(64).order(ByteOrder.nativeOrder()).asIntBuffer();
+    // The size of the viewport. [0] Is <x>, [1] Is <y>, [2] Is <width>, [3] Is <height>
     int[] viewport = new int[4];
 		
 	// The number of "hits" (objects within the pick area).
 	int hits;
 		
-	// only select if mouse button was clicked
-	if(Mouse.isButtonDown(0) && !lastMouseDown){
-		System.out.printf("Mouse Button Pressed\n");
+   
 
-
-
-		// Get the viewport info
+                // Get the viewport info
         GL11.glGetInteger(GL11.GL_VIEWPORT, vpBuffer);
         vpBuffer.get(viewport);
-		
-		// Set the buffer that OpenGL uses for selection to our buffer
-		GL11.glSelectBuffer(selBuffer);
-		
-		// Change to selection mode
-		GL11.glRenderMode(GL11.GL_SELECT);
-		
-		// Initialize the name stack (used for identifying which object was selected)
-		GL11.glInitNames();
-		GL11.glPushName(0);
 
-		
-		
+        // Set the buffer that OpenGL uses for selection to our buffer
+        GL11.glSelectBuffer(selBuffer);
+
+        // Change to selection mode
+        GL11.glRenderMode(GL11.GL_SELECT);
+
+        // Initialize the name stack (used for identifying which object was selected)
+        GL11.glInitNames();
+        GL11.glPushName(0);
 
 
-		GL11.glMatrixMode(GL11.GL_PROJECTION);
 
 
-		
 
-		GL11.glPushMatrix();
-		
-		GL11.glLoadIdentity();
-		// picking window
-		GLU.gluPickMatrix( (float) mouse_x, (float) mouse_y, pickScale * 5.0f, pickScale * 5.0f,IntBuffer.wrap(viewport));
-		GLU.gluPerspective(45.0f,
-    				       windowWidth / windowHeight,
-    				   	   0.1f,
-    				   	   100.0f);
-		CameraLocation();
-
-	
+        GL11.glMatrixMode(GL11.GL_PROJECTION);
 
 
-		RenderMolecule();
-		
-		GL11.glPopMatrix();
 
-		
 
-		// Exit selection mode and return to render mode, returns number selected
-		hits = GL11.glRenderMode(GL11.GL_RENDER);
-                
-		
-		
-		selBuffer.get(buffer);
+        GL11.glPushMatrix();
+
+        GL11.glLoadIdentity();
+        // picking window
+        GLU.gluPickMatrix( (float) mouse_x, (float) mouse_y, pickScale * 5.0f, pickScale * 5.0f,IntBuffer.wrap(viewport));
+        GLU.gluPerspective(45.0f, windowWidth / windowHeight, 0.1f, 100.0f);
+        CameraLocation();
+
+
+
+
+        RenderMolecule();
+
+        GL11.glPopMatrix();
+
+
+
+        // Exit selection mode and return to render mode, returns number selected
+        hits = GL11.glRenderMode(GL11.GL_RENDER);
+
+
+
+        selBuffer.get(buffer);
         // Objects Were Drawn Where The Mouse Was
         if (hits > 0) {
               // If There Were More Than 0 Hits
@@ -393,7 +407,7 @@ private void SelectionInterface(){
               depth = buffer[1]; // Store How Far Away It Is
               for (int i = 1; i < hits; i++) {
                     // Loop Through All The Detected Hits
-			// If This Object Is Closer To Us Than The One We Have Selected
+                        // If This Object Is Closer To Us Than The One We Have Selected
                     if (buffer[i * 4 + 1] < (int) depth) {
                           choice = buffer[i * 4 + 3]; // Select The Closer Object
                           depth = buffer[i * 4 + 1]; // Store How Far Away It Is
@@ -404,20 +418,20 @@ private void SelectionInterface(){
 
               // just for bug fixing
               if(choice < atomSelectedArray.length){
-              	if(atomSelectedArray[choice] == 1){
-              		atomSelectedArray[choice] = 0;
-              	}else{
-              		atomSelectedArray[choice] = 1;
-              	}
+                if(atomSelectedArray[choice] == 1){
+                        atomSelectedArray[choice] = 0;
+                }else{
+                        atomSelectedArray[choice] = 1;
+                }
 
               }
-              	
+
         }
 
-	}
-	GL11.glMatrixMode(GL11.GL_MODELVIEW);
-	lastMouseDown = Mouse.isButtonDown(0);
-	return;
+    
+    GL11.glMatrixMode(GL11.GL_MODELVIEW);
+    
+    return;
 }
 
 
