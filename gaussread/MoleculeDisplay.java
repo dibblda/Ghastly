@@ -115,7 +115,9 @@ public void PassMoleculeGeometry(double [][] atomArray, int [][] bondArray, floa
 
 
 public void start() {
-	float mult = 1.0f;
+        long mouse_time_down;
+        long mouse_time;
+        float alpha = 0.0f, beta = 0.0f;
  	// set colors in the array
 
 	ColorMapArraySet();
@@ -172,10 +174,31 @@ public void start() {
             
             
              // only select if mouse button was clicked
-            if(Mouse.isButtonDown(0) && !lastMouseDown){
-                SelectionInterface(Mouse.getX(), Mouse.getY());
-            };
-            lastMouseDown = Mouse.isButtonDown(0);
+            if(Mouse.isButtonDown(0)){
+                //get the initial time clicked
+                mouse_time_down = System.nanoTime();
+                
+               
+                
+                //loop while the mouse is down for timing purposes
+                //Display.update makes sure the mouse up event is caught (events aren't updated until this is called)
+                while(Mouse.isButtonDown(0)){                                        
+                    Display.update();                    
+                }
+                
+              
+                mouse_time = (System.nanoTime() - mouse_time_down) / 1000000;
+                //System.out.println("Mouse:" + mouse_time);
+                // if less than 200 msec, then count it as a click
+                if(mouse_time < 200.0){
+                    SelectionInterface(Mouse.getX(), Mouse.getY());
+                }else{
+               
+                
+                
+                }                            
+            };    
+                                        
             
             // default look for now
             GLU.gluLookAt(0.0f, 0.0f, 15.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);  
