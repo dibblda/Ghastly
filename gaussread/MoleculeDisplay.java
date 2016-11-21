@@ -245,6 +245,7 @@ public void start() {
 
             GL11.glEnable(GL11.GL_COLOR_MATERIAL);
             
+            // old code, very little present here
              // default look for now
             //GLU.gluLookAt(0.0f, 0.0f, 15.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f); 
             
