@@ -170,14 +170,14 @@ public void start() {
             GL11.glLoadIdentity();
 		
             // OK, now read mouse input and decide if a rotaion is going to happen or a atom picking
-            // picking an atom should be a mouse click less then 100 msec
+            // picking an atom should be a mouse click less then 200 msec
             
             
              // only select if mouse button was clicked
             if(Mouse.isButtonDown(0)){
                 //get the initial time clicked
                 mouse_time_down = System.nanoTime();
-                
+                long thisTime = System.nanoTime();
                
                 
                 //loop while the mouse is down for timing purposes
@@ -198,7 +198,15 @@ public void start() {
                 
                 }                            
             };    
-                                        
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             // default look for now
             GLU.gluLookAt(0.0f, 0.0f, 15.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);  
