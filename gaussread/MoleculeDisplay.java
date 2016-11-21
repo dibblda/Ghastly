@@ -17,6 +17,10 @@ import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import org.joml.Matrix4f;
 import org.joml.camera.ArcBallCamera;
+import org.joml.lwjgl.ViewSettings;
+import static org.lwjgl.opengl.GL11.GL_MODELVIEW;
+import static org.lwjgl.opengl.GL11.GL_PROJECTION;
+import static org.lwjgl.opengl.GL11.glMatrixMode;
 
 
 
@@ -51,7 +55,9 @@ float pickScale = 1.0f;
 
 
 // for arc ball camera 
-
+ Matrix4f mat = new Matrix4f();
+ // FloatBuffer for transferring matrices to OpenGL
+ FloatBuffer fb = BufferUtils.createFloatBuffer(16);
  ArcBallCamera cam = new ArcBallCamera();
 
 private int colorMapArraySize = 97;
@@ -119,6 +125,9 @@ public void start() {
         long mouse_time;
         float alpha = 0.0f, beta = 0.0f;
         boolean clickEvent=false;
+        float mouseXlast = 0, mouseX = 0, mouseYlast = 0, mouseY = 0;
+        
+        
  	// set colors in the array
 
 	ColorMapArraySet();
@@ -137,12 +146,11 @@ public void start() {
         // code borrowed from ArcBallCameraDemo to use mouse to rotate the molecule
         // Remember the current time.
         long lastTime = System.nanoTime();
-        long holdTime = System.nanoTime();
+        long dragTime = System.nanoTime();
+        long holdTimeStart = System.nanoTime();
+        long holdTimeEnd = System.nanoTime();
         
-        
-        Matrix4f mat = new Matrix4f();
-        // FloatBuffer for transferring matrices to OpenGL
-        FloatBuffer fb = BufferUtils.createFloatBuffer(16);
+       
 
         cam.setAlpha((float) Math.toRadians(-20));
         cam.setBeta((float) Math.toRadians(20));
@@ -177,45 +185,86 @@ public void start() {
             
             
              // only select if mouse button was clicked
+             //mark the time from the very first mouse down event
             if(Mouse.isButtonDown(0) && clickEvent == false){
                 //get the initial time clicked
                 //only get the time if we haven't been through this loop before during the same click so the time isn't continually updating  
                 //during a mouse button down hold
-                holdTime = System.nanoTime();
+                holdTimeStart = System.nanoTime();
+                //set initial mouse coordinates on click
+                mouseXlast = Mouse.getX();
+                mouseYlast = Mouse.getY();
                 clickEvent=true;                                                         
             };  
             
-            // mouse button released, check if less then 200 msec
+            // mouse button released, check if less then 200 msec then execute, clear button clock state if >= 200 msec
             if(!Mouse.isButtonDown(0)){
-                System.out.println("MouseUp");     
-                long releaseTime = System.nanoTime();
+                
+                holdTimeEnd = System.nanoTime();
                 //check if less than 200 msec, otherwise reset 
-                if((((releaseTime - holdTime) / 1e6) < 200.0) && clickEvent==true){
-                    System.out.println("Time: " + ((releaseTime - holdTime) / 1e6));
+                if((((holdTimeEnd - holdTimeStart) / 1e6) < 200.0) && clickEvent==true){
+                System.out.println("Mouse Picking");
                     SelectionInterface(Mouse.getX(), Mouse.getY());
                     clickEvent=false;
                 //release time >= 200 msec, go to the drag interface or just reset the click    
-                }else if(((releaseTime - holdTime) / 1e6) >= 200.0){
+                }else if(((holdTimeEnd - holdTimeStart) / 1e6) >= 200.0){
                     clickEvent=false;
+                  
                 }
             }
+            //first look for a down mouse button
+            if(Mouse.isButtonDown(0)){
+                //check it it's been longer the 200 msec then calculate the move during this time slice
+                dragTime = System.nanoTime();
+                if(((dragTime - holdTimeStart) / 1e6) >= 200.0){
+                    
+                    
+                    // get coordinates, calculate delta and modify camera alpha and beta
+                    mouseX = Mouse.getX();
+                    mouseY = Mouse.getY();
+                    cam.setAlpha(cam.getAlpha() + Math.toRadians((mouseX - mouseXlast) * 0.3f));
+                    cam.setBeta(cam.getBeta() + Math.toRadians((mouseYlast - mouseY) * 0.3f));
+                    mouseXlast = mouseX;
+                    mouseYlast = mouseY;
+                                                            
+                }
+            }
+            // implement zoom eventually
             
-            
-            
-            
-            
-            
-            
-            
-            // default look for now
-            GLU.gluLookAt(0.0f, 0.0f, 15.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);  
-					  
-            
-          
+            //calculate time delta and update
+            /* Compute delta time */
+            long thisTime = System.nanoTime();
+            float diff = (float) ((thisTime - lastTime) / 1E9);
+            lastTime = thisTime;
+            /* And let the camera make its update */
+            cam.update(diff);
+                             
+           
+           
             GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);          
 
             GL11.glEnable(GL11.GL_COLOR_MATERIAL);
-                                                                                                
+            
+             // default look for now
+            //GLU.gluLookAt(0.0f, 0.0f, 15.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f); 
+            
+            // new code to render the molecule
+            mat.setPerspective((float) 0.785f, windowWidth / windowHeight, 0.1f, 100.0f).get(fb);
+            glMatrixMode(GL_PROJECTION);          
+            GL11.glLoadMatrix(fb);
+             /*
+             * Obtain the camera's view matrix and render molecule.
+             */
+            cam.viewMatrix(mat.identity()).get(fb);
+            glMatrixMode(GL_MODELVIEW);
+            GL11.glLoadMatrix(fb);
+            // move to the center
+             mat.translate(cam.centerMover.target).get(fb);
+            GL11.glLoadMatrix(fb);
+            //end of new code    
+            
+            
+            
             //GL11.glPushMatrix();
             RenderMolecule();		
             //GL11.glPopMatrix();
@@ -233,6 +282,15 @@ public void start() {
  
 
 
+
+private void CameraLocation(){
+    
+ 
+    
+	// default look for now
+           GLU.gluLookAt(0.0f, 0.0f, 15.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);  
+	return;
+}
     
 
 
@@ -349,12 +407,6 @@ private void initOpenGl(){
 }
 
 
-private void CameraLocation(){
-	// default look for now
-           GLU.gluLookAt(0.0f, 0.0f, 15.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);  
-	return;
-}
-
 
 
 
@@ -411,17 +463,28 @@ private void SelectionInterface(int mouse_x, int mouse_y){
 
         GL11.glLoadIdentity();
         // picking window
-        GLU.gluPickMatrix( (float) mouse_x, (float) mouse_y, pickScale * 5.0f, pickScale * 5.0f,IntBuffer.wrap(viewport));
-        GLU.gluPerspective(45.0f, windowWidth / windowHeight, 0.1f, 100.0f);
-        CameraLocation();
-
-
-
-
+        GLU.gluPickMatrix( (float) mouse_x, (float) mouse_y, pickScale * 5.0f, pickScale * 5.0f,IntBuffer.wrap(viewport));                      
+        
+        // old
+        //GLU.gluPerspective(45.0f, windowWidth / windowHeight, 0.1f, 100.0f);
+        //CameraLocation();
+        
+        // new imported code
+        //set perspective
+        mat.setPerspective((float) 0.785f, windowWidth / windowHeight, 0.1f, 100.0f).get(fb);
+        //glMatrixMode(GL_PROJECTION);          
+        GL11.glLoadMatrix(fb);
+        // get the camera's location
+        cam.viewMatrix(mat.identity()).get(fb);            
+        GL11.glLoadMatrix(fb);
+        mat.translate(cam.centerMover.target).get(fb);
+            GL11.glLoadMatrix(fb);
+        // past new imported code    
+        
+        
         RenderMolecule();
 
         GL11.glPopMatrix();
-
 
 
         // Exit selection mode and return to render mode, returns number selected
