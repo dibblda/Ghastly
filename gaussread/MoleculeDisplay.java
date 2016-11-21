@@ -118,6 +118,7 @@ public void start() {
         long mouse_time_down;
         long mouse_time;
         float alpha = 0.0f, beta = 0.0f;
+        boolean clickEvent=false;
  	// set colors in the array
 
 	ColorMapArraySet();
@@ -136,7 +137,9 @@ public void start() {
         // code borrowed from ArcBallCameraDemo to use mouse to rotate the molecule
         // Remember the current time.
         long lastTime = System.nanoTime();
-
+        long holdTime = System.nanoTime();
+        
+        
         Matrix4f mat = new Matrix4f();
         // FloatBuffer for transferring matrices to OpenGL
         FloatBuffer fb = BufferUtils.createFloatBuffer(16);
@@ -174,32 +177,28 @@ public void start() {
             
             
              // only select if mouse button was clicked
-            if(Mouse.isButtonDown(0)){
+            if(Mouse.isButtonDown(0) && clickEvent == false){
                 //get the initial time clicked
-                mouse_time_down = System.nanoTime();
-                long thisTime = System.nanoTime();
-               
-                
-                //loop while the mouse is down for timing purposes
-                //Display.update makes sure the mouse up event is caught (events aren't updated until this is called)
-                while(Mouse.isButtonDown(0)){                                        
-                    Display.update();                    
-                }
-                
-              
-                mouse_time = (System.nanoTime() - mouse_time_down) / 1000000;
-                //System.out.println("Mouse:" + mouse_time);
-                // if less than 200 msec, then count it as a click
-                if(mouse_time < 200.0){
+                //only get the time if we haven't been through this loop before during the same click so the time isn't continually updating  
+                //during a mouse button down hold
+                holdTime = System.nanoTime();
+                clickEvent=true;                                                         
+            };  
+            
+            // mouse button released, check if less then 200 msec
+            if(!Mouse.isButtonDown(0)){
+                System.out.println("MouseUp");     
+                long releaseTime = System.nanoTime();
+                //check if less than 200 msec, otherwise reset 
+                if((((releaseTime - holdTime) / 1e6) < 200.0) && clickEvent==true){
+                    System.out.println("Time: " + ((releaseTime - holdTime) / 1e6));
                     SelectionInterface(Mouse.getX(), Mouse.getY());
-                }else{
-               
-                
-                
-                }                            
-            };    
-            
-            
+                    clickEvent=false;
+                //release time >= 200 msec, go to the drag interface or just reset the click    
+                }else if(((releaseTime - holdTime) / 1e6) >= 200.0){
+                    clickEvent=false;
+                }
+            }
             
             
             
