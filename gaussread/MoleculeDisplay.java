@@ -5,19 +5,18 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
 import org.lwjgl.util.glu.Sphere;
 import org.lwjgl.util.glu.Cylinder;
-import org.lwjgl.util.glu.Util;
+
 // required for lighting
 import java.nio.FloatBuffer;
 import org.lwjgl.BufferUtils;
 // required for mouse input
 import org.lwjgl.input.Mouse;
 // required for picking buffer
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.IntBuffer;
+
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.joml.camera.ArcBallCamera;
-import org.joml.lwjgl.ViewSettings;
+
 import static org.lwjgl.opengl.GL11.GL_MODELVIEW;
 import static org.lwjgl.opengl.GL11.GL_PROJECTION;
 import static org.lwjgl.opengl.GL11.glMatrixMode;
@@ -49,9 +48,13 @@ private FloatBuffer specularLight;
 private FloatBuffer positionLight; 
 private FloatBuffer matSpecular;
 
-// variable for the opengl window width and height
+// variable for the opengl window width and height, field of view
 float windowWidth, windowHeight;
+// field of view (in radians) (~45 degrees)
+float fieldOfView = 0.785f;
 float pickScale = 1.0f;
+
+
 
 
 // for arc ball camera 
@@ -59,7 +62,8 @@ float pickScale = 1.0f;
  // FloatBuffer for transferring matrices to OpenGL
  FloatBuffer fb = BufferUtils.createFloatBuffer(16);
  ArcBallCamera cam = new ArcBallCamera();
-
+// end arcball camera
+ 
 private int colorMapArraySize = 97;
 // covalent radii used to draw spheres for each AN
 private double [] CovalentRadii = {0.00,0.32,0.28,1.29,0.96,0.84,0.76,0.71,0.66,0.57,0.58,
@@ -90,7 +94,6 @@ private float [] singleBondColorMap = {0.6f, 0.6f, 0.6f};
 
 
 // variables for UI
-private boolean lastMouseDown = false;
 private int [] atomSelectedArray = null;
 private int [] atomHighlightedArrary = null;
 
@@ -121,9 +124,7 @@ public void PassMoleculeGeometry(double [][] atomArray, int [][] bondArray, floa
 
 
 public void start() {
-        long mouse_time_down;
-        long mouse_time;
-        float alpha = 0.0f, beta = 0.0f;
+   
         boolean clickEvent=false;
         float mouseXlast = 0, mouseX = 0, mouseYlast = 0, mouseY = 0;
         
@@ -250,7 +251,7 @@ public void start() {
             //GLU.gluLookAt(0.0f, 0.0f, 15.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f); 
             
             // new code to render the molecule
-            mat.setPerspective((float) 0.785f, windowWidth / windowHeight, 0.1f, 100.0f).get(fb);
+            mat.setPerspective(fieldOfView, windowWidth / windowHeight, 0.1f, 100.0f).get(fb);
             glMatrixMode(GL_PROJECTION);          
             GL11.glLoadMatrix(fb);
              /*
@@ -284,19 +285,7 @@ public void start() {
 
 
 
-private void CameraLocation(){
-    
- 
-    
-	// default look for now
-           GLU.gluLookAt(0.0f, 0.0f, 15.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);  
-	return;
-}
-    
 
-
-
-// doesn't work, distorts the window
 private void doResize(int newWidth, int newHeight){
 float aspectRatio = (float)newWidth / (float)newHeight;
 
@@ -325,87 +314,6 @@ float aspectRatio = (float)newWidth / (float)newHeight;
 
 
 
-private void init(){
-	createWindow();
-	initOpenGl();
-	return;
-}
-
-
-private void createWindow(){
-
-	try {
-
-        Display.setFullscreen(fullscreen);
-        DisplayMode d[] = Display.getAvailableDisplayModes();
-        for (int i = 0; i < d.length; i++) {
-            if (d[i].getWidth() == 640
-                && d[i].getHeight() == 480
-                && d[i].getBitsPerPixel() == 32) {
-                displayMode = d[i];
-                break;
-            }
-        }
-        Display.setDisplayMode(displayMode);
-        Display.setTitle("Molecule Render Window");
-        Display.setResizable(true);
-        Display.create();
-        
-	} catch (LWJGLException e) {
-		e.printStackTrace();
-		System.exit(0);
-	}
- 	
-
-	return;
-}
-
-private void initOpenGl(){
-	
-	
-    initLightArrays();
-
-    GL11.glEnable(GL11.GL_TEXTURE_2D); // Enable Texture Mapping
-    GL11.glShadeModel(GL11.GL_SMOOTH); // Enable Smooth Shading
-    GL11.glClearColor(0.0f, 0.0f, 0.0f, 0.0f); //  Background COLOR
-    GL11.glClearDepth(1.0); // Depth Buffer Setup
-    GL11.glEnable(GL11.GL_DEPTH_TEST); // Enables Depth Testing
-    GL11.glDepthFunc(GL11.GL_LEQUAL); // The Type Of Depth Testing To Do
-
-    GL11.glMatrixMode(GL11.GL_PROJECTION); // Select The Projection Matrix
-    GL11.glLoadIdentity(); // Reset The Projection Matrix
-
-    // Calculate The Aspect Ratio Of The Window
-
-    windowWidth = displayMode.getWidth();
-    windowHeight = displayMode.getHeight();
-    GLU.gluPerspective(45.0f,windowWidth / windowHeight, 0.1f, 100.0f);
-    GL11.glMatrixMode(GL11.GL_MODELVIEW); // Select The Modelview Matrix
-
-    // Really Nice Perspective Calculations
-    GL11.glHint(GL11.GL_PERSPECTIVE_CORRECTION_HINT, GL11.GL_NICEST);
-
-
-
-    // adjust lighting
-    GL11.glMaterial(GL11.GL_FRONT, GL11.GL_SPECULAR, matSpecular);
-    GL11.glMaterialf(GL11.GL_FRONT, GL11.GL_SHININESS, shininess);       
-    GL11.glLight(GL11.GL_LIGHT0, GL11.GL_AMBIENT, ambientLight);
-    GL11.glLight(GL11.GL_LIGHT0, GL11.GL_DIFFUSE, diffuseLight);
-    GL11.glLight(GL11.GL_LIGHT0, GL11.GL_SPECULAR, specularLight);
-    GL11.glLight(GL11.GL_LIGHT0, GL11.GL_POSITION, positionLight);
-
-
-    // enable lighting
-    GL11.glEnable(GL11.GL_LIGHTING);
-    GL11.glEnable(GL11.GL_LIGHT0);
-
-
-    // enable transparency blending
-    GL11.glEnable (GL11.GL_BLEND); 
-    GL11.glBlendFunc (GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-
-}
 
 
 
@@ -414,16 +322,20 @@ private void initOpenGl(){
 
 
 
-
-
-
-
-
-
-
+// seelction mode is deprected, implement ray tracing if possible
 
 private void SelectionInterface(int mouse_x, int mouse_y){
-	
+   
+    
+    // for picking via the ray method
+    // http://schabby.de/picking-opengl-ray-tracing/
+    Vector3f view = new Vector3f();
+    Vector3f screenHoritzontally = new Vector3f();
+    Vector3f screenVertically = new Vector3f();
+    
+    
+    
+/*	commented out
     int choice, depth;
     IntBuffer selBuffer = ByteBuffer.allocateDirect(1024).order(ByteOrder.nativeOrder()).asIntBuffer();
     int buffer[] = new int[256];
@@ -457,9 +369,6 @@ private void SelectionInterface(int mouse_x, int mouse_y){
 
         GL11.glMatrixMode(GL11.GL_PROJECTION);
 
-
-
-
         GL11.glPushMatrix();
 
         GL11.glLoadIdentity();
@@ -480,11 +389,12 @@ private void SelectionInterface(int mouse_x, int mouse_y){
         GL11.glLoadMatrix(fb);
         mat.translate(cam.centerMover.target).get(fb);
             GL11.glLoadMatrix(fb);
-        // past new imported code    
+        // past new imported code
         
         
         RenderMolecule();
-
+        
+        GL11.glMatrixMode(GL11.GL_PROJECTION);
         GL11.glPopMatrix();
 
 
@@ -524,7 +434,7 @@ private void SelectionInterface(int mouse_x, int mouse_y){
 
     
     GL11.glMatrixMode(GL11.GL_MODELVIEW);
-    
+    */
     return;
 }
 
@@ -716,22 +626,6 @@ private void RenderSingleBonds(){
                 2.0f, 16, 16);
         GL11.glRotatef(-90.0f, -1.0f, 0.0f, 0.0f);
 
-
-        // test angle in the X/Y plane
-        /*
-        GL11.glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
-        GL11.glRotatef(45.0f, -1.0f, 0.0f, 0.0f);
-        
-        Cylinder Test = new Cylinder();
-        GL11.glColor3f((float)1.0,(float)1.0,(float)0.0);
-        
-        Test.draw(0.1f, 
-                0.1f, 
-                2.0f, 16, 16);
-        
-        GL11.glRotatef(-45.0f, -1.0f, 0.0f, 0.0f);
-        GL11.glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
-        */
 }
 
 
@@ -740,27 +634,23 @@ private void RenderSingleBonds(){
 private void DrawSelectedCursor(){
 	
 
-	for(int itor = 1; itor < atomSelectedArray.length; itor++){
-		if(atomSelectedArray[itor] == 1){
+    for(int itor = 1; itor < atomSelectedArray.length; itor++){
+        if(atomSelectedArray[itor] == 1){
 
 
 
-			GL11.glTranslatef((float)internalAtomArray[itor][1], 
-		   					 (float)internalAtomArray[itor][2], 
-		   					 (float)internalAtomArray[itor][3]);
+            GL11.glTranslatef((float)internalAtomArray[itor][1], (float)internalAtomArray[itor][2],  (float)internalAtomArray[itor][3]);
 
-			GL11.glColor4f(1.0f, 1.0f, 0.0f, 0.5f);
-			GL11.glLoadName(itor);
-			Sphere s = new Sphere();
+            GL11.glColor4f(1.0f, 1.0f, 0.0f, 0.5f);
+            GL11.glLoadName(itor);
+            Sphere s = new Sphere();
 
-   			s.draw((float)(atomSelectScaling * CovalentRadii[(int)internalAtomArray[itor][0]]), 20, 20);
+            s.draw((float)(atomSelectScaling * CovalentRadii[(int)internalAtomArray[itor][0]]), 20, 20);
 
-	   		GL11.glTranslatef(-1.0f * (float)internalAtomArray[itor][1], 
-			   			 	 -1.0f * (float)internalAtomArray[itor][2], 
-			   				 -1.0f * (float)internalAtomArray[itor][3]);
+            GL11.glTranslatef(-1.0f * (float)internalAtomArray[itor][1],  -1.0f * (float)internalAtomArray[itor][2],  -1.0f * (float)internalAtomArray[itor][3]);
 
-		}
-	}
+        }
+    }
 
 }
 
@@ -879,6 +769,93 @@ void ColorMapArraySet(){
 
     return;
 }
+
+
+
+
+private void init(){
+	createWindow();
+	initOpenGl();
+	return;
+}
+
+
+private void createWindow(){
+
+	try {
+
+        Display.setFullscreen(fullscreen);
+        DisplayMode d[] = Display.getAvailableDisplayModes();
+        for (int i = 0; i < d.length; i++) {
+            if (d[i].getWidth() == 640
+                && d[i].getHeight() == 480
+                && d[i].getBitsPerPixel() == 32) {
+                displayMode = d[i];
+                break;
+            }
+        }
+        Display.setDisplayMode(displayMode);
+        Display.setTitle("Molecule Render Window");
+        Display.setResizable(true);
+        Display.create();
+        
+	} catch (LWJGLException e) {
+		e.printStackTrace();
+		System.exit(0);
+	}
+ 	
+
+	return;
+}
+
+private void initOpenGl(){
+	
+	
+    initLightArrays();
+
+    GL11.glEnable(GL11.GL_TEXTURE_2D); // Enable Texture Mapping
+    GL11.glShadeModel(GL11.GL_SMOOTH); // Enable Smooth Shading
+    GL11.glClearColor(0.0f, 0.0f, 0.0f, 0.0f); //  Background COLOR
+    GL11.glClearDepth(1.0); // Depth Buffer Setup
+    GL11.glEnable(GL11.GL_DEPTH_TEST); // Enables Depth Testing
+    GL11.glDepthFunc(GL11.GL_LEQUAL); // The Type Of Depth Testing To Do
+
+    GL11.glMatrixMode(GL11.GL_PROJECTION); // Select The Projection Matrix
+    GL11.glLoadIdentity(); // Reset The Projection Matrix
+
+    // Calculate The Aspect Ratio Of The Window
+
+    windowWidth = displayMode.getWidth();
+    windowHeight = displayMode.getHeight();
+    GLU.gluPerspective(45.0f,windowWidth / windowHeight, 0.1f, 100.0f);
+    GL11.glMatrixMode(GL11.GL_MODELVIEW); // Select The Modelview Matrix
+
+    // Really Nice Perspective Calculations
+    GL11.glHint(GL11.GL_PERSPECTIVE_CORRECTION_HINT, GL11.GL_NICEST);
+
+
+
+    // adjust lighting
+    GL11.glMaterial(GL11.GL_FRONT, GL11.GL_SPECULAR, matSpecular);
+    GL11.glMaterialf(GL11.GL_FRONT, GL11.GL_SHININESS, shininess);       
+    GL11.glLight(GL11.GL_LIGHT0, GL11.GL_AMBIENT, ambientLight);
+    GL11.glLight(GL11.GL_LIGHT0, GL11.GL_DIFFUSE, diffuseLight);
+    GL11.glLight(GL11.GL_LIGHT0, GL11.GL_SPECULAR, specularLight);
+    GL11.glLight(GL11.GL_LIGHT0, GL11.GL_POSITION, positionLight);
+
+
+    // enable lighting
+    GL11.glEnable(GL11.GL_LIGHTING);
+    GL11.glEnable(GL11.GL_LIGHT0);
+
+
+    // enable transparency blending
+    GL11.glEnable (GL11.GL_BLEND); 
+    GL11.glBlendFunc (GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
+}
+
+
 
 
 
