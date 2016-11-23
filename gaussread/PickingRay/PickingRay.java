@@ -9,6 +9,7 @@ import org.joml.Vector3f;
  *
  * @author David Joshua Dibble
  * borrowed liberally from  http://schabby.de/picking-opengl-ray-tracing/
+ * This is a utility class as part of a ray tracing algorithm to pick objects in a scene
  */
 public class PickingRay {
     private Vector3f clickPosInWorld = new Vector3f();

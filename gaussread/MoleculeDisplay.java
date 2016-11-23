@@ -15,6 +15,7 @@ import org.lwjgl.input.Mouse;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.joml.Vector2f;
 import org.joml.camera.ArcBallCamera;
 
 import static org.lwjgl.opengl.GL11.GL_MODELVIEW;
@@ -54,13 +55,17 @@ float windowWidth, windowHeight;
 float fieldOfView = 0.785f;
 float pickScale = 1.0f;
 
-
+// for picking algorithm based on ray tracing
+Vector3f RayOrigin = new Vector3f();
+Vector3f RayDirection = new Vector3f();
+// end of picking algorithm
 
 
 // for arc ball camera 
  Matrix4f mat = new Matrix4f();
  // FloatBuffer for transferring matrices to OpenGL
  FloatBuffer fb = BufferUtils.createFloatBuffer(16);
+ //FloatBuffer Pickerfb = BufferUtils.createFloatBuffer(16);
  ArcBallCamera cam = new ArcBallCamera();
 // end arcball camera
  
@@ -326,13 +331,36 @@ float aspectRatio = (float)newWidth / (float)newHeight;
 
 private void SelectionInterface(int mouse_x, int mouse_y){
    
+   
+    Vector2f PickerCoordinates = new Vector2f();
+    int[] viewport = {0,0,(int)windowWidth, (int)windowHeight};
     
+    
+    //get the view matrix and put the origin of the picking ray and direction into two vectors
+    cam.viewMatrix(mat.identity()).unprojectRay(PickerCoordinates, viewport, RayOrigin, RayDirection);
+    
+    
+    /*
     // for picking via the ray method
     // http://schabby.de/picking-opengl-ray-tracing/
+    //check
+    //http://stackoverflow.com/questions/25527571/get-the-camera-position-in-opengl
     Vector3f view = new Vector3f();
     Vector3f screenHoritzontally = new Vector3f();
     Vector3f screenVertically = new Vector3f();
+    Vector3f cameraPosition = new Vector3f();
+    // presumably looking at the origin (for now)
+    Vector3f cameraLookAt = new Vector3f(0.0f, 0.0f, 0.0f);
+//get the position of the camera
+    // https://www.opengl.org/discussion_boards/showthread.php/178484-Extracting-camera-position-from-a-ModelView-Matrix
     
+    cam.viewMatrix(mat.identity()).getTranslation(cameraPosition);
+    // get the 3d vector that stores the viewing direction of the camera
+    // by assigning it initially to cameraLookAt and substracting the camera position
+    //then normalize it
+    view.set(cameraLookAt).sub(cameraPosition).normalize();
+    cam.viewMatrix(mat.identity()).
+    */
     
     
 /*	commented out
