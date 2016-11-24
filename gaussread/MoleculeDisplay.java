@@ -204,6 +204,7 @@ public void start() {
                 clickEvent=true;                                                         
             };  
             
+            
             // mouse button released, check if less then 200 msec then execute, clear button clock state if >= 200 msec
             if(!Mouse.isButtonDown(0)){
                 
@@ -221,7 +222,8 @@ public void start() {
                   
                 }
             }
-            //first look for a down mouse button
+             
+            //look for a down mouse button >= 200 msec, must ba a drag
             if(Mouse.isButtonDown(0)){
                 //check it it's been longer the 200 msec then calculate the move during this time slice
                 dragTime = System.nanoTime();
@@ -266,13 +268,19 @@ public void start() {
             glMatrixMode(GL_MODELVIEW);
             GL11.glLoadMatrix(fb);                                    
             // move to the center
-             mat.translate(cam.centerMover.target).get(fb);
+            
+            mat.translate(cam.centerMover.target).get(fb);
             GL11.glLoadMatrix(fb);
-            //end of new code    
-            if(renderSelection == true)renderSelectionLine();                                  
+            
+            //end of new code                                                                                                   
+            
+            if(renderSelection == true)renderSelectionLine();                              
             RenderMolecule();		          
             Display.update();
            
+           
+               
+            
             
             
 	}
@@ -336,9 +344,45 @@ private void SelectionInterface(int mouse_x, int mouse_y){
 }
 
 
+private void TestAtomCollision(){
+    
+    // get closest point between sphere center and line defined by RayOrigin and RayDirection
+    //see if the distance is less than the radius of the sphere
+    
+    //itorate over all atoms
+     for(int itor = 1; itor < atomSelectedArray.length; itor++){
+       finish this section, not sure if the ray component is working though
+     }
+}
 
-
-
+private boolean SphereAtomCollides(float AtomX, float AtomY, float AtomZ, float radius){
+    Vector3f LineStart = new Vector3f(RayDirection.x *(-200.0f - RayOrigin.z) / RayDirection.z + RayOrigin.x,
+                                      RayDirection.x *(-200.0f - RayOrigin.z) / RayDirection.z + RayOrigin.x,  
+                                       -200.0f);
+    Vector3f LineEnd = new Vector3f(RayDirection.x *(200.0f - RayOrigin.z) / RayDirection.z + RayOrigin.x,
+                                      RayDirection.x *(200.0f - RayOrigin.z) / RayDirection.z + RayOrigin.x,  
+                                       200.0f);
+    Vector3f AtomCoordinate = new Vector3f(AtomX, AtomY, AtomZ);
+    
+    Vector3f X0_X1 = new Vector3f();
+    Vector3f X0_X2 = new Vector3f();
+    Vector3f X2_X1 = new Vector3f();
+    Vector3f CrossProduct = new Vector3f();
+    float distance;
+    
+    //http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html
+    
+    AtomCoordinate.sub(LineStart, X0_X1);
+    AtomCoordinate.sub(LineEnd, X0_X2);
+    LineEnd.sub(LineStart, X2_X1);
+    X0_X1.cross(X0_X2, CrossProduct);
+    
+    distance = CrossProduct.length() / X2_X1.length();
+    
+    if(distance <= radius)return true;
+    
+    return false;
+}
 
 void renderSelectionLine() {
     float start_x = 0, start_y = 0, start_z = 0;
@@ -356,11 +400,6 @@ void renderSelectionLine() {
     start_y =  RayDirection.y * start_T + RayOrigin.y;
     start_z = -40.0f;
     
-    /*
-    start_x = RayOrigin.x;
-    start_y = RayOrigin.y;
-    start_z = RayOrigin.z;
-    */
     end_x = RayDirection.x * end_T + RayOrigin.x;
     end_y = RayDirection.y * end_T + RayOrigin.y;
     end_z = 40.0f;
