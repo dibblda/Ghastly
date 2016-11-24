@@ -58,6 +58,7 @@ float pickScale = 1.0f;
 // for picking algorithm based on ray tracing
 Vector3f RayOrigin = new Vector3f();
 Vector3f RayDirection = new Vector3f();
+boolean debug = false;
 // end of picking algorithm
 
 
@@ -176,7 +177,7 @@ public void start() {
         // http://relativity.net.au/gaming/java/ObjectSelection.html
         // 
 
-
+        boolean renderSelection = false;
 	while (!Display.isCloseRequested()) {
  	
              //check for a resize event and do it
@@ -211,6 +212,8 @@ public void start() {
                 if((((holdTimeEnd - holdTimeStart) / 1e6) < 200.0) && clickEvent==true){
                 System.out.println("Mouse Picking");
                     SelectionInterface(Mouse.getX(), Mouse.getY());
+                    debug = true;
+                    renderSelection = true;
                     clickEvent=false;
                 //release time >= 200 msec, go to the drag interface or just reset the click    
                 }else if(((holdTimeEnd - holdTimeStart) / 1e6) >= 200.0){
@@ -251,9 +254,6 @@ public void start() {
 
             GL11.glEnable(GL11.GL_COLOR_MATERIAL);
             
-            // old code, very little present here
-             // default look for now
-            //GLU.gluLookAt(0.0f, 0.0f, 15.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f); 
             
             // new code to render the molecule
             mat.setPerspective(fieldOfView, windowWidth / windowHeight, 0.1f, 100.0f).get(fb);
@@ -264,20 +264,13 @@ public void start() {
              */
             cam.viewMatrix(mat.identity()).get(fb);
             glMatrixMode(GL_MODELVIEW);
-            GL11.glLoadMatrix(fb);
+            GL11.glLoadMatrix(fb);                                    
             // move to the center
              mat.translate(cam.centerMover.target).get(fb);
             GL11.glLoadMatrix(fb);
             //end of new code    
-            
-            
-            
-            //GL11.glPushMatrix();
-            RenderMolecule();		
-            //GL11.glPopMatrix();
-
-  
-
+            if(renderSelection == true)renderSelectionLine();                                  
+            RenderMolecule();		          
             Display.update();
            
             
@@ -332,137 +325,13 @@ float aspectRatio = (float)newWidth / (float)newHeight;
 private void SelectionInterface(int mouse_x, int mouse_y){
    
    
-    Vector2f PickerCoordinates = new Vector2f();
+    Vector2f PickerCoordinates = new Vector2f(mouse_x, mouse_y);
     int[] viewport = {0,0,(int)windowWidth, (int)windowHeight};
     
     
     //get the view matrix and put the origin of the picking ray and direction into two vectors
     cam.viewMatrix(mat.identity()).unprojectRay(PickerCoordinates, viewport, RayOrigin, RayDirection);
-    
-    
-    /*
-    // for picking via the ray method
-    // http://schabby.de/picking-opengl-ray-tracing/
-    //check
-    //http://stackoverflow.com/questions/25527571/get-the-camera-position-in-opengl
-    Vector3f view = new Vector3f();
-    Vector3f screenHoritzontally = new Vector3f();
-    Vector3f screenVertically = new Vector3f();
-    Vector3f cameraPosition = new Vector3f();
-    // presumably looking at the origin (for now)
-    Vector3f cameraLookAt = new Vector3f(0.0f, 0.0f, 0.0f);
-//get the position of the camera
-    // https://www.opengl.org/discussion_boards/showthread.php/178484-Extracting-camera-position-from-a-ModelView-Matrix
-    
-    cam.viewMatrix(mat.identity()).getTranslation(cameraPosition);
-    // get the 3d vector that stores the viewing direction of the camera
-    // by assigning it initially to cameraLookAt and substracting the camera position
-    //then normalize it
-    view.set(cameraLookAt).sub(cameraPosition).normalize();
-    cam.viewMatrix(mat.identity()).
-    */
-    
-    
-/*	commented out
-    int choice, depth;
-    IntBuffer selBuffer = ByteBuffer.allocateDirect(1024).order(ByteOrder.nativeOrder()).asIntBuffer();
-    int buffer[] = new int[256];
-
-    IntBuffer vpBuffer = ByteBuffer.allocateDirect(64).order(ByteOrder.nativeOrder()).asIntBuffer();
-    // The size of the viewport. [0] Is <x>, [1] Is <y>, [2] Is <width>, [3] Is <height>
-    int[] viewport = new int[4];
-		
-	// The number of "hits" (objects within the pick area).
-	int hits;
-		
-   
-
-                // Get the viewport info
-        GL11.glGetInteger(GL11.GL_VIEWPORT, vpBuffer);
-        vpBuffer.get(viewport);
-
-        // Set the buffer that OpenGL uses for selection to our buffer
-        GL11.glSelectBuffer(selBuffer);
-
-        // Change to selection mode
-        GL11.glRenderMode(GL11.GL_SELECT);
-
-        // Initialize the name stack (used for identifying which object was selected)
-        GL11.glInitNames();
-        GL11.glPushName(0);
-
-
-
-
-
-        GL11.glMatrixMode(GL11.GL_PROJECTION);
-
-        GL11.glPushMatrix();
-
-        GL11.glLoadIdentity();
-        // picking window
-        GLU.gluPickMatrix( (float) mouse_x, (float) mouse_y, pickScale * 5.0f, pickScale * 5.0f,IntBuffer.wrap(viewport));                      
-        
-        // old
-        //GLU.gluPerspective(45.0f, windowWidth / windowHeight, 0.1f, 100.0f);
-        //CameraLocation();
-        
-        // new imported code
-        //set perspective
-        mat.setPerspective((float) 0.785f, windowWidth / windowHeight, 0.1f, 100.0f).get(fb);
-        //glMatrixMode(GL_PROJECTION);          
-        GL11.glLoadMatrix(fb);
-        // get the camera's location
-        cam.viewMatrix(mat.identity()).get(fb);            
-        GL11.glLoadMatrix(fb);
-        mat.translate(cam.centerMover.target).get(fb);
-            GL11.glLoadMatrix(fb);
-        // past new imported code
-        
-        
-        RenderMolecule();
-        
-        GL11.glMatrixMode(GL11.GL_PROJECTION);
-        GL11.glPopMatrix();
-
-
-        // Exit selection mode and return to render mode, returns number selected
-        hits = GL11.glRenderMode(GL11.GL_RENDER);
-
-
-
-        selBuffer.get(buffer);
-        // Objects Were Drawn Where The Mouse Was
-        if (hits > 0) {
-              // If There Were More Than 0 Hits
-              choice = buffer[3]; // Make Our Selection The First Object
-              depth = buffer[1]; // Store How Far Away It Is
-              for (int i = 1; i < hits; i++) {
-                    // Loop Through All The Detected Hits
-                        // If This Object Is Closer To Us Than The One We Have Selected
-                    if (buffer[i * 4 + 1] < (int) depth) {
-                          choice = buffer[i * 4 + 3]; // Select The Closer Object
-                          depth = buffer[i * 4 + 1]; // Store How Far Away It Is
-                    }
-              }
-
-              //System.out.println("Atom:" + choice);
-
-              // just for bug fixing
-              if(choice < atomSelectedArray.length){
-                if(atomSelectedArray[choice] == 1){
-                        atomSelectedArray[choice] = 0;
-                }else{
-                        atomSelectedArray[choice] = 1;
-                }
-
-              }
-
-        }
-
-    
-    GL11.glMatrixMode(GL11.GL_MODELVIEW);
-    */
+  
     return;
 }
 
@@ -471,9 +340,67 @@ private void SelectionInterface(int mouse_x, int mouse_y){
 
 
 
+void renderSelectionLine() {
+    float start_x = 0, start_y = 0, start_z = 0;
+    float end_x = 0, end_y = 0, end_z = 0;
+    float start_T = 0, end_T = 0;
+    
+    
+    // go from Z = -40 to Z = 40
+    // determine the starting and ending T value for the paramteric vector line
+    start_T = (-40.0f - RayOrigin.z) / RayDirection.z;
+    end_T = (40.0f - RayOrigin.z) / RayDirection.z;
+    //Set all values based on calculated T
+    
+    start_x =  RayDirection.x * start_T + RayOrigin.x;
+    start_y =  RayDirection.y * start_T + RayOrigin.y;
+    start_z = -40.0f;
+    
+    /*
+    start_x = RayOrigin.x;
+    start_y = RayOrigin.y;
+    start_z = RayOrigin.z;
+    */
+    end_x = RayDirection.x * end_T + RayOrigin.x;
+    end_y = RayDirection.y * end_T + RayOrigin.y;
+    end_z = 40.0f;
+    
+    if(debug)System.out.println("SX: "+start_x+" SY: "+start_y+" SZ: "+start_z+" EX: "+end_x+" EY: "+end_y+" EZ: "+end_z);
+    debug = false;
+    // draw lines
+    GL11.glBegin(GL11.GL_LINES);
+    GL11.glColor3f(1.0f, 0.0f, 0.0f);
+        
+    GL11.glVertex3f(start_x, start_y, start_z);
+    GL11.glVertex3f(end_x, end_y, end_z);
+        
+    GL11.glEnd();
+}
 
 
 
+private void DrawSelectedCursor(){
+	
+
+    for(int itor = 1; itor < atomSelectedArray.length; itor++){
+        if(atomSelectedArray[itor] == 1){
+
+
+
+            GL11.glTranslatef((float)internalAtomArray[itor][1], (float)internalAtomArray[itor][2],  (float)internalAtomArray[itor][3]);
+
+            GL11.glColor4f(1.0f, 1.0f, 0.0f, 0.5f);
+            GL11.glLoadName(itor);
+            Sphere s = new Sphere();
+
+            s.draw((float)(atomSelectScaling * CovalentRadii[(int)internalAtomArray[itor][0]]), 20, 20);
+
+            GL11.glTranslatef(-1.0f * (float)internalAtomArray[itor][1],  -1.0f * (float)internalAtomArray[itor][2],  -1.0f * (float)internalAtomArray[itor][3]);
+
+        }
+    }
+
+}
 
 
 
@@ -658,29 +585,6 @@ private void RenderSingleBonds(){
 
 
 
-
-private void DrawSelectedCursor(){
-	
-
-    for(int itor = 1; itor < atomSelectedArray.length; itor++){
-        if(atomSelectedArray[itor] == 1){
-
-
-
-            GL11.glTranslatef((float)internalAtomArray[itor][1], (float)internalAtomArray[itor][2],  (float)internalAtomArray[itor][3]);
-
-            GL11.glColor4f(1.0f, 1.0f, 0.0f, 0.5f);
-            GL11.glLoadName(itor);
-            Sphere s = new Sphere();
-
-            s.draw((float)(atomSelectScaling * CovalentRadii[(int)internalAtomArray[itor][0]]), 20, 20);
-
-            GL11.glTranslatef(-1.0f * (float)internalAtomArray[itor][1],  -1.0f * (float)internalAtomArray[itor][2],  -1.0f * (float)internalAtomArray[itor][3]);
-
-        }
-    }
-
-}
 
 
 
