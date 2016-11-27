@@ -356,16 +356,7 @@ private void SelectionInterface(int mouse_x, int mouse_y){
     
     
     RayDirection.normalize();
-    // dummy vector test for debuggin the code
-    /*
-    RayOrigin.x = 0;
-    RayOrigin.y = 10;
-    RayOrigin.z = 0;
-    RayDirection.x = 0;
-    RayDirection.y = -1;
-    RayDirection.z = 0;
-    */
-    // update the selection matrix
+  
    
     
     TestAtomCollision();
