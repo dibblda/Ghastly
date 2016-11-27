@@ -1,4 +1,6 @@
-import org.lwjgl.LWJGLException;
+import java.util.Arrays;
+
+        import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
@@ -58,6 +60,10 @@ float pickScale = 1.0f;
 // for picking algorithm based on ray tracing
 Vector3f RayOrigin = new Vector3f();
 Vector3f RayDirection = new Vector3f();
+//maximum value for the parametric equation defining a line to get 
+//the end and beginning points for a picker ray
+// make large to ensure that it always crosses atom space (1000 angstroms here)
+float ParametricTValue = 1000.0f;
 boolean debug = false;
 // end of picking algorithm
 
@@ -268,10 +274,10 @@ public void start() {
             glMatrixMode(GL_MODELVIEW);
             GL11.glLoadMatrix(fb);                                    
             // move to the center
-            
+            /* possibly not needed?
             mat.translate(cam.centerMover.target).get(fb);
             GL11.glLoadMatrix(fb);
-            
+            */
             //end of new code                                                                                                   
             
             if(renderSelection == true)renderSelectionLine();                              
@@ -328,40 +334,88 @@ float aspectRatio = (float)newWidth / (float)newHeight;
 
 
 
-// seelction mode is deprected, implement ray tracing if possible
+// selction mode is deprected, implement ray tracing if possible
 
 private void SelectionInterface(int mouse_x, int mouse_y){
    
-   
+    
     Vector2f PickerCoordinates = new Vector2f(mouse_x, mouse_y);
     int[] viewport = {0,0,(int)windowWidth, (int)windowHeight};
     
-    
-    //get the view matrix and put the origin of the picking ray and direction into two vectors
-    cam.viewMatrix(mat.identity()).unprojectRay(PickerCoordinates, viewport, RayOrigin, RayDirection);
   
+    // create a temporary matrix to put in both the projection and modelview matrices 
+    // which are need to be multiplied together to backtrack the mouse location into 
+    // the scene
+    
+    Matrix4f temp = new Matrix4f();
+    // get the projection matrix
+    temp.setPerspective(fieldOfView, windowWidth / windowHeight, 0.1f, 100.0f);
+    // take the projection matrix and multiply it by the modelview matrix 
+    cam.viewMatrix(temp).unprojectRay(PickerCoordinates, viewport, RayOrigin, RayDirection);
+    
+    
+    
+    RayDirection.normalize();
+    // dummy vector test for debuggin the code
+    /*
+    RayOrigin.x = 0;
+    RayOrigin.y = 10;
+    RayOrigin.z = 0;
+    RayDirection.x = 0;
+    RayDirection.y = -1;
+    RayDirection.z = 0;
+    */
+    // update the selection matrix
+   
+    
+    TestAtomCollision();
+    
     return;
 }
 
 
 private void TestAtomCollision(){
     
+    // place to store all the atoms that intersect the mouse ray
+    int numberHits = 0;
+    int[] atomlist = new int[0];
+    
+    
     // get closest point between sphere center and line defined by RayOrigin and RayDirection
     //see if the distance is less than the radius of the sphere
     
-    //itorate over all atoms
+    //itorate over all atoms, find the hits
      for(int itor = 1; itor < atomSelectedArray.length; itor++){
-       finish this section, not sure if the ray component is working though
+       
+        if(SphereAtomCollides((float)internalAtomArray[itor][1], 
+                              (float)internalAtomArray[itor][2],
+                              (float)internalAtomArray[itor][3],
+                              (float)CovalentRadii[(int)internalAtomArray[itor][0]])){
+            numberHits++;
+            
+            atomlist = Arrays.copyOf(atomlist, numberHits);
+            
+            
+            //for debug just select it for now
+            atomSelectedArray[itor] = 1;
+        };
+                              
+       //Sorting code needs tp be worked out here, sort each new addition by comparison to the last, closest in the beginning of the array
+       if(numberHits > 1){
+           
+       }
+         
+       
      }
 }
 
 private boolean SphereAtomCollides(float AtomX, float AtomY, float AtomZ, float radius){
-    Vector3f LineStart = new Vector3f(RayDirection.x *(-200.0f - RayOrigin.z) / RayDirection.z + RayOrigin.x,
-                                      RayDirection.x *(-200.0f - RayOrigin.z) / RayDirection.z + RayOrigin.x,  
-                                       -200.0f);
-    Vector3f LineEnd = new Vector3f(RayDirection.x *(200.0f - RayOrigin.z) / RayDirection.z + RayOrigin.x,
-                                      RayDirection.x *(200.0f - RayOrigin.z) / RayDirection.z + RayOrigin.x,  
-                                       200.0f);
+    Vector3f LineStart = new Vector3f(RayDirection.x * ParametricTValue + RayOrigin.x,
+                                      RayDirection.y * ParametricTValue + RayOrigin.y,  
+                                      RayDirection.z * ParametricTValue + RayOrigin.z);
+    Vector3f LineEnd = new Vector3f(RayDirection.x * (-ParametricTValue) + RayOrigin.x,
+                                    RayDirection.y * (-ParametricTValue) + RayOrigin.y,  
+                                    RayDirection.z * (-ParametricTValue) + RayOrigin.z);
     Vector3f AtomCoordinate = new Vector3f(AtomX, AtomY, AtomZ);
     
     Vector3f X0_X1 = new Vector3f();
@@ -387,24 +441,17 @@ private boolean SphereAtomCollides(float AtomX, float AtomY, float AtomZ, float 
 void renderSelectionLine() {
     float start_x = 0, start_y = 0, start_z = 0;
     float end_x = 0, end_y = 0, end_z = 0;
-    float start_T = 0, end_T = 0;
+   
+           
+    start_x = RayDirection.x * ParametricTValue + RayOrigin.x;
+    start_y = RayDirection.y * ParametricTValue + RayOrigin.y;
+    start_z = RayDirection.z * ParametricTValue + RayOrigin.z;
     
+    end_x = RayDirection.x * (-ParametricTValue) + RayOrigin.x;
+    end_y = RayDirection.y * (-ParametricTValue) + RayOrigin.y;
+    end_z = RayDirection.z * (-ParametricTValue) + RayOrigin.z;
     
-    // go from Z = -40 to Z = 40
-    // determine the starting and ending T value for the paramteric vector line
-    start_T = (-40.0f - RayOrigin.z) / RayDirection.z;
-    end_T = (40.0f - RayOrigin.z) / RayDirection.z;
-    //Set all values based on calculated T
-    
-    start_x =  RayDirection.x * start_T + RayOrigin.x;
-    start_y =  RayDirection.y * start_T + RayOrigin.y;
-    start_z = -40.0f;
-    
-    end_x = RayDirection.x * end_T + RayOrigin.x;
-    end_y = RayDirection.y * end_T + RayOrigin.y;
-    end_z = 40.0f;
-    
-    if(debug)System.out.println("SX: "+start_x+" SY: "+start_y+" SZ: "+start_z+" EX: "+end_x+" EY: "+end_y+" EZ: "+end_z);
+    //if(debug)System.out.println("SX: "+start_x+" SY: "+start_y+" SZ: "+start_z+" EX: "+end_x+" EY: "+end_y+" EZ: "+end_z);
     debug = false;
     // draw lines
     GL11.glBegin(GL11.GL_LINES);

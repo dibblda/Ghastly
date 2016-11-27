@@ -657,13 +657,7 @@ public float[][][] BondGeometry(){
                                                 }else if(dx == 0.0f && dy < 0.0){
                                                     theta = 270.0f;
                                                 }
-                                                
-                                                
-                                                
-                                                //FINISH THIS FOR ALL QUADRANTS AND AXIS POINTS
-                                                System.out.println("AX  "+InputAtomicCoordinates[A_itor][1]+" AY  "+InputAtomicCoordinates[A_itor][2]+
-                                                        " B  X"+InputAtomicCoordinates[B_itor][1]+" BY  "+InputAtomicCoordinates[B_itor][2]+
-                                                        " R  "+interatomicDistance+" THETA  "+theta);
+                                                                                                                                                                                             
                                                 
                                         // if the rotation is in the not in the X/Y plane, calculate the ang from the Z-axis
                                         }else{
