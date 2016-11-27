@@ -379,37 +379,43 @@ private void TestAtomCollision(){
     // place to store all the atoms that intersect the mouse ray
     int numberHits = 0;
     int[] atomlist = new int[0];
-    
+    float LastR = 1e6f, TestR; // impossibly large number to start 
+    int currentAtom = 0;
     
     // get closest point between sphere center and line defined by RayOrigin and RayDirection
     //see if the distance is less than the radius of the sphere
     
     //itorate over all atoms, find the hits
-     for(int itor = 1; itor < atomSelectedArray.length; itor++){
+    for(int itor = 1; itor < atomSelectedArray.length; itor++){
        
-        if(SphereAtomCollides((float)internalAtomArray[itor][1], 
-                              (float)internalAtomArray[itor][2],
-                              (float)internalAtomArray[itor][3],
-                              (float)CovalentRadii[(int)internalAtomArray[itor][0]])){
-            numberHits++;
-            
-            atomlist = Arrays.copyOf(atomlist, numberHits);
-            
-            
-            //for debug just select it for now
-            atomSelectedArray[itor] = 1;
-        };
-                              
-       //Sorting code needs tp be worked out here, sort each new addition by comparison to the last, closest in the beginning of the array
-       if(numberHits > 1){
-           
-       }
-         
+        if(RayAtomCollides((float)internalAtomArray[itor][1], 
+                           (float)internalAtomArray[itor][2],
+                           (float)internalAtomArray[itor][3],
+                           (float)CovalentRadii[(int)internalAtomArray[itor][0]])){
+            numberHits++;              
+            //test if the atom is any closer than the last atom entered, if so replace it
+            TestR = SphereOriginDistance((float)internalAtomArray[itor][1], (float)internalAtomArray[itor][2], (float)internalAtomArray[itor][3]);
+            System.out.println(TestR);
+            //if closer, swap it out, else move on
+            if(TestR <= LastR){
+                currentAtom = itor;
+                LastR = TestR;
+            }
+                                                                    
+        };                                             
        
      }
+  //Found the closest atom to the origin (and def. found one), just highlight (or unhighlight) for now, in the future this will be a big part of the GUI
+    if(numberHits >= 1){
+        if(atomSelectedArray[currentAtom] == 0){
+            atomSelectedArray[currentAtom] = 1;
+        }else{
+            atomSelectedArray[currentAtom] = 0;
+        }
+    }
 }
 
-private boolean SphereAtomCollides(float AtomX, float AtomY, float AtomZ, float radius){
+private boolean RayAtomCollides(float AtomX, float AtomY, float AtomZ, float radius){
     Vector3f LineStart = new Vector3f(RayDirection.x * ParametricTValue + RayOrigin.x,
                                       RayDirection.y * ParametricTValue + RayOrigin.y,  
                                       RayDirection.z * ParametricTValue + RayOrigin.z);
@@ -437,6 +443,11 @@ private boolean SphereAtomCollides(float AtomX, float AtomY, float AtomZ, float 
     
     return false;
 }
+
+private float SphereOriginDistance(float AtomX, float AtomY, float AtomZ){
+    return (float)Math.sqrt(Math.pow((AtomX - RayOrigin.x), 2) + Math.pow((AtomY - RayOrigin.y),2) + Math.pow((AtomZ - RayOrigin.z), 2));
+}
+
 
 void renderSelectionLine() {
     float start_x = 0, start_y = 0, start_z = 0;
