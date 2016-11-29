@@ -55,7 +55,7 @@ private FloatBuffer matSpecular;
 float windowWidth, windowHeight;
 // field of view (in radians) (~45 degrees)
 float fieldOfView = 0.785f;
-float pickScale = 1.0f;
+//float pickScale = 1.0f;
 
 // for picking algorithm based on ray tracing
 Vector3f RayOrigin = new Vector3f();
@@ -66,7 +66,7 @@ Vector3f RayDirection = new Vector3f();
 float ParametricTValue = 1000.0f;
 boolean debug = false;
 // end of picking algorithm
-
+float zoom = 20;
 
 // for arc ball camera 
  Matrix4f mat = new Matrix4f();
@@ -246,8 +246,17 @@ public void start() {
                                                             
                 }
             }
-            // implement zoom eventually
             
+            int dWheel = Mouse.getDWheel();
+            if(dWheel < 0){
+                zoom *= 1.1f;
+                 System.out.println("DOWN " + zoom);
+            }else if(dWheel > 0){
+                zoom /= 1.1f;
+                 System.out.println("UP " + zoom);
+            }
+            // implement zoom eventually
+            cam.zoom(zoom);
             //calculate time delta and update
             /* Compute delta time */
             long thisTime = System.nanoTime();

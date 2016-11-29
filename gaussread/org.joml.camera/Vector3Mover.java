@@ -48,12 +48,12 @@ public class Vector3Mover {
      * The maximum acceleration directly towards the target.
      */
     public float maxDirectAcceleration = 20.0f;
-
+    //public float maxDirectAcceleration = 1e10f;
     /**
      * The maximum deceleration directly towards the target.
      */
     public float maxDirectDeceleration = 100.0f;
-
+    //public float maxDirectDeceleration = 1e10f;
     /**
      * The maximum deceleration (in positive values) towards the velocity
      * component perpendicular to the target direction.

@@ -44,8 +44,11 @@ public class ArcBallCamera {
     {
         zoomMover.current = 10.0f;
         zoomMover.target = 10.0f;
-        zoomMover.maxAcceleration = 10.0f;
-        zoomMover.maxDeceleration = 15.0f;
+        
+        //zoomMover.maxAcceleration = 10.0f;
+        zoomMover.maxAcceleration = 1e3f;
+        //zoomMover.maxDeceleration = 15.0f;
+        zoomMover.maxAcceleration = 1e3f;
     }
 
     /**

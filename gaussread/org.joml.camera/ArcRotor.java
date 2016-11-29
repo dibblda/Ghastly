@@ -28,8 +28,8 @@ package org.joml.camera;
  */
 public class ArcRotor {
     // these 2 values were originally 250
-    public double maxAcceleration = Math.toRadians(1000.0f);
-    public double maxDeceleration = Math.toRadians(1000.0f);
+    public double maxAcceleration = Math.toRadians(1e4f);
+    public double maxDeceleration = Math.toRadians(1e4f);
     //end of change
     public double target;
     public double current;
