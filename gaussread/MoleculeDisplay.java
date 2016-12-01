@@ -43,8 +43,6 @@ private float diffuseLightData[] = { 0.8f, 0.8f, 0.8f, 1.0f };
 private float specularLightData[] = { 0.30f, 0.30f, 0.30f, 1.0f };
 private float positionLightData[] = { 30.0f, 30.0f, 20.0f, 1.0f }; 
 private float matSpecularData[] = { 1.0f, 1.0f, 1.0f, 1.0f }; 
-
-
 private FloatBuffer ambientLight;
 private FloatBuffer diffuseLight; 
 private FloatBuffer specularLight; 
@@ -75,6 +73,13 @@ float zoom = 20;
  //FloatBuffer Pickerfb = BufferUtils.createFloatBuffer(16);
  ArcBallCamera cam = new ArcBallCamera();
 // end arcball camera
+ 
+ 
+ 
+ 
+ 
+ 
+ 
  
 private int colorMapArraySize = 97;
 // covalent radii used to draw spheres for each AN
@@ -249,14 +254,19 @@ public void start() {
             
             int dWheel = Mouse.getDWheel();
             if(dWheel < 0){
-                zoom *= 1.1f;
-                 System.out.println("DOWN " + zoom);
+                zoom *= 1.1f;                 
             }else if(dWheel > 0){
-                zoom /= 1.1f;
-                 System.out.println("UP " + zoom);
+                zoom /= 1.1f;                
             }
-            // implement zoom eventually
+            // implement zoom 
             cam.zoom(zoom);
+            
+            // see if the molecule is being dragged around in the XY plane
+            // right mouse button?
+            if(Mouse.isButtonDown(1)){
+                System.out.println("button1");
+            }
+            
             //calculate time delta and update
             /* Compute delta time */
             long thisTime = System.nanoTime();
