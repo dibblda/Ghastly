@@ -23,6 +23,7 @@ import org.joml.camera.ArcBallCamera;
 import static org.lwjgl.opengl.GL11.GL_MODELVIEW;
 import static org.lwjgl.opengl.GL11.GL_PROJECTION;
 import static org.lwjgl.opengl.GL11.glMatrixMode;
+import org.lwjgl.util.vector.Vector4f;
 
 
 
@@ -58,6 +59,9 @@ float fieldOfView = 0.785f;
 // for picking algorithm based on ray tracing
 Vector3f RayOrigin = new Vector3f();
 Vector3f RayDirection = new Vector3f();
+
+
+
 //maximum value for the parametric equation defining a line to get 
 //the end and beginning points for a picker ray
 // make large to ensure that it always crosses atom space (1000 angstroms here)
@@ -74,17 +78,28 @@ float zoom = 20;
  ArcBallCamera cam = new ArcBallCamera();
 // end arcball camera
  
- //for molecule dragging
-Vector3f DragRayOrigin = new Vector3f();
-Vector3f DragRayDirection = new Vector3f();
-//Vector3f DragRayOriginLast = new Vector3f();
-//Vector3f DragRayDirectionLast = new Vector3f();
-// total distance to translate the molecule from defaul position
+
+
+// Variables for moving the model around in a plane parallel to the screen
+boolean DragAtomSelected = false; 
+Vector3f AtomSelectionVector = new Vector3f(0, 0, 0);
+Vector3f RayOriginZero = new Vector3f();
+Vector3f RayDirectionZero = new Vector3f();
+boolean planeDefined = false;
+Vector4f PlaneCoefficients = new Vector4f(0, 0, 0, 0);
+// used to draw a vector from teh mouse through the plane
+Vector3f MouseRayOrigin = new Vector3f();
+Vector3f MouseRayDirection = new Vector3f();
+// the coordinates of teh mouse in the plane
+Vector3f MousePlaneCoordinates = new Vector3f(0, 0, 0);
 Vector3f DragRayVector = new Vector3f(0, 0, 0);
-// atom under the selection used to get the Z value
-Vector3f DragRayAtom =  new Vector3f();
-Vector3f DragRayAtomLast =  new Vector3f(); 
- 
+
+
+
+
+
+
+
 private int colorMapArraySize = 97;
 // covalent radii used to draw spheres for each AN
 private double [] CovalentRadii = {0.00,0.32,0.28,1.29,0.96,0.84,0.76,0.71,0.66,0.57,0.58,
@@ -174,9 +189,10 @@ public void start() {
         
        
 
-        cam.setAlpha((float) Math.toRadians(-20));
-        cam.setBeta((float) Math.toRadians(20));
-        
+        //cam.setAlpha((float) Math.toRadians(-20));
+        //cam.setBeta((float) Math.toRadians(20));
+        cam.setAlpha((float) Math.toRadians(0));
+        cam.setBeta((float) Math.toRadians(0));
         
         
        
@@ -191,8 +207,8 @@ public void start() {
         // example:
         // http://relativity.net.au/gaming/java/ObjectSelection.html
         // 
-        boolean DragFirstPass = true;
-        boolean renderSelection = false;
+        boolean RightClickEvent = false;
+        boolean DragFirstPass = true;        
 	while (!Display.isCloseRequested()) {
  	
              //check for a resize event and do it
@@ -225,11 +241,9 @@ public void start() {
                 
                 holdTimeEnd = System.nanoTime();
                 //check if less than 200 msec, otherwise reset 
-                if((((holdTimeEnd - holdTimeStart) / 1e6) < 200.0) && clickEvent==true){
-                System.out.println("Mouse Picking");
+                if((((holdTimeEnd - holdTimeStart) / 1e6) < 200.0) && clickEvent==true){                
                     SelectionInterface(Mouse.getX(), Mouse.getY(), false);
-                    debug = true;
-                    renderSelection = true;
+                    debug = true;                    
                     clickEvent=false;
                 //release time >= 200 msec, go to the drag interface or just reset the click    
                 }else if(((holdTimeEnd - holdTimeStart) / 1e6) >= 200.0){
@@ -267,26 +281,25 @@ public void start() {
             
             // see if the molecule is being dragged around in the XY plane
             // right mouse button?
+            
             if(Mouse.isButtonDown(1)){
-                //System.out.println("button1");
-                
-                if(DragFirstPass){
-                    SelectionInterface(Mouse.getX(), Mouse.getY(), true);
-                    DragFirstPass = false;
-                    DragRayAtomLast.x = DragRayAtom.x;
-                    DragRayAtomLast.y = DragRayAtom.y;
-                    DragRayAtomLast.z = DragRayAtom.z;
-                }else{
-                    SelectionInterface(Mouse.getX(), Mouse.getY(), true);
-                    DragVectorCalc();
-                    DragRayAtomLast.x = DragRayAtom.x;
-                    DragRayAtomLast.y = DragRayAtom.y;
-                    DragRayAtomLast.z = DragRayAtom.z;
+                if(!RightClickEvent){
+                System.out.println("NewDrag");
+                System.out.println("");
                 }
-               
+                RightClickEvent = true;
+                SelectionInterface(Mouse.getX(), Mouse.getY(), true);
                 
             }else if(!Mouse.isButtonDown(1)){
-                
+                if(RightClickEvent == true){
+                    
+                    RightClickEvent = false;
+                    planeDefined = false;
+                     
+                    
+                  
+                    
+                }
             }
             
             //calculate time delta and update
@@ -321,7 +334,10 @@ public void start() {
             */
             //end of new code                                                                                                   
             
-            if(renderSelection == true)renderSelectionLine(true);                              
+            //renderSelectionLine(); 
+           
+            //RenderNormalPlane();
+            //RenderMouseInPlace();
             RenderMolecule();		          
             Display.update();
            
@@ -336,14 +352,20 @@ public void start() {
 }
  
 
-
+private void RenderMolecule(){
+                              
+        GL11.glTranslatef(DragRayVector.x, DragRayVector.y, DragRayVector.z);   					  	                  
+	RenderAtoms();
+	RenderBonds();
+	DrawSelectedCursor();
+        GL11.glTranslatef(-DragRayVector.x, -DragRayVector.y, -DragRayVector.z);
+	return;
+}
 
 
 private void doResize(int newWidth, int newHeight){
 float aspectRatio = (float)newWidth / (float)newHeight;
-
- 
-  
+   
   GL11.glMatrixMode(GL11.GL_PROJECTION);
   GL11.glLoadIdentity();
   GL11.glViewport(0, 0, newWidth, newHeight);
@@ -375,7 +397,7 @@ float aspectRatio = (float)newWidth / (float)newHeight;
 
 
 
-// selction mode is deprected, implement ray tracing if possible
+// used ray tracing to deteermin the location of the mouse 
 
 private void SelectionInterface(int mouse_x, int mouse_y, boolean dragInterface){
    
@@ -390,37 +412,45 @@ private void SelectionInterface(int mouse_x, int mouse_y, boolean dragInterface)
         
     Matrix4f temp = new Matrix4f();
     
-    if(!dragInterface){
-        // get the projection matrix
+   
+    // get the projection matrix
+    temp.setPerspective(fieldOfView, windowWidth / windowHeight, 0.1f, 100.0f);
+    // take the projection matrix and multiply it by the modelview matrix 
+    cam.viewMatrix(temp).translate(DragRayVector).unprojectRay(PickerCoordinates, viewport, RayOrigin, RayDirection);            
+    RayDirection.normalize();
+    
+    if(dragInterface){
+        //reset and recalculate
+        temp.identity();
         temp.setPerspective(fieldOfView, windowWidth / windowHeight, 0.1f, 100.0f);
-        // take the projection matrix and multiply it by the modelview matrix 
-        cam.viewMatrix(temp).translate(DragRayVector).unprojectRay(PickerCoordinates, viewport, RayOrigin, RayDirection);            
-        RayDirection.normalize();
-    }else{
-        // get the projection matrix
-        temp.setPerspective(fieldOfView, windowWidth / windowHeight, 0.1f, 100.0f);
-        // take the projection matrix and multiply it by the modelview matrix 
-        cam.viewMatrix(temp).translate(DragRayVector).unprojectRay(PickerCoordinates, viewport, DragRayOrigin, DragRayDirection);            
-        DragRayDirection.normalize();
+        
+        //on or teh other, bug testing
+        
+        //cam.viewMatrix(temp).translate(DragRayVector).unprojectRay(PickerCoordinates, viewport, MouseRayOrigin, MouseRayDirection); 
+        cam.viewMatrix(temp).unprojectRay(PickerCoordinates, viewport, MouseRayOrigin, MouseRayDirection);   
+        MouseRayDirection.normalize();
     }
     
-    
-    
-    
-    
-   
-    
+    //  calculate ray directly from the center of the screen, use to define the plane of the screen    
+    PickerCoordinates.x = windowWidth / 2.0f;
+    PickerCoordinates.y = windowHeight / 2.0f;
+    //reset and recalculate
+    temp.identity();
+    temp.setPerspective(fieldOfView, windowWidth / windowHeight, 0.1f, 100.0f);
+    cam.viewMatrix(temp).translate(DragRayVector).unprojectRay(PickerCoordinates, viewport, RayOriginZero, RayDirectionZero);            
+    RayDirectionZero.normalize();
+    // now do atom collisions and drag calculations (if asked for)
     TestAtomCollision(dragInterface);
     
     return;
 }
 
-
+// find out which atoms intersect the picking ray and do some stuff depending on the current mode
 private void TestAtomCollision(boolean dragInterface){
     
     // place to store all the atoms that intersect the mouse ray
     int numberHits = 0;
-    int[] atomlist = new int[0];
+    
     float LastR = 1e6f, TestR; // impossibly large number to start 
     int currentAtom = 0;
     
@@ -430,17 +460,15 @@ private void TestAtomCollision(boolean dragInterface){
     //itorate over all atoms, find the hits
     for(int itor = 1; itor < atomSelectedArray.length; itor++){
        
-        if(RayAtomCollides((float)internalAtomArray[itor][1] + DragRayVector.x, 
-                           (float)internalAtomArray[itor][2] + DragRayVector.y,
-                           (float)internalAtomArray[itor][3] + DragRayVector.z,
-                           (float)CovalentRadii[(int)internalAtomArray[itor][0]],
-                           dragInterface)){
+        if(RayAtomCollides((float)internalAtomArray[itor][1], 
+                           (float)internalAtomArray[itor][2],
+                           (float)internalAtomArray[itor][3],
+                           (float)CovalentRadii[(int)internalAtomArray[itor][0]])){
             numberHits++;              
             //test if the atom is any closer than the last atom entered, if so replace it
-            TestR = SphereOriginDistance((float)internalAtomArray[itor][1] + DragRayVector.x, 
-                                         (float)internalAtomArray[itor][2] + DragRayVector.y, 
-                                         (float)internalAtomArray[itor][3] + DragRayVector.z,
-                                         dragInterface);
+            TestR = SphereOriginDistance((float)internalAtomArray[itor][1], 
+                                         (float)internalAtomArray[itor][2], 
+                                         (float)internalAtomArray[itor][3]);
             //System.out.println(TestR);
             //if closer, swap it out, else move on
             if(TestR <= LastR){
@@ -454,7 +482,7 @@ private void TestAtomCollision(boolean dragInterface){
   //Found the closest atom to the origin (and def. found one), just highlight (or unhighlight) for now, in the future this will be a big part of the GUI
   // only do this if for selection and not drag interface  
     if(!dragInterface){
-        if(numberHits >= 1){
+        if(numberHits >= 1){           
             if(atomSelectedArray[currentAtom] == 0){
                 atomSelectedArray[currentAtom] = 1;
             }else{
@@ -462,33 +490,61 @@ private void TestAtomCollision(boolean dragInterface){
             }
         }
     }else{
-        DragRayAtom.x = (float)internalAtomArray[currentAtom][1] + DragRayVector.x;
-        DragRayAtom.y = (float)internalAtomArray[currentAtom][1] + DragRayVector.y;
-        DragRayAtom.z = (float)internalAtomArray[currentAtom][1] + DragRayVector.z;
+        // for dragging arouns teh molecule on screen
+        // first hit defines the drag plane, subsequent 
+        // need to account for rotation and translation, fix this
+        if((numberHits >= 1)&&(planeDefined == false)){
+            //Plus rotation!!!!
+            Vector3f TempRotation = new Vector3f((float)internalAtomArray[currentAtom][1], (float)internalAtomArray[currentAtom][2], (float)internalAtomArray[currentAtom][3]);
+            Vector3f TempAfterRotation = cam.RotateVector(TempRotation);
+            
+          
+            AtomSelectionVector.x = TempAfterRotation.x + DragRayVector.x;
+            AtomSelectionVector.y = TempAfterRotation.y + DragRayVector.y;
+            AtomSelectionVector.z = TempAfterRotation.z + DragRayVector.z;
+                        
+             atomSelectedArray[currentAtom] = 1;
+            // get the plane parallel to the screen that runs through the selected atom
+            DefineScreenPlane();
+            //SelectionVectorScreenIntersection();
+            planeDefined = true;
+            System.out.println("AXP "+AtomSelectionVector.x+" AYP "+AtomSelectionVector.y+" AZP "+AtomSelectionVector.z);
+            System.out.println("DXP "+DragRayVector.x+" DYP "+DragRayVector.y+" DZP "+DragRayVector.z);
+            System.out.println("MXP "+MousePlaneCoordinates.x+" MYP "+MousePlaneCoordinates.y+" MZP "+MousePlaneCoordinates.z);
+        }else if((numberHits >= 1)&&(planeDefined == true)){
+            // find out where the screen intersect the current drag line
+            
+            SelectionVectorScreenIntersection();
+            //update the drag line to match 
+            DragRayVector.x = MousePlaneCoordinates.x - AtomSelectionVector.x;
+            DragRayVector.y = MousePlaneCoordinates.y - AtomSelectionVector.y;
+            DragRayVector.z = MousePlaneCoordinates.z - AtomSelectionVector.z;
+            // update the atom location as well
+            //AtomSelectionVector.x = (float)internalAtomArray[currentAtom][1] + DragRayVector.x;
+            //AtomSelectionVector.y = (float)internalAtomArray[currentAtom][2] + DragRayVector.y;
+            //AtomSelectionVector.z = (float)internalAtomArray[currentAtom][3] + DragRayVector.z;
+            System.out.println("AXA "+AtomSelectionVector.x+" AYA "+AtomSelectionVector.y+" AZA "+AtomSelectionVector.z);
+            System.out.println("DXA "+DragRayVector.x+" DYA "+DragRayVector.y+" DZA "+DragRayVector.z);
+            System.out.println("MXA "+MousePlaneCoordinates.x+" MYA "+MousePlaneCoordinates.y+" MZA "+MousePlaneCoordinates.z);
+        }
+        
     }
 }
 
-private boolean RayAtomCollides(float AtomX, float AtomY, float AtomZ, float radius, boolean dragInterface){
+private boolean RayAtomCollides(float AtomX, float AtomY, float AtomZ, float radius){
     Vector3f LineStart = new Vector3f();
     Vector3f LineEnd = new Vector3f();
 
-    if(!dragInterface){
-        LineStart.x = RayDirection.x * ParametricTValue + RayOrigin.x;
-        LineStart.y = RayDirection.y * ParametricTValue + RayOrigin.y;
-        LineStart.z = RayDirection.z * ParametricTValue + RayOrigin.z;
-        LineEnd.x = RayDirection.x * (-ParametricTValue) + RayOrigin.x;
-        LineEnd.y = RayDirection.y * (-ParametricTValue) + RayOrigin.y;
-        LineEnd.z = RayDirection.z * (-ParametricTValue) + RayOrigin.z;
+
+    LineStart.x = RayDirection.x * ParametricTValue + RayOrigin.x;
+    LineStart.y = RayDirection.y * ParametricTValue + RayOrigin.y;
+    LineStart.z = RayDirection.z * ParametricTValue + RayOrigin.z;
+    LineEnd.x = RayDirection.x * (-ParametricTValue) + RayOrigin.x;
+    LineEnd.y = RayDirection.y * (-ParametricTValue) + RayOrigin.y;
+    LineEnd.z = RayDirection.z * (-ParametricTValue) + RayOrigin.z;
                                          
         
-    }else{
-        LineStart.x = DragRayDirection.x * ParametricTValue + DragRayOrigin.x;
-        LineStart.y = DragRayDirection.y * ParametricTValue + DragRayOrigin.y;
-        LineStart.z = DragRayDirection.z * ParametricTValue + DragRayOrigin.z;
-        LineEnd.x = DragRayDirection.x * (-ParametricTValue) + DragRayOrigin.x;
-        LineEnd.y = DragRayDirection.y * (-ParametricTValue) + DragRayOrigin.y;
-        LineEnd.z = DragRayDirection.z * (-ParametricTValue) + DragRayOrigin.z;
-    }
+   
     Vector3f AtomCoordinate = new Vector3f(AtomX, AtomY, AtomZ);
     
     Vector3f X0_X1 = new Vector3f();
@@ -511,48 +567,146 @@ private boolean RayAtomCollides(float AtomX, float AtomY, float AtomZ, float rad
     return false;
 }
 
-private float SphereOriginDistance(float AtomX, float AtomY, float AtomZ, boolean dragInterface){
-    if(!dragInterface){
-        return (float)Math.sqrt(Math.pow((AtomX - RayOrigin.x), 2) + Math.pow((AtomY - RayOrigin.y),2) + Math.pow((AtomZ - RayOrigin.z), 2));
-    }else{
-        return (float)Math.sqrt(Math.pow((AtomX - DragRayOrigin.x), 2) + Math.pow((AtomY - DragRayOrigin.y),2) + Math.pow((AtomZ - DragRayOrigin.z), 2));
-    }
+private float SphereOriginDistance(float AtomX, float AtomY, float AtomZ){
+    
+    return (float)Math.sqrt(Math.pow((AtomX - RayOrigin.x), 2) + Math.pow((AtomY - RayOrigin.y),2) + Math.pow((AtomZ - RayOrigin.z), 2));
+    
 }
 
 
-void renderSelectionLine(boolean dragInterface) {
+void DefineScreenPlane(){
+    PlaneCoefficients.x = RayDirectionZero.x;
+    PlaneCoefficients.y = RayDirectionZero.y;
+    PlaneCoefficients.z = RayDirectionZero.z;
+    PlaneCoefficients.w =  -RayDirectionZero.x*(AtomSelectionVector.x + DragRayVector.x) - RayDirectionZero.y*(AtomSelectionVector.y + DragRayVector.y) - RayDirectionZero.z*(AtomSelectionVector.z + DragRayVector.z);
+}
+
+void SelectionVectorScreenIntersection(){
+    
+    float numerator;
+    float denominator;
+    float ParametricT;
+    numerator = -(MouseRayOrigin.x * PlaneCoefficients.x + MouseRayOrigin.y * PlaneCoefficients.y + MouseRayOrigin.z * PlaneCoefficients.z + PlaneCoefficients.w);
+    denominator = PlaneCoefficients.x * MouseRayDirection.x + PlaneCoefficients.y * MouseRayDirection.y + PlaneCoefficients.z * MouseRayDirection.z;
+    ParametricT = numerator / denominator;
+    MousePlaneCoordinates.x = MouseRayDirection.x * ParametricT + MouseRayOrigin.x;
+    MousePlaneCoordinates.y = MouseRayDirection.y * ParametricT + MouseRayOrigin.y;
+    MousePlaneCoordinates.z = MouseRayDirection.z * ParametricT + MouseRayOrigin.z;
+}
+
+
+
+void renderSelectionLine() {
     float start_x = 0, start_y = 0, start_z = 0;
     float end_x = 0, end_y = 0, end_z = 0;
    
-    if(!dragInterface){   
-        start_x = RayDirection.x * ParametricTValue + RayOrigin.x;
-        start_y = RayDirection.y * ParametricTValue + RayOrigin.y;
-        start_z = RayDirection.z * ParametricTValue + RayOrigin.z;
-
-        end_x = RayDirection.x * (-ParametricTValue) + RayOrigin.x;
-        end_y = RayDirection.y * (-ParametricTValue) + RayOrigin.y;
-        end_z = RayDirection.z * (-ParametricTValue) + RayOrigin.z;
-    }else{
-        start_x = DragRayDirection.x * ParametricTValue + DragRayOrigin.x;
-        start_y = DragRayDirection.y * ParametricTValue + DragRayOrigin.y;
-        start_z = DragRayDirection.z * ParametricTValue + DragRayOrigin.z;
-
-        end_x = DragRayDirection.x * (-ParametricTValue) + DragRayOrigin.x;
-        end_y = DragRayDirection.y * (-ParametricTValue) + DragRayOrigin.y;
-        end_z = DragRayDirection.z * (-ParametricTValue) + DragRayOrigin.z;
-    }
     
-    //if(debug)System.out.println("SX: "+start_x+" SY: "+start_y+" SZ: "+start_z+" EX: "+end_x+" EY: "+end_y+" EZ: "+end_z);
-    debug = false;
+    float start_x0 = 0, start_y0 = 0, start_z0 = 0;
+    float end_x0 = 0, end_y0 = 0, end_z0 = 0;
+    
+    
+    start_x = RayDirection.x * ParametricTValue + RayOrigin.x;
+    start_y = RayDirection.y * ParametricTValue + RayOrigin.y;
+    start_z = RayDirection.z * ParametricTValue + RayOrigin.z;
+
+    end_x = RayDirection.x * (-ParametricTValue) + RayOrigin.x;
+    end_y = RayDirection.y * (-ParametricTValue) + RayOrigin.y;
+    end_z = RayDirection.z * (-ParametricTValue) + RayOrigin.z;
+   
+    start_x0 = RayDirectionZero.x * ParametricTValue + RayOriginZero.x;
+    start_y0 = RayDirectionZero.y * ParametricTValue + RayOriginZero.y;
+    start_z0 = RayDirectionZero.z * ParametricTValue + RayOriginZero.z;
+
+    end_x0 = RayDirectionZero.x * (-ParametricTValue) + RayOriginZero.x;
+    end_y0 = RayDirectionZero.y * (-ParametricTValue) + RayOriginZero.y;
+    end_z0 = RayDirectionZero.z * (-ParametricTValue) + RayOriginZero.z;
+   
+    
+   
+    
+    
+    
     // draw lines
     GL11.glBegin(GL11.GL_LINES);
-    GL11.glColor3f(1.0f, 0.0f, 0.0f);
-        
+   // selection line    
+    GL11.glColor3f(1.0f, 0.0f, 0.0f); 
     GL11.glVertex3f(start_x, start_y, start_z);
     GL11.glVertex3f(end_x, end_y, end_z);
-        
+    //camera center line
+    GL11.glColor3f(0.0f, 1.0f, 0.0f); 
+    GL11.glVertex3f(start_x0, start_y0, start_z0);
+    GL11.glVertex3f(end_x0, end_y0, end_z0);
+   
     GL11.glEnd();
+
+//System.out.println(" x "+RayOriginZero.x+" y "+RayOriginZero.y+" z "+RayOriginZero.z);
+
 }
+
+private void RenderMouseInPlace(){
+    
+     GL11.glTranslatef(MousePlaneCoordinates.x, MousePlaneCoordinates.y,  MousePlaneCoordinates.z);
+
+    GL11.glColor4f(1.0f, 0.0f, 0.0f, 0.5f);
+    
+    Sphere s = new Sphere();
+
+    s.draw(1.0f, 20, 20);
+
+    GL11.glTranslatef(-MousePlaneCoordinates.x, -MousePlaneCoordinates.y,  -MousePlaneCoordinates.z);           
+                               
+}
+
+
+
+private void RenderNormalPlane(){
+    
+    // http://mathworld.wolfram.com/Plane.html
+    
+    
+    float X_1, X_2, X_3, X_4;
+    float Y_1, Y_2, Y_3, Y_4;
+    float Z_1, Z_2, Z_3, Z_4;
+    float A_P, B_P, C_P, D_P;
+    X_1 = -100.0f;
+    X_2 = -100.0f;
+    X_3 = 100.0f;
+    X_4 = 100.0f;
+    
+    Y_1 = -100.0f;
+    Y_2 = 100.0f;
+    Y_3 = 100.0f;
+    Y_4 = -100.0f;
+    
+    // variable defining the plane
+    // the plance is parralell to the screen, normal vector direction discovered by deprojection from center of screen
+    // the plane is specified to be the incident with the center of the selected atom
+    
+    A_P = RayDirectionZero.x;
+    B_P = RayDirectionZero.y;
+    C_P = RayDirectionZero.z;
+    D_P = -RayDirectionZero.x*(AtomSelectionVector.x + DragRayVector.x) - RayDirectionZero.y*(AtomSelectionVector.y + DragRayVector.y) - RayDirectionZero.z*(AtomSelectionVector.z + DragRayVector.z);
+    
+    Z_1 = (-D_P - B_P * Y_1 - A_P * X_1) / C_P;
+    Z_2 = (-D_P - B_P * Y_2 - A_P * X_2) / C_P;
+    Z_3 = (-D_P - B_P * Y_3 - A_P * X_3) / C_P;
+    Z_4 = (-D_P - B_P * Y_4 - A_P * X_4) / C_P;
+    
+    
+    GL11.glBegin(GL11.GL_QUADS);
+    GL11.glEnable(GL11.GL_BLEND);
+    GL11.glColor4f(0.0f, 1.0f, 0.0f, 0.5f);
+    GL11.glVertex3f(X_1, Y_1, Z_1);
+    GL11.glVertex3f(X_2, Y_2, Z_2);
+    GL11.glVertex3f(X_3, Y_3, Z_3);
+    GL11.glVertex3f(X_4, Y_4, Z_4);
+    GL11.glDisable(GL11.GL_BLEND);
+    
+    
+    GL11.glEnd();
+   
+}
+
 
 
 
@@ -582,35 +736,12 @@ private void DrawSelectedCursor(){
 
 
 
-private void DragVectorCalc(){
-    float TValueCalc = (DragRayAtomLast.z - DragRayOrigin.z) / DragRayDirection.z;
-    DragRayVector.x = DragRayDirection.x * TValueCalc + RayOrigin.x;
-    DragRayVector.y = DragRayDirection.x * TValueCalc + RayOrigin.y;
-    // shouldn't change from zero
-    DragRayVector.z = 0.0f; 
-    System.out.println("SX: "+DragRayVector.x+" SY: "+DragRayVector.y+" SZ: "+DragRayVector.z);
-}
 
 
 
 
 
 
-private void RenderMolecule(){
-
-        
-        GL11.glTranslatef(DragRayVector.x, DragRayVector.y, DragRayVector.z);
-   					  	  
-        
-        
-	RenderAtoms();
-	RenderBonds();
-
-	DrawSelectedCursor();
-        GL11.glTranslatef(-DragRayVector.x, -DragRayVector.y, -DragRayVector.z);
-	return;
-
-}
 
 
 

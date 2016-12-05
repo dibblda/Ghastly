@@ -20,6 +20,7 @@
 package org.joml.camera;
 
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 //import org.joml.camera
         
 /**
@@ -70,7 +71,18 @@ public class ArcBallCamera {
                   .rotateY((float) alphaMover.current)
                   .translate(-centerMover.current.x, -centerMover.current.y, -centerMover.current.z);
     }
-
+    //rotation of a single vector
+    public Vector3f RotateVector(Vector3f Input){
+        Matrix4f RotationMatrix = new Matrix4f().identity();
+        Vector3f ReturnVector = new Vector3f();
+        RotationMatrix.translate(0, 0, (float) -zoomMover.current);
+        RotationMatrix.rotateX((float) betaMover.current);        
+        RotationMatrix.rotateY((float) alphaMover.current);
+        RotationMatrix.translate(-centerMover.current.x, -centerMover.current.y, -centerMover.current.z);
+        
+        Input.mulDirection(RotationMatrix, ReturnVector);
+        return ReturnVector;
+    }
     public void setAlpha(double alpha) {
         alphaMover.target = alpha % (2.0 * Math.PI);
     }
