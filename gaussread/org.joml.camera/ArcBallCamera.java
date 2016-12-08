@@ -75,12 +75,21 @@ public class ArcBallCamera {
     public Vector3f RotateVector(Vector3f Input){
         Matrix4f RotationMatrix = new Matrix4f().identity();
         Vector3f ReturnVector = new Vector3f();
+        
+        RotationMatrix.m00(Input.x);
+        RotationMatrix.m11(Input.y);
+        RotationMatrix.m22(Input.z);
+        
         RotationMatrix.translate(0, 0, (float) -zoomMover.current);
         RotationMatrix.rotateX((float) betaMover.current);        
         RotationMatrix.rotateY((float) alphaMover.current);
         RotationMatrix.translate(-centerMover.current.x, -centerMover.current.y, -centerMover.current.z);
         
-        Input.mulDirection(RotationMatrix, ReturnVector);
+        ReturnVector.x = RotationMatrix.m00();
+        ReturnVector.y = RotationMatrix.m11();
+        ReturnVector.z = RotationMatrix.m22();
+        
+        //Input.mulDirection(RotationMatrix, ReturnVector);
         return ReturnVector;
     }
     public void setAlpha(double alpha) {

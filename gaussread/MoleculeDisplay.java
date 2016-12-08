@@ -437,7 +437,7 @@ private void SelectionInterface(int mouse_x, int mouse_y, boolean dragInterface)
     //reset and recalculate
     temp.identity();
     temp.setPerspective(fieldOfView, windowWidth / windowHeight, 0.1f, 100.0f);
-    cam.viewMatrix(temp).translate(DragRayVector).unprojectRay(PickerCoordinates, viewport, RayOriginZero, RayDirectionZero);            
+    cam.viewMatrix(temp).unprojectRay(PickerCoordinates, viewport, RayOriginZero, RayDirectionZero);            
     RayDirectionZero.normalize();
     // now do atom collisions and drag calculations (if asked for)
     TestAtomCollision(dragInterface);
@@ -492,16 +492,16 @@ private void TestAtomCollision(boolean dragInterface){
     }else{
         // for dragging arouns teh molecule on screen
         // first hit defines the drag plane, subsequent 
-        // need to account for rotation and translation, fix this
+       // keeps the dragging on the plane, or it should anyways
         if((numberHits >= 1)&&(planeDefined == false)){
             //Plus rotation!!!!
             Vector3f TempRotation = new Vector3f((float)internalAtomArray[currentAtom][1], (float)internalAtomArray[currentAtom][2], (float)internalAtomArray[currentAtom][3]);
             Vector3f TempAfterRotation = cam.RotateVector(TempRotation);
             
           
-            AtomSelectionVector.x = TempAfterRotation.x + DragRayVector.x;
-            AtomSelectionVector.y = TempAfterRotation.y + DragRayVector.y;
-            AtomSelectionVector.z = TempAfterRotation.z + DragRayVector.z;
+            AtomSelectionVector.x = TempAfterRotation.x/* + DragRayVector.x*/;
+            AtomSelectionVector.y = TempAfterRotation.y/* + DragRayVector.y */;
+            AtomSelectionVector.z = TempAfterRotation.z/* + DragRayVector.z*/;
                         
              atomSelectedArray[currentAtom] = 1;
             // get the plane parallel to the screen that runs through the selected atom
