@@ -25,7 +25,7 @@ import static org.lwjgl.opengl.GL11.GL_PROJECTION;
 import static org.lwjgl.opengl.GL11.glMatrixMode;
 import org.lwjgl.util.vector.Vector4f;
 
-
+import MeanPlane.*;
 
 
 public class MoleculeDisplay {
@@ -199,8 +199,21 @@ public void start() {
 	// start up the display
 	init();
 
-	
-            
+        
+        
+        
+        // temporary debugging some math
+        Plane TempPlane = new Plane();
+        
+        Vector3f temp = new Vector3f(0,1,2);
+        Vector3f temp1 = new Vector3f(3,4,5);
+        Vector3f temp2 = new Vector3f(6,7,8);
+        
+        TempPlane.AddPoint(temp);
+	TempPlane.AddPoint(temp1);
+        TempPlane.AddPoint(temp2);
+        TempPlane.CalculatePCAMatrix();
+        
         // everything set up
         // loop and determine if moving model or selecting model
         // if selecting, enter selection mode then render mode
