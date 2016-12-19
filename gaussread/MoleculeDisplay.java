@@ -25,19 +25,30 @@ import static org.lwjgl.opengl.GL11.GL_PROJECTION;
 import static org.lwjgl.opengl.GL11.glMatrixMode;
 import org.lwjgl.util.vector.Vector4f;
 
+import GhostAtom.*;
 import MeanPlane.*;
+import java.util.ArrayList;
 
 
 public class MoleculeDisplay {
 
+    
+// parameters for obtaining the data from the read inb file for display
+//------------------------------------------------------------------------------    
 private boolean moleculeGeometryLoaded = false;
 private double [][] internalAtomArray = null;
 private int [][] internalBondArray = null;
 private float [][][] internalBondGeometry = null;
+//------------------------------------------------------------------------------
+
+
+
+
+ 
+// display and lighting parameters
+//------------------------------------------------------------------------------
 private DisplayMode displayMode;
 private boolean fullscreen = false;
- 
-// lighting parameters
 private float shininess = 50.0f;
 private float ambientLightData[] = { 0.2f, 0.2f, 0.2f, 1.0f };
 private float diffuseLightData[] = { 0.8f, 0.8f, 0.8f, 1.0f };
@@ -49,51 +60,86 @@ private FloatBuffer diffuseLight;
 private FloatBuffer specularLight; 
 private FloatBuffer positionLight; 
 private FloatBuffer matSpecular;
+//------------------------------------------------------------------------------
 
+
+
+
+
+//window parameters and camera FOV
+//------------------------------------------------------------------------------
 // variable for the opengl window width and height, field of view
 float windowWidth, windowHeight;
 // field of view (in radians) (~45 degrees)
 float fieldOfView = 0.785f;
-//float pickScale = 1.0f;
+//------------------------------------------------------------------------------
 
-// for picking algorithm based on ray tracing
+
+
+
+
+
+// for picking algorithm based on ray tracing and 
+// atom selection / plane variables
+//------------------------------------------------------------------------------
 Vector3f RayOrigin = new Vector3f();
 Vector3f RayDirection = new Vector3f();
-
-
-
 //maximum value for the parametric equation defining a line to get 
 //the end and beginning points for a picker ray
 // make large to ensure that it always crosses atom space (1000 angstroms here)
 float ParametricTValue = 1000.0f;
-boolean debug = false;
-// end of picking algorithm
-float zoom = 20;
+// variables for UI
 
-// for arc ball camera 
+// quick note, the input atomic coordinates start at 1 (0 is null) and have 
+// a matrix size one larger than the total number of atoms
+private int [] atomSelectedArray = null;
+// storage of coordinates for the extra highlighted atom
+Vector3f HighlightedAtom = null;
+//int NumberAtomsSelected = 0;
+//private int [] atomOrderSelectedArray = null;
+//private int [] atomHighlightedArrary = null;
+// for generating a plane from selected atoms
+Plane SelectionPlane = new Plane();
+//------------------------------------------------------------------------------
+
+
+
+
+// variable to identify ghost atoms, here is an array list for fliexibility
+//------------------------------------------------------------------------------
+ private ArrayList<GhostAtom> GhostAtomList = new ArrayList();
+//------------------------------------------------------------------------------
+
+
+// for arc ball camera, rotation of the model + zoom
+//------------------------------------------------------------------------------
  Matrix4f mat = new Matrix4f();
  // FloatBuffer for transferring matrices to OpenGL
  FloatBuffer fb = BufferUtils.createFloatBuffer(16);
  //FloatBuffer Pickerfb = BufferUtils.createFloatBuffer(16);
  ArcBallCamera cam = new ArcBallCamera();
-// end arcball camera
+ float zoom = 20;
+//------------------------------------------------------------------------------
  
 
+ 
+ 
 
 // Variables for moving the model around in a plane parallel to the screen
-boolean DragAtomSelected = false; 
+//------------------------------------------------------------------------------
+ boolean DragAtomSelected = false; 
 Vector3f AtomSelectionVector = new Vector3f(0, 0, 0);
 Vector3f RayOriginZero = new Vector3f();
 Vector3f RayDirectionZero = new Vector3f();
 boolean planeDefined = false;
 Vector4f PlaneCoefficients = new Vector4f(0, 0, 0, 0);
-// used to draw a vector from teh mouse through the plane
+// used to draw a vector from the mouse through the plane
 Vector3f MouseRayOrigin = new Vector3f();
 Vector3f MouseRayDirection = new Vector3f();
-// the coordinates of teh mouse in the plane
+// the coordinates of the mouse in the plane
 Vector3f MousePlaneCoordinates = new Vector3f(0, 0, 0);
 Vector3f DragRayVector = new Vector3f(0, 0, 0);
-
+//------------------------------------------------------------------------------
 
 
 
@@ -103,23 +149,20 @@ Vector3f DragRayVector = new Vector3f(0, 0, 0);
 private int colorMapArraySize = 97;
 // covalent radii used to draw spheres for each AN
 private double [] CovalentRadii = {0.00,0.32,0.28,1.29,0.96,0.84,0.76,0.71,0.66,0.57,0.58,
-						   1.67,1.42,1.21,1.11,1.07,1.05,1.02,1.06,2.03,1.76,
-						   1.71,1.61,1.54,1.40,1.40,1.32,1.26,1.24,1.32,1.22,
-						   1.22,1.20,1.19,1.20,1.20,1.16,2.21,1.95,1.91,1.76,
-						   1.65,1.55,1.48,1.47,1.43,1.40,1.46,1.45,1.43,1.39,
-						   1.40,1.38,1.39,1.41,2.44,2.15,2.08,2.05,2.04,2.02,
-						   1.99,1.99,1.99,1.97,1.95,1.93,1.93,1.90,1.90,1.88,
-						   1.88,1.75,1.71,1.63,1.52,1.44,1.42,1.37,1.37,1.33,
-						   1.46,1.47,1.48,1.40,1.50,1.50,2.60,2.21,2.15,2.07,
-						   2.00,1.97,1.90,1.87,1.81,1.69};
+                                   1.67,1.42,1.21,1.11,1.07,1.05,1.02,1.06,2.03,1.76,
+                                   1.71,1.61,1.54,1.40,1.40,1.32,1.26,1.24,1.32,1.22,
+                                   1.22,1.20,1.19,1.20,1.20,1.16,2.21,1.95,1.91,1.76,
+                                   1.65,1.55,1.48,1.47,1.43,1.40,1.46,1.45,1.43,1.39,
+                                   1.40,1.38,1.39,1.41,2.44,2.15,2.08,2.05,2.04,2.02,
+                                   1.99,1.99,1.99,1.97,1.95,1.93,1.93,1.90,1.90,1.88,
+                                   1.88,1.75,1.71,1.63,1.52,1.44,1.42,1.37,1.37,1.33,
+                                   1.46,1.47,1.48,1.40,1.50,1.50,2.60,2.21,2.15,2.07,
+                                   2.00,1.97,1.90,1.87,1.81,1.69};
 
 
 private int SINGLE_BOND = 10;
-
-
 private float atomScaling = 0.5f; 
 private float atomSelectScaling = 0.7f;
-private float originScaling = 0.3f;
 private float bondScaling = 0.3f;
 
 
@@ -129,9 +172,11 @@ private float [][] atomColorMap = new float[colorMapArraySize][3];
 private float [] singleBondColorMap = {0.6f, 0.6f, 0.6f};
 
 
-// variables for UI
-private int [] atomSelectedArray = null;
-private int [] atomHighlightedArrary = null;
+
+
+
+
+
 
 public void PassMoleculeGeometry(double [][] atomArray, int [][] bondArray, float [][][] bondGeometry){
 	assert(atomArray != null);
@@ -143,10 +188,9 @@ public void PassMoleculeGeometry(double [][] atomArray, int [][] bondArray, floa
 	internalBondGeometry = bondGeometry;
 
 	atomSelectedArray = new int [internalAtomArray.length];
-	atomHighlightedArrary = new int [internalAtomArray.length];
+       
 	for(int itor = 0; itor < internalAtomArray.length; itor++){
-		atomSelectedArray[itor] = 0;
-		atomHighlightedArrary[itor] = 0;
+		atomSelectedArray[itor] = 0;               
 	}
 	
         //System.out.println("Made it here2 Geometry");
@@ -202,17 +246,6 @@ public void start() {
         
         
         
-        // temporary debugging some math
-        Plane TempPlane = new Plane();
-        
-        Vector3f temp = new Vector3f(0,1,2);
-        Vector3f temp1 = new Vector3f(3,4,5);
-        Vector3f temp2 = new Vector3f(6,7,8);
-        
-        TempPlane.AddPoint(temp);
-	TempPlane.AddPoint(temp1);
-        TempPlane.AddPoint(temp2);
-        TempPlane.CalculatePCAMatrix();
         
         // everything set up
         // loop and determine if moving model or selecting model
@@ -221,7 +254,7 @@ public void start() {
         // http://relativity.net.au/gaming/java/ObjectSelection.html
         // 
         boolean RightClickEvent = false;
-        boolean DragFirstPass = true;        
+        
 	while (!Display.isCloseRequested()) {
  	
              //check for a resize event and do it
@@ -255,8 +288,7 @@ public void start() {
                 holdTimeEnd = System.nanoTime();
                 //check if less than 200 msec, otherwise reset 
                 if((((holdTimeEnd - holdTimeStart) / 1e6) < 200.0) && clickEvent==true){                
-                    SelectionInterface(Mouse.getX(), Mouse.getY(), false);
-                    debug = true;                    
+                    SelectionInterface(Mouse.getX(), Mouse.getY(), false);                                       
                     clickEvent=false;
                 //release time >= 200 msec, go to the drag interface or just reset the click    
                 }else if(((holdTimeEnd - holdTimeStart) / 1e6) >= 200.0){
@@ -347,18 +379,38 @@ public void start() {
             */
             //end of new code                                                                                                   
             
-            //renderSelectionLine(); 
-           
-            //RenderNormalPlane();
-            //RenderMouseInPlace();
+            
             RenderMolecule();		          
             Display.update();
            
            
-               
+               // debugging test of ghost atoms
+            if(SelectionPlane.PlaneCalculated()&&(HighlightedAtom!= null)){
+                // first clear the list
+                GhostAtomList.clear();
+                GhostAtom PositiveValue = new GhostAtom();
+                GhostAtom NegativeValue = new GhostAtom();
+                Vector3f tempGhost = SelectionPlane.CalculateTransformedCoordinates(HighlightedAtom , new Vector3f((float)0.0, (float)0.0, (float)2.0), true);
+                PositiveValue.x = tempGhost.x;
+                PositiveValue.y = tempGhost.y;
+                PositiveValue.z = tempGhost.z;
+                System.out.println("PX "+PositiveValue.x+" PY "+PositiveValue.y+" PZ "+PositiveValue.z);
+                
+                tempGhost = SelectionPlane.CalculateTransformedCoordinates(HighlightedAtom , new Vector3f((float)0.0, (float)0.0, (float)-2.0), true);
+                NegativeValue.x = tempGhost.x;
+                NegativeValue.y = tempGhost.y;
+                NegativeValue.z = tempGhost.z;
+                System.out.println("NX "+NegativeValue.x+" NY "+NegativeValue.y+" NZ "+NegativeValue.z);
+                
+                
+                GhostAtomList.add(PositiveValue);
+                GhostAtomList.add(NegativeValue);
+                
+            }
             
-            
-            
+            if(!SelectionPlane.PlaneCalculated()){
+                GhostAtomList.clear();
+            }
 	}
  
 	Display.destroy();
@@ -369,8 +421,10 @@ private void RenderMolecule(){
                               
         GL11.glTranslatef(DragRayVector.x, DragRayVector.y, DragRayVector.z);   					  	                  
 	RenderAtoms();
+        RenderGhostAtoms();
 	RenderBonds();
 	DrawSelectedCursor();
+        RenderPCAPlane();
         GL11.glTranslatef(-DragRayVector.x, -DragRayVector.y, -DragRayVector.z);
 	return;
 }
@@ -411,7 +465,7 @@ float aspectRatio = (float)newWidth / (float)newHeight;
 
 
 // used ray tracing to deteermin the location of the mouse 
-
+// depending if left or right mouse, dragging or picking will occur
 private void SelectionInterface(int mouse_x, int mouse_y, boolean dragInterface){
    
     
@@ -437,9 +491,6 @@ private void SelectionInterface(int mouse_x, int mouse_y, boolean dragInterface)
         temp.identity();
         temp.setPerspective(fieldOfView, windowWidth / windowHeight, 0.1f, 100.0f);
         
-        //on or teh other, bug testing
-        
-        //cam.viewMatrix(temp).translate(DragRayVector).unprojectRay(PickerCoordinates, viewport, MouseRayOrigin, MouseRayDirection); 
         cam.viewMatrix(temp).unprojectRay(PickerCoordinates, viewport, MouseRayOrigin, MouseRayDirection);   
         MouseRayDirection.normalize();
     }
@@ -495,35 +546,74 @@ private void TestAtomCollision(boolean dragInterface){
   //Found the closest atom to the origin (and def. found one), just highlight (or unhighlight) for now, in the future this will be a big part of the GUI
   // only do this if for selection and not drag interface  
     if(!dragInterface){
-        if(numberHits >= 1){           
+        if(numberHits >= 1){
+                                                            
             if(atomSelectedArray[currentAtom] == 0){
-                atomSelectedArray[currentAtom] = 1;
-            }else{
+                // first make sure last atom is no longer highlighted (turn 2 into 1)
+                for(int itor_refresh = 1; itor_refresh < atomSelectedArray.length; itor_refresh++){
+                    if(atomSelectedArray[itor_refresh] == 2)atomSelectedArray[itor_refresh] = 1;
+                }                                            
+                
+                // newly selected so give it a value of 2
+                atomSelectedArray[currentAtom] = 2;
+                
+                // store coordinates
+                HighlightedAtom = new Vector3f((float)internalAtomArray[currentAtom][1], (float)internalAtomArray[currentAtom][2], (float)internalAtomArray[currentAtom][3]);
+                
+                // atom the atom to the selection plane
+                // need to list whole name, clashes in the libraries
+                org.joml.Vector4f NewPoint = new org.joml.Vector4f((float)internalAtomArray[currentAtom][1], (float)internalAtomArray[currentAtom][2], (float)internalAtomArray[currentAtom][3], (float)currentAtom);
+                SelectionPlane.AddPoint(NewPoint);                                                
+            
+            }else if(atomSelectedArray[currentAtom] == 2){
+                // unselect the atom and remove from the current selection plane
                 atomSelectedArray[currentAtom] = 0;
+                // unselected, remove from the list
+                SelectionPlane.RemovePoint(currentAtom);
+                
+                
+            }else if(atomSelectedArray[currentAtom] == 1) {
+                // unseelct the currently extra-highlighted atom and choose this new one
+                // no change to the plane selection
+                for(int itor_refresh = 1; itor_refresh < atomSelectedArray.length; itor_refresh++){
+                    if(atomSelectedArray[itor_refresh] == 2)atomSelectedArray[itor_refresh] = 1;
+                }
+                atomSelectedArray[currentAtom] = 2;                
+                // store coordinates
+                HighlightedAtom = new Vector3f((float)internalAtomArray[currentAtom][1], (float)internalAtomArray[currentAtom][2], (float)internalAtomArray[currentAtom][3]);
             }
         }
+        
+        
+        
+        
+        
+        
     }else{
-        // for dragging arouns teh molecule on screen
+        // for dragging around the molecule on screen
         // first hit defines the drag plane, subsequent 
        // keeps the dragging on the plane, or it should anyways
         if((numberHits >= 1)&&(planeDefined == false)){
+
+             
+            // first rotate the atom  selected to match the screen location (not just the internal atom coordinates) 
             //Plus rotation!!!!
+
+
             Vector3f TempRotation = new Vector3f((float)internalAtomArray[currentAtom][1], (float)internalAtomArray[currentAtom][2], (float)internalAtomArray[currentAtom][3]);
             Vector3f TempAfterRotation = cam.RotateVector(TempRotation);
             
           
-            AtomSelectionVector.x = TempAfterRotation.x/* + DragRayVector.x*/;
-            AtomSelectionVector.y = TempAfterRotation.y/* + DragRayVector.y */;
-            AtomSelectionVector.z = TempAfterRotation.z/* + DragRayVector.z*/;
+            AtomSelectionVector.x = TempAfterRotation.x;
+            AtomSelectionVector.y = TempAfterRotation.y;
+            AtomSelectionVector.z = TempAfterRotation.z;
                         
-             atomSelectedArray[currentAtom] = 1;
+            
             // get the plane parallel to the screen that runs through the selected atom
             DefineScreenPlane();
             //SelectionVectorScreenIntersection();
             planeDefined = true;
-            System.out.println("AXP "+AtomSelectionVector.x+" AYP "+AtomSelectionVector.y+" AZP "+AtomSelectionVector.z);
-            System.out.println("DXP "+DragRayVector.x+" DYP "+DragRayVector.y+" DZP "+DragRayVector.z);
-            System.out.println("MXP "+MousePlaneCoordinates.x+" MYP "+MousePlaneCoordinates.y+" MZP "+MousePlaneCoordinates.z);
+            
         }else if((numberHits >= 1)&&(planeDefined == true)){
             // find out where the screen intersect the current drag line
             
@@ -532,13 +622,7 @@ private void TestAtomCollision(boolean dragInterface){
             DragRayVector.x = MousePlaneCoordinates.x - AtomSelectionVector.x;
             DragRayVector.y = MousePlaneCoordinates.y - AtomSelectionVector.y;
             DragRayVector.z = MousePlaneCoordinates.z - AtomSelectionVector.z;
-            // update the atom location as well
-            //AtomSelectionVector.x = (float)internalAtomArray[currentAtom][1] + DragRayVector.x;
-            //AtomSelectionVector.y = (float)internalAtomArray[currentAtom][2] + DragRayVector.y;
-            //AtomSelectionVector.z = (float)internalAtomArray[currentAtom][3] + DragRayVector.z;
-            System.out.println("AXA "+AtomSelectionVector.x+" AYA "+AtomSelectionVector.y+" AZA "+AtomSelectionVector.z);
-            System.out.println("DXA "+DragRayVector.x+" DYA "+DragRayVector.y+" DZA "+DragRayVector.z);
-            System.out.println("MXA "+MousePlaneCoordinates.x+" MYA "+MousePlaneCoordinates.y+" MZA "+MousePlaneCoordinates.z);
+          
         }
         
     }
@@ -658,7 +742,7 @@ void renderSelectionLine() {
 
 private void RenderMouseInPlace(){
     
-     GL11.glTranslatef(MousePlaneCoordinates.x, MousePlaneCoordinates.y,  MousePlaneCoordinates.z);
+    GL11.glTranslatef(MousePlaneCoordinates.x, MousePlaneCoordinates.y,  MousePlaneCoordinates.z);
 
     GL11.glColor4f(1.0f, 0.0f, 0.0f, 0.5f);
     
@@ -721,24 +805,85 @@ private void RenderNormalPlane(){
 }
 
 
-
+private void RenderPCAPlane(){
+    
+    if(!SelectionPlane.PlaneCalculated()){
+        //System.out.println("no plane");
+        return;
+    } 
+    
+    org.joml.Vector4f SelPlaneEq = SelectionPlane.GetPlaneEquation();
+    // http://mathworld.wolfram.com/Plane.html
+    
+    //System.out.println("A: "+ SelPlaneEq.x +" B: "+SelPlaneEq.y+" C: "+SelPlaneEq.z+" D: "+SelPlaneEq.w);
+    
+    
+    float X_1, X_2, X_3, X_4;
+    float Y_1, Y_2, Y_3, Y_4;
+    float Z_1, Z_2, Z_3, Z_4;
+    float A_P, B_P, C_P, D_P;
+    X_1 = -100.0f;
+    X_2 = -100.0f;
+    X_3 = 100.0f;
+    X_4 = 100.0f;
+    
+    Y_1 = -100.0f;
+    Y_2 = 100.0f;
+    Y_3 = 100.0f;
+    Y_4 = -100.0f;
+    
+    // variable defining the plane
+    // the plance is parralell to the screen, normal vector direction discovered by deprojection from center of screen
+    // the plane is specified to be the incident with the center of the selected atom
+    
+    A_P = SelPlaneEq.x;
+    B_P = SelPlaneEq.y;
+    C_P = SelPlaneEq.z;
+    D_P = SelPlaneEq.w;
+    
+    Z_1 = (-D_P - B_P * Y_1 - A_P * X_1) / C_P;
+    Z_2 = (-D_P - B_P * Y_2 - A_P * X_2) / C_P;
+    Z_3 = (-D_P - B_P * Y_3 - A_P * X_3) / C_P;
+    Z_4 = (-D_P - B_P * Y_4 - A_P * X_4) / C_P;
+    
+    
+    GL11.glBegin(GL11.GL_QUADS);
+    GL11.glEnable(GL11.GL_BLEND);
+    GL11.glColor4f(0.0f, 1.0f, 0.0f, 0.5f);
+    GL11.glVertex3f(X_1, Y_1, Z_1);
+    GL11.glVertex3f(X_2, Y_2, Z_2);
+    GL11.glVertex3f(X_3, Y_3, Z_3);
+    GL11.glVertex3f(X_4, Y_4, Z_4);
+    GL11.glDisable(GL11.GL_BLEND);
+    
+    
+    GL11.glEnd();
+    
+    
+    
+    
+}
 
 private void DrawSelectedCursor(){
 	
 
     for(int itor = 1; itor < atomSelectedArray.length; itor++){
-        if(atomSelectedArray[itor] == 1){
+        if(atomSelectedArray[itor] > 0){
 
 
-
+            // differenct colors depending on if a highlighted atom or a selected atom
             GL11.glTranslatef((float)internalAtomArray[itor][1], (float)internalAtomArray[itor][2],  (float)internalAtomArray[itor][3]);
-
-            GL11.glColor4f(1.0f, 1.0f, 0.0f, 0.5f);
-            GL11.glLoadName(itor);
-            Sphere s = new Sphere();
-
-            s.draw((float)(atomSelectScaling * CovalentRadii[(int)internalAtomArray[itor][0]]), 20, 20);
-
+            if(atomSelectedArray[itor] == 1){
+                GL11.glColor4f(1.0f, 1.0f, 0.0f, 0.5f);
+                GL11.glLoadName(itor);
+                Sphere s = new Sphere();
+                s.draw((float)(atomSelectScaling * CovalentRadii[(int)internalAtomArray[itor][0]]), 20, 20);
+            }else if(atomSelectedArray[itor] == 2  ){
+                GL11.glColor4f(1.0f, 0.0f, 0.0f, 0.5f);
+                GL11.glLoadName(itor);
+                Sphere s = new Sphere();
+                s.draw((float)(atomSelectScaling * CovalentRadii[(int)internalAtomArray[itor][0]]), 20, 20);
+            }
             GL11.glTranslatef(-1.0f * (float)internalAtomArray[itor][1],  -1.0f * (float)internalAtomArray[itor][2],  -1.0f * (float)internalAtomArray[itor][3]);
 
         }
@@ -747,8 +892,20 @@ private void DrawSelectedCursor(){
 }
 
 
-
-
+private void RenderGhostAtoms(){
+    GhostAtom temp;
+    if(GhostAtomList.isEmpty())return;
+    
+    for(int itor = 0; itor < GhostAtomList.size(); itor++){
+        temp = GhostAtomList.get(itor);
+        GL11.glTranslatef(temp.x, temp.y, temp.z);
+        GL11.glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
+        GL11.glLoadName(itor + 10000);
+        Sphere s = new Sphere();
+        s.draw(0.5f, 20, 20);
+        GL11.glTranslatef(-temp.x, -temp.y, -temp.z);
+    }
+}
 
 
 
@@ -959,10 +1116,10 @@ void ColorMapArraySet(){
 	atomColorMap[6][1] = (float)0.235;
 	atomColorMap[6][2] = (float)0.235;
 
-	// nitrogen brown
-	atomColorMap[7][0] = (float)0.545;
-	atomColorMap[7][1] = (float)0.271;
-	atomColorMap[7][2] = (float)0.075;
+	// nitrogen blue
+	atomColorMap[7][0] = (float)0.0;
+	atomColorMap[7][1] = (float)0.0;
+	atomColorMap[7][2] = (float)1.0;
 
 	// oxygen red
 	atomColorMap[8][0] = (float)1.0;
