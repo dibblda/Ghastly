@@ -24,7 +24,6 @@ import org.joml.Vector4f;
 import org.joml.Matrix3f;
 import java.util.ArrayList;
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.data.Complex64F;
 import org.ejml.interfaces.decomposition.EigenDecomposition;
 import org.ejml.factory.DecompositionFactory;
 public class Plane {
@@ -45,7 +44,9 @@ public class Plane {
     
     private Vector4f PlaneEquation = new Vector4f(); 
     
-    
+    // used to define the x-vecotr on the plane
+    private Vector3f XVectorAtom = new Vector3f();
+    boolean XVectorAtomDefined = false;
     
     
     
@@ -334,7 +335,17 @@ public class Plane {
         PlaneEquation.z =  NormalToPlane.z;
         PlaneEquation.w =  -(NormalToPlane.x*TranslationVector.x + NormalToPlane.y*TranslationVector.y + NormalToPlane.z*TranslationVector.z);
     }
-     
+   
+    public void AddXProjectionAtom(Vector3f XProjectionAtom){
+        XVectorAtom.x = XProjectionAtom.x;
+        XVectorAtom.y = XProjectionAtom.y;
+        XVectorAtom.z = XProjectionAtom.z;
+        XVectorAtomDefined = true;
+    }
+    
+    public void RemoveXProjectionAtom(Vector3f XProjectionAtom){        
+        XVectorAtomDefined = false;
+    }
      
     // determine the coordinate of a point using the plane as the coordinate space tp the coordinate space of the molecule
     // XProjectionAtom is the coordinate that when projected onto the plane represents the X vector (Z is the normal)
@@ -413,8 +424,84 @@ public class Plane {
         
         return FinalValue;
     }     
+     public Vector3f CalculateTransformedCoordinates(Vector3f PlaneCoordinate, boolean ZcrossX){
+         
+         // since we are assuming the x-vector is in, then crash if not
+         assert(XVectorAtomDefined);
+         
+         
+        float A, B, C, D, a, b, c, d, xo, yo, zo;
+        
+        float ParametricT;
+        Vector3f XVector = new Vector3f(0,0,0);
+        Vector3f YVector = new Vector3f(0,0,0);
+        Vector3f ZVector = new Vector3f(0,0,0);
+        Vector3f FinalValue = new Vector3f(0,0,0);
+        
+        A = PlaneEquation.x;
+        B = PlaneEquation.y;
+        C = PlaneEquation.z;
+        D = PlaneEquation.w;
+        a = NormalToPlane.x;
+        b = NormalToPlane.y;
+        c = NormalToPlane.z;
+        xo = XVectorAtom.x;
+        yo = XVectorAtom.y;
+        zo = XVectorAtom.z;
+        // find the t value at which the plane meets the line
+        // I know the a = A, etc. but hust for this purpose for clarity
+        ParametricT = -(A * xo + B * yo + C * zo + D) / (a * A + b * B + c * C);
+        // first get the point where the paramteric line meets the plane        
+        XVector.x = xo + a * ParametricT;
+        XVector.y = yo + b * ParametricT;
+        XVector.z = zo + c * ParametricT;
+        // the substract the normalization vector to get the X vecotr relative to the Z and normalize
+        XVector.x = XVector.x - TranslationVector.x;
+        XVector.y = XVector.y - TranslationVector.y;
+        XVector.z = XVector.z - TranslationVector.z;
+        XVector.normalize();
+        // normalize the XVector
+       
+        //transer data into Z vector and normalize
+        ZVector.x = a;
+        ZVector.y = b;       
+        ZVector.z = c;
+        ZVector.normalize();
+        
+        
+        // now calculate the cross product to find the YVector, X and Z are normal to each other so no additional sine
+        if(ZcrossX){
+            ZVector.cross(XVector, YVector);
+        }else{
+            XVector.cross(ZVector, YVector);
+        }
      
-     
+       // https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=4&ved=0ahUKEwiC1tTNnv_QAhUGwFQKHX4QCYoQFggvMAM&url=http%3A%2F%2Fwww.math.tau.ac.il%2F~dcor%2FGraphics%2Fcg-slides%2Fgeom3d.pdf&usg=AFQjCNG0qhbk3E8jlw8ale28Wt9s_kUxUg&bvm=bv.142059868,d.cGw&cad=rja
+        //transforming from XVector, YVector, ZVector defining plane coordinate system to global coordinate system
+        
+
+         Matrix3f TempRotation = new Matrix3f();
+         TempRotation.m00 = XVector.x;
+         TempRotation.m01 = XVector.y;
+         TempRotation.m02 = XVector.z;
+         TempRotation.m10 = YVector.x;
+         TempRotation.m11 = YVector.y;
+         TempRotation.m12 = YVector.z;
+         TempRotation.m20 = ZVector.x;
+         TempRotation.m21 = ZVector.y;
+         TempRotation.m22 = ZVector.z;
+                                                      
+         //TempRotation.transpose();
+         TempRotation.transform(PlaneCoordinate, FinalValue);
+        
+        //Finally move to the geometric center
+        FinalValue.x = FinalValue.x + TranslationVector.x;
+        FinalValue.y = FinalValue.y + TranslationVector.y;      
+        FinalValue.z = FinalValue.z + TranslationVector.z;
+        
+        return FinalValue;
+    }      
+    
      
      
      

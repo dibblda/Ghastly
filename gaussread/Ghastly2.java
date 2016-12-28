@@ -3,11 +3,11 @@ import java.awt.event.*;
 import java.io.*;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import org.lwjgl.LWJGLException;
-import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.DisplayMode;
+import GhostAtom.*;
 
-public class PractiGauss extends JFrame implements ActionListener{
+
+
+public class Ghastly2 extends JFrame implements ActionListener{
 
 
 JFrame moleculeControlFrame;
@@ -15,11 +15,12 @@ JFrame moleculeControlFrame;
 static MoleculeDisplay molecule;
 
 GaussFile moleculeData = null;
+
 boolean moleculeDataLoaded = false;
 
+GhostAtomSet Ghastly = new GhostAtomSet();
 
-
-public PractiGauss(){
+public Ghastly2(){
 	super("PractiGauss v1.0");
 	Container content = getContentPane();  // unnecessary in 5.0+
 
@@ -54,7 +55,7 @@ public void actionPerformed(ActionEvent e) {
 private void loadFile () {
 	JFileChooser chooser = new JFileChooser();
         // set this version to read gaussian com files only for now
-         FileNameExtensionFilter filter = new FileNameExtensionFilter("Gaussian Input File", "com");
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("Gaussian Input File", "com");
         chooser.setFileFilter(filter);
         //now open the file dialog
 	int result = chooser.showOpenDialog(this);
@@ -68,7 +69,7 @@ private void loadFile () {
 			
 			// temporarily here
 			
-			molecule.PassMoleculeGeometry(moleculeData.AtomicCoordinates(), moleculeData.BondArray(), moleculeData.BondGeometry());
+			molecule.PassInterfaceParameters(moleculeData.AtomicCoordinates(), moleculeData.BondArray(), moleculeData.BondGeometry(), Ghastly);
 			
                         //molecule.start();
                         
@@ -98,7 +99,7 @@ return m;
 
 public static void main(String[] s) {
 	System.setProperty("bluecove.jsr82.psm_minimum_off", "true");
-	new PractiGauss().setVisible(true);
+	new Ghastly2().setVisible(true);
 //	RC = new RemoteControl();
 //	RC.StartGeometryPrintout();
 

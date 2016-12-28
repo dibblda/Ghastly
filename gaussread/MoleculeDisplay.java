@@ -26,7 +26,7 @@ import static org.lwjgl.opengl.GL11.glMatrixMode;
 import org.lwjgl.util.vector.Vector4f;
 
 import GhostAtom.*;
-import MeanPlane.*;
+//import MeanPlane.*;
 import java.util.ArrayList;
 
 
@@ -39,6 +39,7 @@ private boolean moleculeGeometryLoaded = false;
 private double [][] internalAtomArray = null;
 private int [][] internalBondArray = null;
 private float [][][] internalBondGeometry = null;
+GhostAtomSet Ghastly = null;
 //------------------------------------------------------------------------------
 
 
@@ -99,7 +100,7 @@ Vector3f HighlightedAtom = null;
 //private int [] atomOrderSelectedArray = null;
 //private int [] atomHighlightedArrary = null;
 // for generating a plane from selected atoms
-Plane SelectionPlane = new Plane();
+//Plane SelectionPlane = new Plane();
 //------------------------------------------------------------------------------
 
 
@@ -107,7 +108,7 @@ Plane SelectionPlane = new Plane();
 
 // variable to identify ghost atoms, here is an array list for fliexibility
 //------------------------------------------------------------------------------
- private ArrayList<GhostAtom> GhostAtomList = new ArrayList();
+ //private ArrayList<GhostAtom> GhostAtomList = new ArrayList();
 //------------------------------------------------------------------------------
 
 
@@ -178,7 +179,7 @@ private float [] singleBondColorMap = {0.6f, 0.6f, 0.6f};
 
 
 
-public void PassMoleculeGeometry(double [][] atomArray, int [][] bondArray, float [][][] bondGeometry){
+public void PassInterfaceParameters(double [][] atomArray, int [][] bondArray, float [][][] bondGeometry, GhostAtomSet GhastlyPassed){
 	assert(atomArray != null);
 	assert(bondArray != null);
 	assert(bondGeometry != null);
@@ -195,6 +196,8 @@ public void PassMoleculeGeometry(double [][] atomArray, int [][] bondArray, floa
 	
         //System.out.println("Made it here2 Geometry");
 	moleculeGeometryLoaded = true;
+        
+        Ghastly = GhastlyPassed;
 }
 
 
@@ -385,9 +388,13 @@ public void start() {
            
            
                // debugging test of ghost atoms
-            if(SelectionPlane.PlaneCalculated()&&(HighlightedAtom!= null)){
+            if(Ghastly.CurrentPlane.PlaneCalculated()&&(HighlightedAtom!= null)){
+               /*
                 // first clear the list
                 GhostAtomList.clear();
+                
+                
+                
                 GhostAtom PositiveValue = new GhostAtom();
                 GhostAtom NegativeValue = new GhostAtom();
                 Vector3f tempGhost = SelectionPlane.CalculateTransformedCoordinates(HighlightedAtom , new Vector3f((float)0.0, (float)0.0, (float)2.0), true);
@@ -406,11 +413,28 @@ public void start() {
                 GhostAtomList.add(PositiveValue);
                 GhostAtomList.add(NegativeValue);
                 
+                
+                for(int Xitor = -5; Xitor <=5; Xitor++){
+                    for(int Yitor = -5; Yitor <=5; Yitor++){
+                        for (int Zitor = -1; Zitor <=1; Zitor++){
+                            GhostAtom PositiveValue = new GhostAtom();
+                            Vector3f tempGhost = SelectionPlane.CalculateTransformedCoordinates(HighlightedAtom , new Vector3f(2.0f * (float)Xitor, 2.0f * (float)Yitor, 2.0f * (float)Zitor), true);
+                            PositiveValue.x = tempGhost.x;
+                            PositiveValue.y = tempGhost.y;
+                            PositiveValue.z = tempGhost.z;
+                            GhostAtomList.add(PositiveValue);
+                        }
+                    }
+                
+                }
+            */    
+                
             }
-            
+            /*
             if(!SelectionPlane.PlaneCalculated()){
                 GhostAtomList.clear();
             }
+            */
 	}
  
 	Display.destroy();
@@ -563,13 +587,13 @@ private void TestAtomCollision(boolean dragInterface){
                 // atom the atom to the selection plane
                 // need to list whole name, clashes in the libraries
                 org.joml.Vector4f NewPoint = new org.joml.Vector4f((float)internalAtomArray[currentAtom][1], (float)internalAtomArray[currentAtom][2], (float)internalAtomArray[currentAtom][3], (float)currentAtom);
-                SelectionPlane.AddPoint(NewPoint);                                                
+                Ghastly.CurrentPlane.AddPoint(NewPoint);                                                
             
             }else if(atomSelectedArray[currentAtom] == 2){
                 // unselect the atom and remove from the current selection plane
                 atomSelectedArray[currentAtom] = 0;
                 // unselected, remove from the list
-                SelectionPlane.RemovePoint(currentAtom);
+                Ghastly.CurrentPlane.RemovePoint(currentAtom);
                 
                 
             }else if(atomSelectedArray[currentAtom] == 1) {
@@ -807,12 +831,12 @@ private void RenderNormalPlane(){
 
 private void RenderPCAPlane(){
     
-    if(!SelectionPlane.PlaneCalculated()){
+    if(!Ghastly.CurrentPlane.PlaneCalculated()){
         //System.out.println("no plane");
         return;
     } 
     
-    org.joml.Vector4f SelPlaneEq = SelectionPlane.GetPlaneEquation();
+    org.joml.Vector4f SelPlaneEq = Ghastly.CurrentPlane.GetPlaneEquation();
     // http://mathworld.wolfram.com/Plane.html
     
     //System.out.println("A: "+ SelPlaneEq.x +" B: "+SelPlaneEq.y+" C: "+SelPlaneEq.z+" D: "+SelPlaneEq.w);
@@ -894,15 +918,32 @@ private void DrawSelectedCursor(){
 
 private void RenderGhostAtoms(){
     GhostAtom temp;
-    if(GhostAtomList.isEmpty())return;
+    if(Ghastly.GetAtoms().isEmpty())return;
     
-    for(int itor = 0; itor < GhostAtomList.size(); itor++){
-        temp = GhostAtomList.get(itor);
+    for(int itor = 0; itor < Ghastly.GetAtoms().size(); itor++){
+        temp = Ghastly.GetAtoms().get(itor);
         GL11.glTranslatef(temp.x, temp.y, temp.z);
-        GL11.glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
-        GL11.glLoadName(itor + 10000);
-        Sphere s = new Sphere();
-        s.draw(0.5f, 20, 20);
+        
+        
+        // need to higlight atoms if they are
+        if(Ghastly.GetAtoms().get(itor).HighlightLevel == 0){
+            GL11.glColor4f(1.0f, 1.0f, 1.0f, 0.25f);
+            GL11.glLoadName(itor + 10000);
+            Sphere s = new Sphere();
+            s.draw(0.5f, 20, 20);
+        }else if(Ghastly.GetAtoms().get(itor).HighlightLevel == 0){
+            GL11.glColor4f(1.0f, 1.0f, 0.0f, 0.25f);
+            GL11.glLoadName(itor + 10000);
+            Sphere s = new Sphere();
+            s.draw(0.5f, 20, 20);
+        }else{
+            GL11.glColor4f(1.0f, 0.0f, 0.0f, 0.25f);
+            GL11.glLoadName(itor + 10000);
+            Sphere s = new Sphere();
+            s.draw(0.5f, 20, 20);
+        }
+        
+        
         GL11.glTranslatef(-temp.x, -temp.y, -temp.z);
     }
 }
