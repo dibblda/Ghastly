@@ -5,6 +5,8 @@
  */
 package GhostAtom;
 import java.util.ArrayList;
+import java.util.Observable;
+import org.joml.Vector4f;
 import MeanPlane.*;
 /**
  *
@@ -21,11 +23,9 @@ import MeanPlane.*;
  * need to implement multiple atom types
  * 
  */
-public class GhostAtomSet {
+public class GhostAtomSet extends Observable{
     
-// public varialbe to store the current plane needed to generate ghost atoms
-// in general coordinates    
-    public Plane CurrentPlane = new Plane();
+
 //variables to store information on ghost atom types and lists       
         
     int NumberOfSets = 0;
@@ -33,11 +33,23 @@ public class GhostAtomSet {
     
     
     boolean SetProposed = false;
-    GhostAtomType ProposedSet;
+    GhostAtomType ProposedSet = null;
     
     ArrayList<GhostAtomType> GhostAtomSets = new ArrayList();
     
     ArrayList<GhostAtom> CurrentAtoms = new ArrayList();
+    
+// booleans for GUI / display purposes    
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+    // to turn off mouse choosing after create has been set
+    // mo selection until in the proper context
+    public boolean LockSelection = true;
+    // unselect every real atom that is currently selected
+    public boolean UnselectAtoms = false;
+    // display only the proposed set
+    public boolean DisplayProposed = false;
+
     
 // add Section    
 //------------------------------------------------------------------------------    
@@ -52,7 +64,7 @@ public class GhostAtomSet {
     }
     
     // add but don't include in the list yet
-    public void IncludeProposed(GhostAtomType GhostType){
+    public void NewProposed(GhostAtomType GhostType){
         ProposedSet = GhostType;        
     }
     
@@ -139,11 +151,33 @@ public class GhostAtomSet {
         }    
     }
     
+    public boolean IsHighlighted(float x, float y, float z){
+        for (int itor = 0; itor < GhostAtomSets.size(); itor++){
+            if(GhostAtomSets.get(itor).AtomMatches(x, y, z)){
+               return GhostAtomSets.get(itor).IsHighlighted();
+            }
+        }
+        // couldn't find, false by default
+        return false;
+    }
+    
+    public boolean IsHighlighted(int TypeIndexValue){        
+        for (int itor = 0; itor < GhostAtomSets.size(); itor++){
+            if(GhostAtomSets.get(itor).Identifier == TypeIndexValue){
+                return GhostAtomSets.get(itor).IsHighlighted();
+            };
+        }
+        // couldn't find, false by default
+        return false;
+    }
+    
+    
+    
 // Atom list return Section    
 //------------------------------------------------------------------------------    
 //------------------------------------------------------------------------------    
     
-    // return every atom stored in this class including the propsed atoms     
+    // return every atom stored in this class including the proposed atoms     
     public ArrayList<GhostAtom> GetAllAtoms(){
                 
         if(!CurrentAtoms.isEmpty())CurrentAtoms.clear();
@@ -169,6 +203,9 @@ public class GhostAtomSet {
         return CurrentAtoms;
     }
     
+    public ArrayList<GhostAtom> GetProposedAtoms(){
+        return ProposedSet.GetAtomList();
+    }
     
     // return the list of highlited atoms 
     public ArrayList<GhostAtom> GetHighlightedAtoms(){
@@ -188,5 +225,43 @@ public class GhostAtomSet {
         return CurrentAtoms;
         
     }
-
+    
+    
+    
+//  Section to detail with the plane obtained from the atom selection interface
+// make it observable for the java swing interface    
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------    
+// public varialbe to store the current plane needed to generate ghost atoms
+// in general coordinates    
+    private Plane CurrentPlane = new Plane();
+    public void AddPointToPlane(Vector4f point){
+        CurrentPlane.AddPoint(point);
+        // if a plane now exists, tell everyone who's asked to know
+        if(CurrentPlane.PlaneCalculated()){
+            setChanged();
+            notifyObservers();
+        }
+    }
+    
+    public void RemovePointFromPlane(int AtomIndex){
+        CurrentPlane.RemovePoint(AtomIndex);
+        // if a plane now exists, tell everyone who's asked to know
+        if(!CurrentPlane.PlaneCalculated()){
+            setChanged();
+            notifyObservers();
+        }
+    }
+    
+    public boolean PlaneCalculated(){
+        return CurrentPlane.PlaneCalculated();       
+    }
+    
+    public Vector4f GetPlaneEquation(){
+        return CurrentPlane.GetPlaneEquation();
+    };
+    public Plane GetPlane(){
+        return CurrentPlane;
+    }
+    
 }

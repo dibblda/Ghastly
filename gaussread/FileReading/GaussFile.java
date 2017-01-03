@@ -1,3 +1,5 @@
+package FileReading;
+
 import java.io.*;
 import java.text.*;
 import java.util.regex.*;
@@ -98,7 +100,7 @@ double [] CovalentRadii = {0.00,0.32,0.28,1.29,0.96,0.84,0.76,0.71,0.66,0.57,0.5
                            2.00,1.97,1.90,1.87,1.81,1.69};
 
  // atomic symbols listed by atomic number for lookup
-    static public String [] AtomicSymbol = {"NAN","H","He","Li","Be","B","C","N","O","F","Ne",
+    static public String [] AtomicSymbol = {"Bq","H","He","Li","Be","B","C","N","O","F","Ne",
                                               "Na","Mg","Al","Si","P","S","Cl","Ar","K","Ca",
                                               "Sc","Ti","V","Cr","Mn","Fe","Co","Ni","Cu","Zn",
                                               "Ga","Ge","As","Se","Br","Kr","Rb","Sr","Y","Zr",
@@ -500,7 +502,7 @@ double OptEnergyValue(){
 //boolean InputOrientationRead = false;
 //double [][] InputAtomicCoordinates = null;
 
-public double [][] AtomicCoordinates(){
+public double [][] AtomicCoordinates(boolean ReturnNormalized){
 	double [][] safeAtomicCoordinates = null;
 	int A_itor, B_itor;
 	double averageX, sumX, averageY, sumY, averageZ, sumZ;
@@ -530,10 +532,15 @@ public double [][] AtomicCoordinates(){
 		safeAtomicCoordinates = new double [InputAtomicCoordinates.length][InputAtomicCoordinates[0].length];
 		for(A_itor = 0; A_itor < InputAtomicCoordinates.length; A_itor++){
 			safeAtomicCoordinates[A_itor][0] = InputAtomicCoordinates[A_itor][0];
-			safeAtomicCoordinates[A_itor][1] = InputAtomicCoordinates[A_itor][1] - averageX;
-			safeAtomicCoordinates[A_itor][2] = InputAtomicCoordinates[A_itor][2] - averageY;
-			safeAtomicCoordinates[A_itor][3] = InputAtomicCoordinates[A_itor][3] - averageZ;
-                      //  System.out.println("Atomic Coords, Atomic #:"+ safeAtomicCoordinates[A_itor][0] + "X:" + safeAtomicCoordinates[A_itor][1]+ "Y:" + safeAtomicCoordinates[A_itor][2]+ "Z:"+ safeAtomicCoordinates[A_itor][3]);
+                        if(ReturnNormalized){
+                            safeAtomicCoordinates[A_itor][1] = InputAtomicCoordinates[A_itor][1] - averageX;
+                            safeAtomicCoordinates[A_itor][2] = InputAtomicCoordinates[A_itor][2] - averageY;
+                            safeAtomicCoordinates[A_itor][3] = InputAtomicCoordinates[A_itor][3] - averageZ;
+                        }else{
+                            safeAtomicCoordinates[A_itor][1] = InputAtomicCoordinates[A_itor][1];
+                            safeAtomicCoordinates[A_itor][2] = InputAtomicCoordinates[A_itor][2];
+                            safeAtomicCoordinates[A_itor][3] = InputAtomicCoordinates[A_itor][3];
+                        }                    
 		}
 		
 	}
@@ -578,7 +585,7 @@ public int [][] BondArray(){
 // first and second [] represent atoms
 // third [] represent (Origin X, Origin Y, Origin Z, R, Theta, crossZI, crossZJ, crossZK, Xaxis) in [0] ... [9]
 // units are degrees
-public float[][][] BondGeometry(){
+public float[][][] BondGeometry(boolean ReturnNormalized){
 	int A_itor, B_itor;
 	float dx, dy, dz, interatomicDistance,  angleConversion;
 	float theta;
@@ -595,7 +602,7 @@ public float[][][] BondGeometry(){
 		// make the BondGeometryArray
 		BondGeometryArray = new float[numberAtoms + 1][numberAtoms + 1][9];
 
-		// normalized coordinates used 
+		// if normalized coordinates used 
 		sumX = 0;
 		sumY = 0;
 		sumZ = 0;
@@ -666,10 +673,16 @@ public float[][][] BondGeometry(){
 						if(dz <= 0.0) theta = -1.0f * theta;
 
 					}
-                                        // origin shifted to match the overall shift in the geometry to the geometric center 
-					BondGeometryArray[A_itor][B_itor][0] = (float)InputAtomicCoordinates[B_itor][1] - averageX;
-					BondGeometryArray[A_itor][B_itor][1] = (float)InputAtomicCoordinates[B_itor][2] - averageY;
-					BondGeometryArray[A_itor][B_itor][2] = (float)InputAtomicCoordinates[B_itor][3] - averageZ;
+                                        // origin shifted to match the overall shift in the geometry to the geometric center
+                                        if(ReturnNormalized){
+                                            BondGeometryArray[A_itor][B_itor][0] = (float)InputAtomicCoordinates[B_itor][1] - averageX;
+                                            BondGeometryArray[A_itor][B_itor][1] = (float)InputAtomicCoordinates[B_itor][2] - averageY;
+                                            BondGeometryArray[A_itor][B_itor][2] = (float)InputAtomicCoordinates[B_itor][3] - averageZ;
+                                        }else{
+                                            BondGeometryArray[A_itor][B_itor][0] = (float)InputAtomicCoordinates[B_itor][1];
+                                            BondGeometryArray[A_itor][B_itor][1] = (float)InputAtomicCoordinates[B_itor][2];
+                                            BondGeometryArray[A_itor][B_itor][2] = (float)InputAtomicCoordinates[B_itor][3];
+                                        }
 					BondGeometryArray[A_itor][B_itor][3] = interatomicDistance;
                                         //angle of the rotation about the vector
 					BondGeometryArray[A_itor][B_itor][4] = theta;

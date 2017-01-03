@@ -1,3 +1,5 @@
+package OpenGLEngine;
+
 import java.util.Arrays;
 
         import org.lwjgl.LWJGLException;
@@ -145,8 +147,8 @@ Vector3f DragRayVector = new Vector3f(0, 0, 0);
 
 
 
-
-
+// variables for the size of atoms, scaling, and colors
+//------------------------------------------------------------------------------
 private int colorMapArraySize = 97;
 // covalent radii used to draw spheres for each AN
 private double [] CovalentRadii = {0.00,0.32,0.28,1.29,0.96,0.84,0.76,0.71,0.66,0.57,0.58,
@@ -166,12 +168,11 @@ private float atomScaling = 0.5f;
 private float atomSelectScaling = 0.7f;
 private float bondScaling = 0.3f;
 
-
 // default color map for each atom
 private float [][] atomColorMap = new float[colorMapArraySize][3];
 // color map for bonds
 private float [] singleBondColorMap = {0.6f, 0.6f, 0.6f};
-
+//------------------------------------------------------------------------------
 
 
 
@@ -290,9 +291,13 @@ public void start() {
                 
                 holdTimeEnd = System.nanoTime();
                 //check if less than 200 msec, otherwise reset 
-                if((((holdTimeEnd - holdTimeStart) / 1e6) < 200.0) && clickEvent==true){                
-                    SelectionInterface(Mouse.getX(), Mouse.getY(), false);                                       
-                    clickEvent=false;
+                if((((holdTimeEnd - holdTimeStart) / 1e6) < 200.0) && clickEvent==true){ 
+                    //check is selection is currently allowed
+                    // this variable is set within the swing components
+                    if(!Ghastly.LockSelection){
+                        SelectionInterface(Mouse.getX(), Mouse.getY(), false);                                       
+                        clickEvent=false;
+                    }
                 //release time >= 200 msec, go to the drag interface or just reset the click    
                 }else if(((holdTimeEnd - holdTimeStart) / 1e6) >= 200.0){
                     clickEvent=false;
@@ -385,56 +390,13 @@ public void start() {
             
             RenderMolecule();		          
             Display.update();
-           
-           
-               // debugging test of ghost atoms
-            if(Ghastly.CurrentPlane.PlaneCalculated()&&(HighlightedAtom!= null)){
-               /*
-                // first clear the list
-                GhostAtomList.clear();
-                
-                
-                
-                GhostAtom PositiveValue = new GhostAtom();
-                GhostAtom NegativeValue = new GhostAtom();
-                Vector3f tempGhost = SelectionPlane.CalculateTransformedCoordinates(HighlightedAtom , new Vector3f((float)0.0, (float)0.0, (float)2.0), true);
-                PositiveValue.x = tempGhost.x;
-                PositiveValue.y = tempGhost.y;
-                PositiveValue.z = tempGhost.z;
-                System.out.println("PX "+PositiveValue.x+" PY "+PositiveValue.y+" PZ "+PositiveValue.z);
-                
-                tempGhost = SelectionPlane.CalculateTransformedCoordinates(HighlightedAtom , new Vector3f((float)0.0, (float)0.0, (float)-2.0), true);
-                NegativeValue.x = tempGhost.x;
-                NegativeValue.y = tempGhost.y;
-                NegativeValue.z = tempGhost.z;
-                System.out.println("NX "+NegativeValue.x+" NY "+NegativeValue.y+" NZ "+NegativeValue.z);
-                
-                
-                GhostAtomList.add(PositiveValue);
-                GhostAtomList.add(NegativeValue);
-                
-                
-                for(int Xitor = -5; Xitor <=5; Xitor++){
-                    for(int Yitor = -5; Yitor <=5; Yitor++){
-                        for (int Zitor = -1; Zitor <=1; Zitor++){
-                            GhostAtom PositiveValue = new GhostAtom();
-                            Vector3f tempGhost = SelectionPlane.CalculateTransformedCoordinates(HighlightedAtom , new Vector3f(2.0f * (float)Xitor, 2.0f * (float)Yitor, 2.0f * (float)Zitor), true);
-                            PositiveValue.x = tempGhost.x;
-                            PositiveValue.y = tempGhost.y;
-                            PositiveValue.z = tempGhost.z;
-                            GhostAtomList.add(PositiveValue);
-                        }
-                    }
-                
-                }
-            */    
-                
+            
+            // unselect all atoms if requested by swing interface
+            if(Ghastly.UnselectAtoms){
+                UnselectAtoms();
+                Ghastly.UnselectAtoms = false;
             }
-            /*
-            if(!SelectionPlane.PlaneCalculated()){
-                GhostAtomList.clear();
-            }
-            */
+             
 	}
  
 	Display.destroy();
@@ -447,7 +409,7 @@ private void RenderMolecule(){
 	RenderAtoms();
         RenderGhostAtoms();
 	RenderBonds();
-	DrawSelectedCursor();
+	RenderSelectedCursor();
         RenderPCAPlane();
         GL11.glTranslatef(-DragRayVector.x, -DragRayVector.y, -DragRayVector.z);
 	return;
@@ -478,7 +440,17 @@ float aspectRatio = (float)newWidth / (float)newHeight;
 
 
 
+private void UnselectAtoms(){
+    for(int itor = 1; itor < atomSelectedArray.length; itor++){
+        if(atomSelectedArray[itor] != 0){
+            // unselect the atom and remove from the current selection plane
+            atomSelectedArray[itor] = 0;
+            // unselected, remove from the list
+            Ghastly.RemovePointFromPlane(itor);
+        }
+    }
 
+}
 
 
 
@@ -587,13 +559,13 @@ private void TestAtomCollision(boolean dragInterface){
                 // atom the atom to the selection plane
                 // need to list whole name, clashes in the libraries
                 org.joml.Vector4f NewPoint = new org.joml.Vector4f((float)internalAtomArray[currentAtom][1], (float)internalAtomArray[currentAtom][2], (float)internalAtomArray[currentAtom][3], (float)currentAtom);
-                Ghastly.CurrentPlane.AddPoint(NewPoint);                                                
+                Ghastly.AddPointToPlane(NewPoint);;                                                
             
             }else if(atomSelectedArray[currentAtom] == 2){
                 // unselect the atom and remove from the current selection plane
                 atomSelectedArray[currentAtom] = 0;
                 // unselected, remove from the list
-                Ghastly.CurrentPlane.RemovePoint(currentAtom);
+                Ghastly.RemovePointFromPlane(currentAtom);
                 
                 
             }else if(atomSelectedArray[currentAtom] == 1) {
@@ -831,12 +803,12 @@ private void RenderNormalPlane(){
 
 private void RenderPCAPlane(){
     
-    if(!Ghastly.CurrentPlane.PlaneCalculated()){
+    if(!Ghastly.PlaneCalculated()){
         //System.out.println("no plane");
         return;
     } 
     
-    org.joml.Vector4f SelPlaneEq = Ghastly.CurrentPlane.GetPlaneEquation();
+    org.joml.Vector4f SelPlaneEq = Ghastly.GetPlaneEquation();
     // http://mathworld.wolfram.com/Plane.html
     
     //System.out.println("A: "+ SelPlaneEq.x +" B: "+SelPlaneEq.y+" C: "+SelPlaneEq.z+" D: "+SelPlaneEq.w);
@@ -888,7 +860,7 @@ private void RenderPCAPlane(){
     
 }
 
-private void DrawSelectedCursor(){
+private void RenderSelectedCursor(){
 	
 
     for(int itor = 1; itor < atomSelectedArray.length; itor++){
@@ -918,34 +890,71 @@ private void DrawSelectedCursor(){
 
 private void RenderGhostAtoms(){
     GhostAtom temp;
-    if(Ghastly.GetAtoms().isEmpty())return;
     
-    for(int itor = 0; itor < Ghastly.GetAtoms().size(); itor++){
-        temp = Ghastly.GetAtoms().get(itor);
-        GL11.glTranslatef(temp.x, temp.y, temp.z);
-        
-        
-        // need to higlight atoms if they are
-        if(Ghastly.GetAtoms().get(itor).HighlightLevel == 0){
-            GL11.glColor4f(1.0f, 1.0f, 1.0f, 0.25f);
-            GL11.glLoadName(itor + 10000);
-            Sphere s = new Sphere();
-            s.draw(0.5f, 20, 20);
-        }else if(Ghastly.GetAtoms().get(itor).HighlightLevel == 0){
-            GL11.glColor4f(1.0f, 1.0f, 0.0f, 0.25f);
-            GL11.glLoadName(itor + 10000);
-            Sphere s = new Sphere();
-            s.draw(0.5f, 20, 20);
-        }else{
-            GL11.glColor4f(1.0f, 0.0f, 0.0f, 0.25f);
-            GL11.glLoadName(itor + 10000);
-            Sphere s = new Sphere();
-            s.draw(0.5f, 20, 20);
+    // in display proposed mode
+    if(Ghastly.DisplayProposed){
+        if(Ghastly.GetProposedAtoms().isEmpty())return;
+        for(int itor = 0; itor < Ghastly.GetProposedAtoms().size(); itor++){
+            temp = Ghastly.GetProposedAtoms().get(itor);
+            GL11.glTranslatef(temp.x, temp.y, temp.z);
+
+
+            // need to higlight atoms if they are
+            if(Ghastly.GetProposedAtoms().get(itor).HighlightLevel == 0){
+                GL11.glColor4f(1.0f, 1.0f, 1.0f, 0.25f);
+                GL11.glLoadName(itor + 10000);
+                Sphere s = new Sphere();
+                s.draw(0.5f, 20, 20);
+            }else if(Ghastly.GetProposedAtoms().get(itor).HighlightLevel == 1){
+                GL11.glColor4f(1.0f, 1.0f, 0.0f, 0.25f);
+                GL11.glLoadName(itor + 10000);
+                Sphere s = new Sphere();
+                s.draw(0.5f, 20, 20);
+            }else{
+                GL11.glColor4f(1.0f, 0.0f, 0.0f, 0.25f);
+                GL11.glLoadName(itor + 10000);
+                Sphere s = new Sphere();
+                s.draw(0.5f, 20, 20);
+            }
+
+
+            GL11.glTranslatef(-temp.x, -temp.y, -temp.z);
         }
         
+    // in normal mode, display all    
+    }else{
         
-        GL11.glTranslatef(-temp.x, -temp.y, -temp.z);
+        if(Ghastly.GetAtoms().isEmpty())return;                            
+        for(int itor = 0; itor < Ghastly.GetAtoms().size(); itor++){
+            temp = Ghastly.GetAtoms().get(itor);
+            GL11.glTranslatef(temp.x, temp.y, temp.z);
+
+
+            // need to higlight atoms if they are
+            if(Ghastly.GetAtoms().get(itor).HighlightLevel == 0){
+                GL11.glColor4f(1.0f, 1.0f, 1.0f, 0.25f);
+                GL11.glLoadName(itor + 10000);
+                Sphere s = new Sphere();
+                s.draw(0.5f, 20, 20);
+            }else if(Ghastly.GetAtoms().get(itor).HighlightLevel == 1){
+                GL11.glColor4f(1.0f, 1.0f, 0.0f, 0.25f);
+                GL11.glLoadName(itor + 10000);
+                Sphere s = new Sphere();
+                s.draw(0.5f, 20, 20);
+            }else{
+                GL11.glColor4f(1.0f, 0.0f, 0.0f, 0.25f);
+                GL11.glLoadName(itor + 10000);
+                Sphere s = new Sphere();
+                s.draw(0.5f, 20, 20);
+            }
+
+
+            GL11.glTranslatef(-temp.x, -temp.y, -temp.z);
+        }
+    
     }
+    
+    
 }
 
 

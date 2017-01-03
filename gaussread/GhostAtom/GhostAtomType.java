@@ -69,6 +69,9 @@ public class GhostAtomType {
         }
     }         
      
+    public boolean IsHighlighted(){
+        return IsHighlighted;
+    }
      
     public ArrayList<GhostAtom> GetHighlightedAtoms(){
         ArrayList<GhostAtom> TemporaryList = new ArrayList();
