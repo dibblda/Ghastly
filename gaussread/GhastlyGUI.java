@@ -11,7 +11,6 @@
 import OpenGLEngine.MoleculeDisplay;
 import FileReading.GaussFile;
 import GhostAtom.*;
-import java.awt.Component;
 import java.io.File;
 import java.util.Observer;
 import java.util.Observable;
@@ -19,6 +18,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 
 /**
@@ -89,15 +89,16 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         jSeparator1 = new javax.swing.JSeparator();
         NICS0_dialog_saveButton = new javax.swing.JButton();
         NICS1_dialog = new javax.swing.JFrame();
-        NICS1_dialog_cancelButton1 = new javax.swing.JButton();
+        NICS1_dialog_cancelButton = new javax.swing.JButton();
         NICS1_dialog_calculateButton = new javax.swing.JButton();
         NICS1_dialog_textField = new javax.swing.JTextField();
-        NICS1_dialog_saveReturnButton1 = new javax.swing.JButton();
-        NICS1_dialog_clearButton1 = new javax.swing.JButton();
+        NICS1_dialog_saveReturnButton = new javax.swing.JButton();
+        NICS1_dialog_clearButton = new javax.swing.JButton();
         jSeparator2 = new javax.swing.JSeparator();
-        NICS1_dialog_saveButton1 = new javax.swing.JButton();
-        PlaneSideButton = new javax.swing.JButton();
+        NICS1_dialog_saveButton = new javax.swing.JButton();
+        NICS1_dialog_ChoosePlane = new javax.swing.JComboBox<>();
         jScrollPane1 = new javax.swing.JScrollPane();
+        jTextAreaCompletedCalculation = new javax.swing.JTextArea();
         MainMenu = new javax.swing.JMenuBar();
         FileMenu = new javax.swing.JMenu();
         CloseMenu = new javax.swing.JMenuItem();
@@ -160,6 +161,9 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         GhostAtomTable.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mousePressed(java.awt.event.MouseEvent evt) {
                 GhostAtomTableMousePressed(evt);
+            }
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                GhostAtomTableMouseReleased(evt);
             }
         });
         GhostAtomTable.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
@@ -318,14 +322,13 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         NICS1_dialog.setTitle("NICS(0) ");
         NICS1_dialog.setAlwaysOnTop(true);
         NICS1_dialog.setMinimumSize(new java.awt.Dimension(400, 200));
-        NICS1_dialog.setPreferredSize(new java.awt.Dimension(400, 200));
         NICS1_dialog.setSize(new java.awt.Dimension(400, 200));
         NICS1_dialog.getContentPane().setLayout(new java.awt.GridBagLayout());
 
-        NICS1_dialog_cancelButton1.setText("Quit");
-        NICS1_dialog_cancelButton1.addActionListener(new java.awt.event.ActionListener() {
+        NICS1_dialog_cancelButton.setText("Quit");
+        NICS1_dialog_cancelButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                NICS1_dialog_cancelButton1ActionPerformed(evt);
+                NICS1_dialog_cancelButtonActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -333,7 +336,7 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         gridBagConstraints.gridy = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 5);
-        NICS1_dialog.getContentPane().add(NICS1_dialog_cancelButton1, gridBagConstraints);
+        NICS1_dialog.getContentPane().add(NICS1_dialog_cancelButton, gridBagConstraints);
 
         NICS1_dialog_calculateButton.setText("Calculate");
         NICS1_dialog_calculateButton.setEnabled(false);
@@ -361,11 +364,11 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         gridBagConstraints.insets = new java.awt.Insets(10, 0, 10, 0);
         NICS1_dialog.getContentPane().add(NICS1_dialog_textField, gridBagConstraints);
 
-        NICS1_dialog_saveReturnButton1.setText("Save and Return");
-        NICS1_dialog_saveReturnButton1.setEnabled(false);
-        NICS1_dialog_saveReturnButton1.addActionListener(new java.awt.event.ActionListener() {
+        NICS1_dialog_saveReturnButton.setText("Save and Return");
+        NICS1_dialog_saveReturnButton.setEnabled(false);
+        NICS1_dialog_saveReturnButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                NICS1_dialog_saveReturnButton1ActionPerformed(evt);
+                NICS1_dialog_saveReturnButtonActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -373,13 +376,13 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         gridBagConstraints.gridy = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 5);
-        NICS1_dialog.getContentPane().add(NICS1_dialog_saveReturnButton1, gridBagConstraints);
+        NICS1_dialog.getContentPane().add(NICS1_dialog_saveReturnButton, gridBagConstraints);
 
-        NICS1_dialog_clearButton1.setText("Clear");
-        NICS1_dialog_clearButton1.setEnabled(false);
-        NICS1_dialog_clearButton1.addActionListener(new java.awt.event.ActionListener() {
+        NICS1_dialog_clearButton.setText("Clear");
+        NICS1_dialog_clearButton.setEnabled(false);
+        NICS1_dialog_clearButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                NICS1_dialog_clearButton1ActionPerformed(evt);
+                NICS1_dialog_clearButtonActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -388,7 +391,7 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.ipadx = 10;
         gridBagConstraints.ipady = 5;
-        NICS1_dialog.getContentPane().add(NICS1_dialog_clearButton1, gridBagConstraints);
+        NICS1_dialog.getContentPane().add(NICS1_dialog_clearButton, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 3;
@@ -398,11 +401,11 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         gridBagConstraints.insets = new java.awt.Insets(11, 10, 0, 10);
         NICS1_dialog.getContentPane().add(jSeparator2, gridBagConstraints);
 
-        NICS1_dialog_saveButton1.setText("Save");
-        NICS1_dialog_saveButton1.setEnabled(false);
-        NICS1_dialog_saveButton1.addActionListener(new java.awt.event.ActionListener() {
+        NICS1_dialog_saveButton.setText("Save");
+        NICS1_dialog_saveButton.setEnabled(false);
+        NICS1_dialog_saveButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                NICS1_dialog_saveButton1ActionPerformed(evt);
+                NICS1_dialog_saveButtonActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -410,16 +413,28 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         gridBagConstraints.gridy = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(9, 5, 9, 5);
-        NICS1_dialog.getContentPane().add(NICS1_dialog_saveButton1, gridBagConstraints);
+        NICS1_dialog.getContentPane().add(NICS1_dialog_saveButton, gridBagConstraints);
 
-        PlaneSideButton.setText("+ / -");
+        NICS1_dialog_ChoosePlane.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Above Plane", "Below Plane", "Both" }));
+        NICS1_dialog_ChoosePlane.setEnabled(false);
+        NICS1_dialog_ChoosePlane.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS1_dialog_ChoosePlaneActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 2;
-        NICS1_dialog.getContentPane().add(PlaneSideButton, gridBagConstraints);
+        NICS1_dialog.getContentPane().add(NICS1_dialog_ChoosePlane, gridBagConstraints);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Ghastly Version 0.1");
+
+        jTextAreaCompletedCalculation.setEditable(false);
+        jTextAreaCompletedCalculation.setColumns(20);
+        jTextAreaCompletedCalculation.setRows(5);
+        jTextAreaCompletedCalculation.setText("No Calculations performed yet!");
+        jScrollPane1.setViewportView(jTextAreaCompletedCalculation);
 
         FileMenu.setText("File");
         FileMenu.addActionListener(new java.awt.event.ActionListener() {
@@ -524,6 +539,9 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         // TODO add your handling code here:
          GhostAtomForm.setVisible(false);
+         
+         jTextAreaCompletedCalculation.setText(Ghastly.GetGhostAtomString());
+         
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void FileMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_FileMenuActionPerformed
@@ -564,14 +582,24 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         if(!Ghastly.PlaneCalculated()){
             
                 NICS0_dialog_textField.setText("Define Atom Plane");
+                NICS1_dialog_textField.setText("Define Atom Plane");
+                jTextAreaCompletedCalculation.setText("");
+                
                 NICS0_dialog_calculateButton.setEnabled(false);
+                NICS1_dialog_calculateButton.setEnabled(false);
+                NICS1_dialog_ChoosePlane.setEnabled(false);
+                
             
         // what to do if a plane is there
         }else{
             
                 NICS0_dialog_textField.setText("Atom Plane Defined");
+                NICS1_dialog_textField.setText("Atom Plane Defined");
+                jTextAreaCompletedCalculation.setText(Ghastly.GetPlaneNormal());
+                
                 NICS0_dialog_calculateButton.setEnabled(true);
-            
+                NICS1_dialog_calculateButton.setEnabled(true);
+                NICS1_dialog_ChoosePlane.setEnabled(true);
         }
     }
     
@@ -615,7 +643,7 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         NICS0_dialog_clearButton.setEnabled(false);
         NICS0_dialog_saveReturnButton.setEnabled(false);
         NICS0_dialog_saveButton.setEnabled(false);
-        NICS0_dialog_calculateButton.setEnabled(true);
+        NICS0_dialog_calculateButton.setEnabled(false);
         AddNewGhostAtomType.setEnabled(true);
         NICSO_dialog.setVisible(false);
     }//GEN-LAST:event_NICS0_dialog_cancelButtonActionPerformed
@@ -633,7 +661,7 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         Ghastly.LockSelection = true;
         Ghastly.DisplayProposed = false;
         Ghastly.UnselectAtoms = true;
-        NICS0_dialog_calculateButton.setEnabled(true);
+        NICS0_dialog_calculateButton.setEnabled(false);
         NICS0_dialog_clearButton.setEnabled(false);
         NICS0_dialog_saveReturnButton.setEnabled(false);
         NICS0_dialog_saveButton.setEnabled(false);
@@ -671,10 +699,8 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         NICS0_dialog_clearButton.setEnabled(false);
         NICS0_dialog_saveReturnButton.setEnabled(false);
         NICS0_dialog_saveButton.setEnabled(false);
-        NICS0_dialog_calculateButton.setEnabled(true);
-        
-        
-        
+        NICS0_dialog_calculateButton.setEnabled(false);
+   
         
     }//GEN-LAST:event_NICS0_dialog_clearButtonActionPerformed
 
@@ -690,9 +716,7 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
 
     private void GhostAtomTableMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_GhostAtomTableMousePressed
         // TODO add your handling code here:
-        // check to see if a highlight changed or not when the mouse is pressed in the table
-        System.out.println("Mouse Clicked in Table." + tempclickcounter);
-        tempclickcounter++;
+       
     }//GEN-LAST:event_GhostAtomTableMousePressed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
@@ -737,7 +761,7 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         Ghastly.LockSelection = false;
         Ghastly.DisplayProposed = false;
         Ghastly.UnselectAtoms = true;
-        NICS0_dialog_calculateButton.setEnabled(true);
+        NICS0_dialog_calculateButton.setEnabled(false);
         NICS0_dialog_clearButton.setEnabled(false);
         NICS0_dialog_saveReturnButton.setEnabled(false);
         NICS0_dialog_saveButton.setEnabled(false);
@@ -749,25 +773,177 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
      
     }//GEN-LAST:event_NICS0_dialog_saveButtonActionPerformed
 
-    private void NICS1_dialog_cancelButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS1_dialog_cancelButton1ActionPerformed
+    private void NICS1_dialog_cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS1_dialog_cancelButtonActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_NICS1_dialog_cancelButton1ActionPerformed
+        Ghastly.DisplayProposed = false; 
+        Ghastly.LockSelection = true;
+        Ghastly.UnselectAtoms = true;
+        Ghastly.ExcludeProposed();       
+        NICS1_dialog_clearButton.setEnabled(false);
+        NICS1_dialog_saveReturnButton.setEnabled(false);
+        NICS1_dialog_saveButton.setEnabled(false);
+        NICS1_dialog_calculateButton.setEnabled(false);
+        NICS1_dialog_ChoosePlane.setEnabled(false);
+        AddNewGhostAtomType.setEnabled(true);
+        NICS1_dialog.setVisible(false);
+    }//GEN-LAST:event_NICS1_dialog_cancelButtonActionPerformed
 
     private void NICS1_dialog_calculateButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS1_dialog_calculateButtonActionPerformed
         // TODO add your handling code here:
+          // TODO add your handling code here:
+        // plane must be defined or button would be unavailable
+        // create a ghost atom, add it to the proposed list
+        // lock the atom selection so that it can't change during
+        // the decision
+        // display only the proposed ghost atom
+        // let the user have the option of clearing the choice 
+        // or saving the new ghost atom
+        // remove access to the calulate button
+        NICS_1 Temp = new NICS_1();
+        
+        String PlaneType = (String)NICS1_dialog_ChoosePlane.getSelectedItem();
+        if(PlaneType.equals("Above Plane")){
+            Temp.Define(0, Ghastly.GetPlane(), 1);
+            System.out.println("Positive");
+        }else if(PlaneType.equals("Below Plane")){
+            Temp.Define(0, Ghastly.GetPlane(), -1);
+            System.out.println("Negative");
+        }else if(PlaneType.equals("Both")){
+            Temp.Define(0, Ghastly.GetPlane(), 0);
+            System.out.println("Both");
+        }else{
+            System.out.println("Shouldn't be here");
+        }        
+        Ghastly.NewProposed(Temp);
+        Ghastly.LockSelection = true;
+        Ghastly.DisplayProposed = true;        
+        NICS1_dialog_clearButton.setEnabled(true);
+        NICS1_dialog_saveReturnButton.setEnabled(true);
+        NICS1_dialog_saveButton.setEnabled(true);
+        // leave these enabled so the user can immediately choose another plane setting
+        //NICS1_dialog_calculateButton.setEnabled(false);
+        //NICS1_dialog_ChoosePlane.setEnabled(false);
     }//GEN-LAST:event_NICS1_dialog_calculateButtonActionPerformed
 
-    private void NICS1_dialog_saveReturnButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS1_dialog_saveReturnButton1ActionPerformed
+    private void NICS1_dialog_saveReturnButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS1_dialog_saveReturnButtonActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_NICS1_dialog_saveReturnButton1ActionPerformed
+         // TODO add your handling code here:
+         // TODO add your handling code here:
+         // TODO add your handling code here:
+        //transfer proposed to full atom list
+        // undo selection display mode
+        // unlock selection
+        // reenable calculate button (plane still selected)
+        // unselect all selected atoms
+        // and disable clear button as well as save button
+        // finally quite whole dialog
+        TempIndex = Ghastly.AddProposed();        
+        Ghastly.LockSelection = false;
+        Ghastly.DisplayProposed = false;
+        Ghastly.UnselectAtoms = true;
+        NICS1_dialog_calculateButton.setEnabled(false);
+        NICS1_dialog_ChoosePlane.setEnabled(false);
+        NICS1_dialog_clearButton.setEnabled(false);
+        NICS1_dialog_saveReturnButton.setEnabled(false);
+        NICS1_dialog_saveButton.setEnabled(false);
+        // Add to the Ghost Atom Table
+        
+        Object[] NewRow = {TempIndex, "NICS(1)", Ghastly.GetAtomsInType(TempIndex),  new Boolean(false),  new Boolean (false)};
+        DefaultTableModel model = (DefaultTableModel) GhostAtomTable.getModel();        
+        model.addRow(NewRow);
+        AddNewGhostAtomType.setEnabled(true);
+        NICS1_dialog.setVisible(false);
+    }//GEN-LAST:event_NICS1_dialog_saveReturnButtonActionPerformed
 
-    private void NICS1_dialog_clearButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS1_dialog_clearButton1ActionPerformed
+    private void NICS1_dialog_clearButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS1_dialog_clearButtonActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_NICS1_dialog_clearButton1ActionPerformed
+         // TODO add your handling code here:        
+        // no longer display the proposed ghost atom
+        // unlock the selection 
+        // unselect selected atoms
+        // and remove the propsed atom from the list
+        // remove clear button and save button option
+        // and disable calculate button
+        Ghastly.DisplayProposed = false; 
+        Ghastly.LockSelection = false;
+        Ghastly.UnselectAtoms = true;
+        Ghastly.ExcludeProposed();       
+        NICS1_dialog_clearButton.setEnabled(false);
+        NICS1_dialog_saveReturnButton.setEnabled(false);
+        NICS1_dialog_saveButton.setEnabled(false);
+        NICS1_dialog_calculateButton.setEnabled(false);
+        NICS1_dialog_ChoosePlane.setEnabled(false);
+   
+        
+    }//GEN-LAST:event_NICS1_dialog_clearButtonActionPerformed
 
-    private void NICS1_dialog_saveButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS1_dialog_saveButton1ActionPerformed
+    private void NICS1_dialog_saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS1_dialog_saveButtonActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_NICS1_dialog_saveButton1ActionPerformed
+         // TODO add your handling code here:
+         // TODO add your handling code here:
+        //transfer proposed to full atom list
+        // undo selection display mode
+        // unlock selection
+        // reenable calculate button (plane still selected)
+        // unselect all selected atoms
+        // and disable clear button as well as save button
+        // finally quite whole dialog
+        TempIndex = Ghastly.AddProposed();        
+        Ghastly.LockSelection = false;
+        Ghastly.DisplayProposed = false;
+        Ghastly.UnselectAtoms = true;
+        NICS1_dialog_calculateButton.setEnabled(false);
+        NICS1_dialog_ChoosePlane.setEnabled(false);
+        NICS1_dialog_clearButton.setEnabled(false);
+        NICS1_dialog_saveReturnButton.setEnabled(false);
+        NICS1_dialog_saveButton.setEnabled(false);
+        // Add to the Ghost Atom Table
+        
+        Object[] NewRow = {TempIndex, "NICS(1)", Ghastly.GetAtomsInType(TempIndex),  new Boolean(false),  new Boolean (false)};
+        DefaultTableModel model = (DefaultTableModel) GhostAtomTable.getModel();        
+        model.addRow(NewRow);
+     
+    }//GEN-LAST:event_NICS1_dialog_saveButtonActionPerformed
+
+    private void GhostAtomTableMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_GhostAtomTableMouseReleased
+        // TODO add your handling code here:
+         // check to see if a highlight changed or not when the mouse is pressed in the table
+        System.out.println("Mouse Clicked in Table." + tempclickcounter);
+        tempclickcounter++;
+        
+        ((AbstractTableModel)GhostAtomTable.getModel()).fireTableDataChanged();
+        // check for highlighting in the table and set the flag of all 
+         for(int itor = 0; itor < GhostAtomTable.getRowCount(); itor++){
+                // see if the table is asking for highlighting
+                
+                System.out.println(itor + " is Highlighted " + (boolean)GhostAtomTable.getModel().getValueAt(itor, 3));
+                if((boolean)GhostAtomTable.getModel().getValueAt(itor, 3)){
+                    if(!(boolean)Ghastly.IsHighlighted((Integer)GhostAtomTable.getModel().getValueAt(itor, 0))){
+                         Ghastly.HighlightType((Integer)GhostAtomTable.getModel().getValueAt(itor, 0));
+                    };
+                   
+                }else{
+                    Ghastly.UnHighlightType((Integer)GhostAtomTable.getModel().getValueAt(itor, 0));
+                }
+             /*
+                // see if the last column is asking for a deletion
+                if((boolean)GhostAtomTable.getModel().getValueAt(itor, 4)){
+                  
+                }else{
+                    
+                }
+                
+               */ 
+              
+            }
+        
+        
+        
+    }//GEN-LAST:event_GhostAtomTableMouseReleased
+
+    private void NICS1_dialog_ChoosePlaneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS1_dialog_ChoosePlaneActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_NICS1_dialog_ChoosePlaneActionPerformed
 
     /**
      * @param args the command line arguments
@@ -793,14 +969,14 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
     private javax.swing.JButton NICS0_dialog_saveReturnButton;
     private javax.swing.JTextField NICS0_dialog_textField;
     private javax.swing.JFrame NICS1_dialog;
+    private javax.swing.JComboBox<String> NICS1_dialog_ChoosePlane;
     private javax.swing.JButton NICS1_dialog_calculateButton;
-    private javax.swing.JButton NICS1_dialog_cancelButton1;
-    private javax.swing.JButton NICS1_dialog_clearButton1;
-    private javax.swing.JButton NICS1_dialog_saveButton1;
-    private javax.swing.JButton NICS1_dialog_saveReturnButton1;
+    private javax.swing.JButton NICS1_dialog_cancelButton;
+    private javax.swing.JButton NICS1_dialog_clearButton;
+    private javax.swing.JButton NICS1_dialog_saveButton;
+    private javax.swing.JButton NICS1_dialog_saveReturnButton;
     private javax.swing.JTextField NICS1_dialog_textField;
     private javax.swing.JFrame NICSO_dialog;
-    private javax.swing.JButton PlaneSideButton;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JMenuItem jMenuItem2;
@@ -811,5 +987,6 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
+    private javax.swing.JTextArea jTextAreaCompletedCalculation;
     // End of variables declaration//GEN-END:variables
 }

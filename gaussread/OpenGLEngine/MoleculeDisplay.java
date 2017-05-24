@@ -901,20 +901,28 @@ private void RenderGhostAtoms(){
 
             // need to higlight atoms if they are
             if(Ghastly.GetProposedAtoms().get(itor).HighlightLevel == 0){
-                GL11.glColor4f(1.0f, 1.0f, 1.0f, 0.25f);
+                GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
                 GL11.glLoadName(itor + 10000);
                 Sphere s = new Sphere();
-                s.draw(0.5f, 20, 20);
+                s.draw(0.2f, 20, 20);
             }else if(Ghastly.GetProposedAtoms().get(itor).HighlightLevel == 1){
-                GL11.glColor4f(1.0f, 1.0f, 0.0f, 0.25f);
+                GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+                GL11.glLoadName(itor + 11000);
+                Sphere sin = new Sphere();
+                sin.draw(0.2f, 20, 20);
+                GL11.glColor4f(1.0f, 1.0f, 0.0f, 0.5f);
                 GL11.glLoadName(itor + 10000);
-                Sphere s = new Sphere();
-                s.draw(0.5f, 20, 20);
+                Sphere sout = new Sphere();
+                sout.draw(0.5f, 20, 20);
             }else{
-                GL11.glColor4f(1.0f, 0.0f, 0.0f, 0.25f);
+                GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+                GL11.glLoadName(itor + 11000);
+                Sphere sin = new Sphere();
+                sin.draw(0.2f, 20, 20);
+                GL11.glColor4f(1.0f, 0.0f, 0.0f, 0.5f);
                 GL11.glLoadName(itor + 10000);
-                Sphere s = new Sphere();
-                s.draw(0.5f, 20, 20);
+                Sphere sout = new Sphere();
+                sout.draw(0.5f, 20, 20);
             }
 
 
@@ -932,20 +940,28 @@ private void RenderGhostAtoms(){
 
             // need to higlight atoms if they are
             if(Ghastly.GetAtoms().get(itor).HighlightLevel == 0){
-                GL11.glColor4f(1.0f, 1.0f, 1.0f, 0.25f);
+                GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
                 GL11.glLoadName(itor + 10000);
                 Sphere s = new Sphere();
-                s.draw(0.5f, 20, 20);
+                s.draw(0.2f, 20, 20);
             }else if(Ghastly.GetAtoms().get(itor).HighlightLevel == 1){
-                GL11.glColor4f(1.0f, 1.0f, 0.0f, 0.25f);
+                GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+                GL11.glLoadName(itor + 11000);
+                Sphere sin = new Sphere();
+                sin.draw(0.2f, 20, 20);
+                GL11.glColor4f(1.0f, 1.0f, 0.0f, 0.5f);
                 GL11.glLoadName(itor + 10000);
-                Sphere s = new Sphere();
-                s.draw(0.5f, 20, 20);
+                Sphere sout = new Sphere();
+                sout.draw(0.5f, 20, 20);
             }else{
-                GL11.glColor4f(1.0f, 0.0f, 0.0f, 0.25f);
+                GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+                GL11.glLoadName(itor + 11000);
+                Sphere sin = new Sphere();
+                sin.draw(0.2f, 20, 20);
+                GL11.glColor4f(1.0f, 0.0f, 0.0f, 0.5f);
                 GL11.glLoadName(itor + 10000);
-                Sphere s = new Sphere();
-                s.draw(0.5f, 20, 20);
+                Sphere sout = new Sphere();
+                sout.draw(0.5f, 20, 20);
             }
 
 

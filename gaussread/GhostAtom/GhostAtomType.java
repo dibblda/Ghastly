@@ -6,6 +6,7 @@
 package GhostAtom;
 import java.util.ArrayList;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 /**
  *
  * @author David Joshua Dibble
@@ -19,6 +20,11 @@ public class GhostAtomType {
     String SetType;
     int Identifier;
     ArrayList<GhostAtom> Atoms;
+    
+    // usefull for giving out information about the plane the atoms are on
+    Vector3f NormalToPlane;
+    Vector4f PlaneEquation;
+    
     
     
     // UI to keep track of if the user has highlighted this particular set for
@@ -57,7 +63,10 @@ public class GhostAtomType {
         
         
     }
-      
+    
+    
+    
+    
      public void UnHighlight(){
         IsHighlighted = false;
          // for different levels of selection highlighting

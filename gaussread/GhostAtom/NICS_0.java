@@ -7,6 +7,7 @@ package GhostAtom;
 import MeanPlane.*;
 import java.util.ArrayList;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 /**
  *
@@ -24,7 +25,15 @@ public class NICS_0 extends GhostAtomType{
         Atoms.add(new GhostAtom(CurrentPlane.CalculateTransformedCoordinates(new Vector3f(0.0f,0.0f,0.0f), true)));       
         Atoms.get(0).Identifier = Identity;
         Atoms.get(0).AtomIndex = 1;
+        NormalToPlane = CurrentPlane.GetPlaneNormal();
+        PlaneEquation = CurrentPlane.GetPlaneEquation();
+                
     }
+    
+    
+    
+    
+    
     
     
 }

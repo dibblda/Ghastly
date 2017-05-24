@@ -51,7 +51,6 @@ public class Plane {
     
     
     
-    
     // add points to the list for eventual plane calculation
     public void AddPoint(Vector4f NewPoint){
        VectorList.add(NewPoint);
@@ -169,6 +168,12 @@ public class Plane {
         return new Vector4f(PlaneEquation);
     }
     
+    public Vector3f GetPlaneNormal(){
+        if(VectorList.size() <= 2){
+            return null;
+        }        
+        return new Vector3f(NormalToPlane);
+    }
     
     
     
@@ -334,6 +339,8 @@ public class Plane {
         PlaneEquation.y =  NormalToPlane.y;
         PlaneEquation.z =  NormalToPlane.z;
         PlaneEquation.w =  -(NormalToPlane.x*TranslationVector.x + NormalToPlane.y*TranslationVector.y + NormalToPlane.z*TranslationVector.z);
+        
+        
     }
    
     public void AddXProjectionAtom(Vector3f XProjectionAtom){
@@ -347,7 +354,7 @@ public class Plane {
         XVectorAtomDefined = false;
     }
      
-    // determine the coordinate of a point using the plane as the coordinate space tp the coordinate space of the molecule
+    // determine the coordinate of a point using the plane as the coordinate space tpo the coordinate space of the molecule
     // XProjectionAtom is the coordinate that when projected onto the plane represents the X vector (Z is the normal)
     // Plane coordinate is the coordinate to be transformed
     // ZcrossX means calculate Z x X to find the Y vector
@@ -371,6 +378,9 @@ public class Plane {
         xo = XProjectionAtom.x;
         yo = XProjectionAtom.y;
         zo = XProjectionAtom.z;
+        // find the closest point at which the atom used to define the X-axis (which
+        //isn't necessarily on the plane) meet the plane. This point defines the 
+        // x-vector of the coodrinate transformation
         // find the t value at which the plane meets the line
         // I know the a = A, etc. but hust for this purpose for clarity
         ParametricT = -(A * xo + B * yo + C * zo + D) / (a * A + b * B + c * C);

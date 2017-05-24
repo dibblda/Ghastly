@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Observable;
 import org.joml.Vector4f;
 import MeanPlane.*;
+import java.math.BigDecimal;
 /**
  *
  * @author David Joshua Dibble
@@ -263,5 +264,50 @@ public class GhostAtomSet extends Observable{
     public Plane GetPlane(){
         return CurrentPlane;
     }
+
+    public String GetPlaneNormal(){
+        String PlaneNormalString = new String("");
+        PlaneNormalString =  PlaneNormalString.concat((new BigDecimal(CurrentPlane.GetPlaneNormal().x)).setScale(3, BigDecimal.ROUND_HALF_UP).toPlainString() + " ");
+        PlaneNormalString =  PlaneNormalString.concat((new BigDecimal(CurrentPlane.GetPlaneNormal().y)).setScale(3, BigDecimal.ROUND_HALF_UP).toPlainString() + " ");
+        PlaneNormalString =  PlaneNormalString.concat((new BigDecimal(CurrentPlane.GetPlaneNormal().z)).setScale(3, BigDecimal.ROUND_HALF_UP).toPlainString() + "\n");
+        
+        return PlaneNormalString;
+    }
+    
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+    public int GetAtomsInType(int TypeIndexValue){
+        for (int itor = 0; itor < GhostAtomSets.size(); itor++){
+            if(GhostAtomSets.get(itor).Identifier == TypeIndexValue){
+                return GhostAtomSets.get(itor).GetAtomList().size();                
+            };
+        }
+        // shouldn't get here
+        return 0;
+    }
+//section to write the calculated data to file (or return a formatted string
+// containing it
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+    
+    // write all of the current atoms to a string in xyz format 
+    public String GetGhostAtomString(){
+        String GhostAtomString = new String("");
+        ArrayList<GhostAtom> ToPrint = GetAtoms();
+       //use "Big Decimal java formatting and toPlainString"???
+        
+        for(int itor = 0; itor < ToPrint.size(); itor++){
+           GhostAtomString = GhostAtomString.concat("Bq ");
+           //http://docs.oracle.com/javase/7/docs/api/java/math/BigDecimal.html#setScale(int,%20java.math.RoundingMode)
+          // http://docs.oracle.com/javase/7/docs/api/java/math/RoundingMode.html
+           GhostAtomString =  GhostAtomString.concat((new BigDecimal(ToPrint.get(itor).x)).setScale(3, BigDecimal.ROUND_HALF_UP).toPlainString() + " ");
+           GhostAtomString =  GhostAtomString.concat((new BigDecimal(ToPrint.get(itor).y)).setScale(3, BigDecimal.ROUND_HALF_UP).toPlainString() + " ");
+           GhostAtomString =  GhostAtomString.concat((new BigDecimal(ToPrint.get(itor).z)).setScale(3, BigDecimal.ROUND_HALF_UP).toPlainString() + "\n");
+        }
+        
+        return GhostAtomString;
+    }
+    
+  
     
 }
