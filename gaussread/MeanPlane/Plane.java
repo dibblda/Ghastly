@@ -44,9 +44,10 @@ public class Plane {
     
     private Vector4f PlaneEquation = new Vector4f(); 
     
-    // used to define the x-vecotr on the plane
-    private Vector3f XVectorAtom = new Vector3f();
-    boolean XVectorAtomDefined = false;
+    // used to define the x-vector on the plane
+    private Vector3f XVectorAtom = new Vector3f(0,0,0);
+    private Vector3f XVectorAtomLast = new Vector3f(0,0,0);
+    private boolean XVectorAtomDefined = false;
     
     
     
@@ -58,32 +59,13 @@ public class Plane {
        // more than or equal to three points, Do PCA by default
        if(VectorList.size() >= 3){
             CalculatePCAMatrix();
-            /* debugging
-            System.out.println("Eigenvalues");
-            System.out.println("[" +EigenValues.x+ "][" +EigenValues.y+"]["+EigenValues.z+ "]");
-            System.out.println();      
-            System.out.println("Eigenvectors");
-            System.out.println("[" +EigenvectorOne.x+ "][" +EigenvectorOne.y+"]["+EigenvectorOne.z+ "]");
-            System.out.println();
-            System.out.println("[" +EigenvectorTwo.x+ "][" +EigenvectorTwo.y+"]["+EigenvectorTwo.z+ "]");
-            System.out.println();
-            System.out.println("[" +EigenvectorThree.x+ "][" +EigenvectorThree.y+"]["+EigenvectorThree.z+ "]");
-            System.out.println();
-            
-            
-            System.out.println("Translation Vector");
-            System.out.println("[" +TranslationVector.x+ "][" +TranslationVector.y+"]["+TranslationVector.z+ "]");
-            System.out.println("Points:");
-            for(int itor = 0; itor < VectorList.size(); itor++){
-                Vector4f temp = (Vector4f)VectorList.get(itor);
-                System.out.println("[" +temp.x+ "][" +temp.y+"]["+temp.z+ "] Index: "+ temp.w);
-                System.out.println();
-                
-            }
-            System.out.println();
-            */
+           
         }
-       
+       //DebugAtomList();
+    }
+    
+    public void ClearPlanePoints(){
+        VectorList.clear();
     }
     
     public void RemovePoint(int AtomIndex){
@@ -98,7 +80,7 @@ public class Plane {
         if(VectorList.size() >= 3){
             CalculatePCAMatrix();                       
         }
-
+        //DebugAtomList();
     }
     
     public boolean PlaneCalculated(){
@@ -175,7 +157,34 @@ public class Plane {
         return new Vector3f(NormalToPlane);
     }
     
-    
+    public void GlobalCoordinatePlane(Vector3f Origin){
+        // Translation vector is at the origin point for a global plane
+        TranslationVector.x = Origin.x;
+        TranslationVector.y = Origin.y;
+        TranslationVector.z = Origin.z;
+        
+        // this function should only be called for a new plane but anyways start with
+        // a new vecotr list to be sure we aren't working with old data
+        VectorList.clear();
+        // create three points in the global coordinate plane space translated by the origin
+        // add the translation vector points to each
+        // these points create a well-behaved plane along the x-y axis with the normal vector
+        // pointing in the positive z-direction
+        VectorList.add(new Vector4f(0.0f + TranslationVector.x, 1.0f + TranslationVector.y, 0.0f + TranslationVector.z, 0.0f));
+        VectorList.add(new Vector4f(1.0f + TranslationVector.x, 0.0f + TranslationVector.y, 0.0f + TranslationVector.z, 0.0f));
+        VectorList.add(new Vector4f(1.0f + TranslationVector.x, 0.0f + TranslationVector.y, 0.0f + TranslationVector.z, 0.0f));
+        
+        //the projection atom is along the X axis
+         AddXProjectionAtom(new Vector3f(1.0f + TranslationVector.x, 0.0f + TranslationVector.y, 0.0f + TranslationVector.z));
+                
+        // now do standard calculations
+        CreateCovarianceMatrix();
+        CalculateEigenVectors();
+        CalculatePlaneCoefficients();
+        
+        
+        //DebugEigenvectors();
+    }
     
     public void CalculatePCAMatrix(){
         
@@ -192,7 +201,7 @@ public class Plane {
     
     
     
-    
+    // translation vector = average center of atomic coordinates
     private void CalculateTranslationVector(){
         
         Vector4f temp;
@@ -252,24 +261,9 @@ public class Plane {
     }    
     // use EJML library to calculate eigenvector and eigenvalues from the covariance matrix
      private void CalculateEigenVectors(){
-         // debugging
-         //CovarianceMatrix[0][0] = 3;
-         //CovarianceMatrix[0][1] = 2;
-         //CovarianceMatrix[0][2] = 4;
-         //CovarianceMatrix[1][0] = 2;
-         //CovarianceMatrix[1][1] = 0;
-         //CovarianceMatrix[1][2] = 2;
-         //CovarianceMatrix[2][0] = 4;
-         //CovarianceMatrix[2][1] = 2;
-         //CovarianceMatrix[2][2] = 3;
-
-         
-         
+        
          
          DenseMatrix64F EigenCalcMatrix = new DenseMatrix64F(CovarianceMatrix);
-         
-         //EigenCalcMatrix.print();
-         
          
          EigenDecomposition<DenseMatrix64F> eig = DecompositionFactory.eig(3, true);
          // matrix is 3x3 symmetric, 3 eigenvectors
@@ -340,27 +334,46 @@ public class Plane {
         PlaneEquation.z =  NormalToPlane.z;
         PlaneEquation.w =  -(NormalToPlane.x*TranslationVector.x + NormalToPlane.y*TranslationVector.y + NormalToPlane.z*TranslationVector.z);
         
-        
+
     }
    
     public void AddXProjectionAtom(Vector3f XProjectionAtom){
+        XVectorAtomLast.x = XVectorAtom.x;
+        XVectorAtomLast.y = XVectorAtom.y;
+        XVectorAtomLast.z = XVectorAtom.z;
+        
         XVectorAtom.x = XProjectionAtom.x;
         XVectorAtom.y = XProjectionAtom.y;
         XVectorAtom.z = XProjectionAtom.z;
         XVectorAtomDefined = true;
+        
+        System.out.println("X Projection Atom: (X,Y,Z): "+XVectorAtom.x+""+XVectorAtom.y+""+XVectorAtom.z);
+        
     }
     
-    public void RemoveXProjectionAtom(Vector3f XProjectionAtom){        
-        XVectorAtomDefined = false;
+    public void RemoveCurrentXProjectionAtom(){
+        // first fall back to last selection
+        XVectorAtom.x = XVectorAtomLast.x;
+        XVectorAtom.y = XVectorAtomLast.y;
+        XVectorAtom.z = XVectorAtomLast.z;
+        // if list is smaller than two, fall back to (0,0,0)
+        if(VectorList.size() <= 2){
+            XVectorAtom.x = 0;
+            XVectorAtom.y = 0;
+            XVectorAtom.z = 0;
+            XVectorAtomDefined = false;
+        }
+        
     }
      
-    // determine the coordinate of a point using the plane as the coordinate space tpo the coordinate space of the molecule
+   
+    // determine the coordinate of a point using the plane as the coordinate space to the coordinate space of the molecule
     // XProjectionAtom is the coordinate that when projected onto the plane represents the X vector (Z is the normal)
     // Plane coordinate is the coordinate to be transformed
     // ZcrossX means calculate Z x X to find the Y vector
     // otherwise do X x Z (which will flip the axis)
     public Vector3f CalculateTransformedCoordinates(Vector3f XProjectionAtom, Vector3f PlaneCoordinate, boolean ZcrossX){
-        float A, B, C, D, a, b, c, d, xo, yo, zo;
+        float A, B, C, D, a, b, c, xo, yo, zo;
         
         float ParametricT;
         Vector3f XVector = new Vector3f(0,0,0);
@@ -380,7 +393,7 @@ public class Plane {
         zo = XProjectionAtom.z;
         // find the closest point at which the atom used to define the X-axis (which
         //isn't necessarily on the plane) meet the plane. This point defines the 
-        // x-vector of the coodrinate transformation
+        // x-vector of the coordinate transformation
         // find the t value at which the plane meets the line
         // I know the a = A, etc. but hust for this purpose for clarity
         ParametricT = -(A * xo + B * yo + C * zo + D) / (a * A + b * B + c * C);
@@ -402,7 +415,7 @@ public class Plane {
         ZVector.normalize();
         
         
-        // now calculate the cross product to find the YVector, X and Z are normal to each other so no additional sine
+        // now calculate the cross product to find the Y Vector, X and Z are normal to each other so no additional sine
         if(ZcrossX){
             ZVector.cross(XVector, YVector);
         }else{
@@ -434,19 +447,37 @@ public class Plane {
         
         return FinalValue;
     }     
-     public Vector3f CalculateTransformedCoordinates(Vector3f PlaneCoordinate, boolean ZcrossX){
+    
+    
+    
+    
+     public Vector3f CalculateTransformedCoordinates(Vector3f PlaneCoordinate, boolean ZcrossX) throws ArithmeticException{
          
          // since we are assuming the x-vector is in, then crash if not
-         assert(XVectorAtomDefined);
+         //System.out.println("XVectorAtomDefined " + XVectorAtomDefined);
+         assert XVectorAtomDefined;
          
+        if(!XVectorAtomDefined){
+            throw new ArithmeticException("CalculateTransformedCoordinates in Plane.java missing XVectorAtom");
+        }
          
-        float A, B, C, D, a, b, c, d, xo, yo, zo;
+        float A, B, C, D, a, b, c, xo, yo, zo;
         
         float ParametricT;
         Vector3f XVector = new Vector3f(0,0,0);
         Vector3f YVector = new Vector3f(0,0,0);
         Vector3f ZVector = new Vector3f(0,0,0);
         Vector3f FinalValue = new Vector3f(0,0,0);
+        
+        
+        //http://www.songho.ca/math/plane/plane.html
+        // Edge Cases! 
+        // for the plane equation Ax + By + Cz + D = 0, D = A*(x1) + B*(Y1) + C*(Z1)
+        // where the plane is normal to the Z axis (A, B = 0, the parametric calculation fails (divides by zero)
+        // but the closest point to the X/Y plane is just the Z point
+        
+        
+        
         
         A = PlaneEquation.x;
         B = PlaneEquation.y;
@@ -461,14 +492,22 @@ public class Plane {
         // find the t value at which the plane meets the line
         // I know the a = A, etc. but hust for this purpose for clarity
         ParametricT = -(A * xo + B * yo + C * zo + D) / (a * A + b * B + c * C);
-        // first get the point where the paramteric line meets the plane        
+        
+      
+        // first get the point where the parametric line meets the plane        
         XVector.x = xo + a * ParametricT;
         XVector.y = yo + b * ParametricT;
         XVector.z = zo + c * ParametricT;
-        // the substract the normalization vector to get the X vecotr relative to the Z and normalize
+        
+        //System.out.println("X:x: " + XVector.x + "X:y: " + XVector.y+ "X:z: " + XVector.z);
+        
+        // the substract the normalization vector to get the X vector relative to the Z and normalize
         XVector.x = XVector.x - TranslationVector.x;
         XVector.y = XVector.y - TranslationVector.y;
         XVector.z = XVector.z - TranslationVector.z;
+        
+       // System.out.println("X:x: " + XVector.x + "X:y: " + XVector.y+ "X:z: " + XVector.z);
+        
         XVector.normalize();
         // normalize the XVector
        
@@ -477,6 +516,13 @@ public class Plane {
         ZVector.y = b;       
         ZVector.z = c;
         ZVector.normalize();
+        
+        
+       // System.out.println("X, Y, Z Vector Pre Cross" + System.nanoTime());
+      //  System.out.println("X:x: " + XVector.x + "X:y: " + XVector.y+ "X:z: " + XVector.z);
+       // System.out.println("Y:x: " + YVector.x + "Y:y: " + YVector.y+ "Y:z: " + YVector.z);
+      //  System.out.println("Z:x: " + ZVector.x + "Z:y: " + ZVector.y+ "Z:z: " + ZVector.z);
+      //  DebugEigenvectors();
         
         
         // now calculate the cross product to find the YVector, X and Z are normal to each other so no additional sine
@@ -489,6 +535,11 @@ public class Plane {
        // https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=4&ved=0ahUKEwiC1tTNnv_QAhUGwFQKHX4QCYoQFggvMAM&url=http%3A%2F%2Fwww.math.tau.ac.il%2F~dcor%2FGraphics%2Fcg-slides%2Fgeom3d.pdf&usg=AFQjCNG0qhbk3E8jlw8ale28Wt9s_kUxUg&bvm=bv.142059868,d.cGw&cad=rja
         //transforming from XVector, YVector, ZVector defining plane coordinate system to global coordinate system
         
+      //  System.out.println("X, Y, Z Vector Post Cross" + System.nanoTime());
+     //   System.out.println("X:x: " + XVector.x + "X:y: " + XVector.y+ "X:z: " + XVector.z);
+      //  System.out.println("Y:x: " + YVector.x + "Y:y: " + YVector.y+ "Y:z: " + YVector.z);
+      //  System.out.println("Z:x: " + ZVector.x + "Z:y: " + ZVector.y+ "Z:z: " + ZVector.z);
+      //  DebugEigenvectors();
 
          Matrix3f TempRotation = new Matrix3f();
          TempRotation.m00 = XVector.x;
@@ -533,6 +584,16 @@ public class Plane {
         
     }
     
+    
+    
+    private void DebugAtomList(){
+        System.out.println("Atoms Defining Plane: " + VectorList.size());
+        for(int itor = 0; itor < VectorList.size(); itor++){
+            System.out.println("[" + VectorList.get(itor).w + "," + VectorList.get(itor).x + 
+                    ","+ VectorList.get(itor).y + ","+ VectorList.get(itor).z +"]");
+        }
+        System.out.println("End Atoms Defining Plane:");
+    }
     
 }
 

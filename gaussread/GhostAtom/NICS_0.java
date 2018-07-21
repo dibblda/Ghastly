@@ -19,10 +19,15 @@ public class NICS_0 extends GhostAtomType{
     
     // set the parameters
     public void Define(int Identity, Plane CurrentPlane){
-        SetType = new String("NICS(0)");
+        
+        Vector3f TempAtom;
+        
+        SetType = 0;
         Identifier = Identity;
-        Atoms = new ArrayList();       
-        Atoms.add(new GhostAtom(CurrentPlane.CalculateTransformedCoordinates(new Vector3f(0.0f,0.0f,0.0f), true)));       
+        Atoms = new ArrayList();
+        TempAtom = CurrentPlane.CalculateTransformedCoordinates(new Vector3f(0.0f,0.0f,0.0f), true);
+        // set radius to default (-1.0 equals choose default of graphics engine 
+        Atoms.add(new GhostAtom(new Vector4f(TempAtom.x, TempAtom.y, TempAtom.z, -1.0f)));       
         Atoms.get(0).Identifier = Identity;
         Atoms.get(0).AtomIndex = 1;
         NormalToPlane = CurrentPlane.GetPlaneNormal();

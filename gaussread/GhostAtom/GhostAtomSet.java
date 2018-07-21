@@ -7,8 +7,12 @@ package GhostAtom;
 import java.util.ArrayList;
 import java.util.Observable;
 import org.joml.Vector4f;
+import org.joml.Vector3f;
 import MeanPlane.*;
 import java.math.BigDecimal;
+import java.nio.charset.Charset;
+import java.nio.file.*;
+import java.io.*;
 /**
  *
  * @author David Joshua Dibble
@@ -25,22 +29,23 @@ import java.math.BigDecimal;
  * 
  */
 public class GhostAtomSet extends Observable{
-    
 
+// variable for the render image to know if any changes have occured in the list of atoms to be rendered    
+   
 //variables to store information on ghost atom types and lists       
         
     int NumberOfSets = 0;
-    int TypeIndex = 0;
-    
-    
+    int TypeIndex = 0;        
     boolean SetProposed = false;
     GhostAtomType ProposedSet = null;
-    
+    // array list of all of the different ghost atom types with their atoms
     ArrayList<GhostAtomType> GhostAtomSets = new ArrayList();
-    
+    // array list of every single ghost atom irrespective of the type they belong to
     ArrayList<GhostAtom> CurrentAtoms = new ArrayList();
     
-// booleans for GUI / display purposes    
+   
+    
+// booleans for GUI / display purposes      
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
     // to turn off mouse choosing after create has been set
@@ -51,6 +56,14 @@ public class GhostAtomSet extends Observable{
     // display only the proposed set
     public boolean DisplayProposed = false;
 
+    // needed to deal with some poorly behaved transparency issues
+    //changing display order solved the problem, not needed but kept for flexibility 
+    public boolean RenderSelectionCursorSolid = false;
+    public boolean RenderHighlightCursorSolid = false;
+
+    // plane is not calculated from atom positions it is a standard plane corresponding to the 
+    // global coordinates
+    public boolean GlobalCoordinatePlane = false;
     
 // add Section    
 //------------------------------------------------------------------------------    
@@ -66,10 +79,14 @@ public class GhostAtomSet extends Observable{
     
     // add but don't include in the list yet
     public void NewProposed(GhostAtomType GhostType){
-        ProposedSet = GhostType;        
+        
+        try{
+            ProposedSet = (GhostAtomType)GhostType.clone();
+        }catch(CloneNotSupportedException e){        
+        }
     }
     
-    // add teh proposed to the list
+    // add the proposed to the list
     public int AddProposed(){
         assert(ProposedSet != null);
         NumberOfSets++;
@@ -107,6 +124,7 @@ public class GhostAtomSet extends Observable{
     
     // add but don't include in the list yet
     public void ExcludeProposed(){
+        DisplayProposed = false;
         ProposedSet = null;
         SetProposed = false;        
     }
@@ -178,11 +196,16 @@ public class GhostAtomSet extends Observable{
 //------------------------------------------------------------------------------    
 //------------------------------------------------------------------------------    
     
-    // return every atom stored in this class including the proposed atoms     
-    public ArrayList<GhostAtom> GetAllAtoms(){
-                
-        if(!CurrentAtoms.isEmpty())CurrentAtoms.clear();
-        
+    // return every atom stored in this class including the proposed atoms 
+    
+    public ArrayList<GhostAtomType> GetCurrentGhostAtomTypes(){
+        return GhostAtomSets;
+    }
+     public GhostAtomType GetProposedGhostAtomType(){
+        return ProposedSet;
+    }
+    public ArrayList<GhostAtom> GetAllAtoms(){                
+        if(!CurrentAtoms.isEmpty())CurrentAtoms.clear();        
         //proposed
         CurrentAtoms.addAll(ProposedSet.GetAtomList());
         //currently listed
@@ -205,10 +228,16 @@ public class GhostAtomSet extends Observable{
     }
     
     public ArrayList<GhostAtom> GetProposedAtoms(){
+        if(ProposedSet == null){
+            System.out.println("Proposed Atoms Already Deleted: GhostAtomSet.java");
+            return null;
+        };
+        
+        
         return ProposedSet.GetAtomList();
     }
     
-    // return the list of highlited atoms 
+    // return the list of highlighted atoms 
     public ArrayList<GhostAtom> GetHighlightedAtoms(){
     
         if(!CurrentAtoms.isEmpty())CurrentAtoms.clear();
@@ -233,7 +262,7 @@ public class GhostAtomSet extends Observable{
 // make it observable for the java swing interface    
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------    
-// public varialbe to store the current plane needed to generate ghost atoms
+// public variable to store the current plane needed to generate ghost atoms
 // in general coordinates    
     private Plane CurrentPlane = new Plane();
     public void AddPointToPlane(Vector4f point){
@@ -245,13 +274,32 @@ public class GhostAtomSet extends Observable{
         }
     }
     
-    public void RemovePointFromPlane(int AtomIndex){
-        CurrentPlane.RemovePoint(AtomIndex);
-        // if a plane now exists, tell everyone who's asked to know
-        if(!CurrentPlane.PlaneCalculated()){
+    public void ClearPlanePoints(){
+        CurrentPlane.ClearPlanePoints();
+         setChanged();
+         notifyObservers();
+    }
+    
+    public void SetPlaneXAxisPoint(Vector3f Point){
+        CurrentPlane.AddXProjectionAtom(Point);
+        if(CurrentPlane.PlaneCalculated()){
             setChanged();
             notifyObservers();
         }
+       
+       
+    }
+    public void RemoveCurrentXAxisPoint(){
+        CurrentPlane.RemoveCurrentXProjectionAtom();
+    }
+    public void RemovePointFromPlane(int AtomIndex){
+        CurrentPlane.RemovePoint(AtomIndex);
+
+        // actually always notify, even if plane still exists, changing the number
+        // of points changes the plane equation
+        setChanged();
+        notifyObservers();
+        
     }
     
     public boolean PlaneCalculated(){
@@ -274,6 +322,12 @@ public class GhostAtomSet extends Observable{
         return PlaneNormalString;
     }
     
+    public void GlobalCoordinatePlane(float X_Origin, float Y_Origin, float Z_Origin){
+        CurrentPlane = new Plane();
+        CurrentPlane.GlobalCoordinatePlane(new Vector3f(X_Origin, Y_Origin, Z_Origin));
+    }
+    
+    
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
     public int GetAtomsInType(int TypeIndexValue){
@@ -283,6 +337,9 @@ public class GhostAtomSet extends Observable{
             };
         }
         // shouldn't get here
+        System.out.println("Error in GetAtomsInType, GhostAtomSet");
+        System.out.flush();
+        assert(false);
         return 0;
     }
 //section to write the calculated data to file (or return a formatted string
@@ -290,7 +347,7 @@ public class GhostAtomSet extends Observable{
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
     
-    // write all of the current atoms to a string in xyz format 
+    // write all of the current atoms into a string in xyz format 
     public String GetGhostAtomString(){
         String GhostAtomString = new String("");
         ArrayList<GhostAtom> ToPrint = GetAtoms();
@@ -307,7 +364,63 @@ public class GhostAtomSet extends Observable{
         
         return GhostAtomString;
     }
-    
-  
+// write the atoms to file in a format specified by the user     
+    public void WriteGhostAtomFile(Path FilePath, String FileType){
+        
+        String GhostAtomString = new String("");
+        ArrayList<GhostAtom> ToPrint = GetAtoms();
+        Charset charset = Charset.forName("US-ASCII");
+        BufferedWriter OutputBuffer;
+        
+        try{
+            OutputBuffer = Files.newBufferedWriter(FilePath, charset);
+        }catch(IOException e){
+            System.out.println("In WriteGhostAtomFile " + e.getMessage());
+            return;
+        }
+        
+        if(FileType.matches("txt")){
+            for(int itor = 0; itor < ToPrint.size(); itor++){
+                GhostAtomString = GhostAtomString.concat("Bq ");
+                //http://docs.oracle.com/javase/7/docs/api/java/math/BigDecimal.html#setScale(int,%20java.math.RoundingMode)
+                // http://docs.oracle.com/javase/7/docs/api/java/math/RoundingMode.html
+                GhostAtomString =  GhostAtomString.concat((new BigDecimal(ToPrint.get(itor).x)).setScale(3, BigDecimal.ROUND_HALF_UP).toPlainString() + " ");
+                GhostAtomString =  GhostAtomString.concat((new BigDecimal(ToPrint.get(itor).y)).setScale(3, BigDecimal.ROUND_HALF_UP).toPlainString() + " ");
+                GhostAtomString =  GhostAtomString.concat((new BigDecimal(ToPrint.get(itor).z)).setScale(3, BigDecimal.ROUND_HALF_UP).toPlainString() + "\n");
+                try{
+                    OutputBuffer.write(GhostAtomString);
+                }catch(IOException e){
+                    System.out.println("In WriteGhostAtomFile, writing atom: " + itor + " Error: " + e.getMessage());
+                }               
+                // empty the string and start again
+                GhostAtomString = "";
+               
+            }
+        }else if(FileType.matches("csv")){
+            for(int itor = 0; itor < ToPrint.size(); itor++){
+                GhostAtomString = GhostAtomString.concat("Bq,");
+                //http://docs.oracle.com/javase/7/docs/api/java/math/BigDecimal.html#setScale(int,%20java.math.RoundingMode)
+                // http://docs.oracle.com/javase/7/docs/api/java/math/RoundingMode.html
+                GhostAtomString =  GhostAtomString.concat((new BigDecimal(ToPrint.get(itor).x)).setScale(3, BigDecimal.ROUND_HALF_UP).toPlainString() + ",");
+                GhostAtomString =  GhostAtomString.concat((new BigDecimal(ToPrint.get(itor).y)).setScale(3, BigDecimal.ROUND_HALF_UP).toPlainString() + ",");
+                GhostAtomString =  GhostAtomString.concat((new BigDecimal(ToPrint.get(itor).z)).setScale(3, BigDecimal.ROUND_HALF_UP).toPlainString() + "\n");
+
+
+
+                try{
+                    OutputBuffer.write(GhostAtomString);
+                }catch(IOException e){
+                    System.out.println("In WriteGhostAtomFile, writing atom: " + itor + " Error: " + e.getMessage());
+                }
+                // empty the string and start again              
+                GhostAtomString = "";
+            }
+        }
+        try{
+            OutputBuffer.close();   
+        }catch(IOException e){
+            System.out.println("At end of WriteGhostAtomFile: " + e.getMessage());
+        }
+    }
     
 }

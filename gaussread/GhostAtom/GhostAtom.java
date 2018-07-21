@@ -5,6 +5,7 @@
  */
 package GhostAtom;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 /**
  *
  * @author David Joshua Dibble
@@ -18,26 +19,31 @@ public class GhostAtom {
     public int AtomIndex;
     //coordinates of the ghost atom
     public float x,y,z;
+    public float radius;
+    
     
     public boolean IsHighlighted = false;
     public int HighlightLevel = 0;
     
     public GhostAtom(){        
     }
-    public GhostAtom(float new_x, float new_y, float new_z){
+    public GhostAtom(float new_x, float new_y, float new_z, float atom_radius){
         x = new_x;
         y = new_y;
-        z = new_z;        
+        z = new_z;
+        radius = atom_radius;        
     }
-    public GhostAtom(Vector3f Coordinates){
-        x = Coordinates.x;
-        y = Coordinates.y;
-        z = Coordinates.z;
+    public GhostAtom(Vector4f Atom){
+        x = Atom.x;
+        y = Atom.y;
+        z = Atom.z;
+        radius = Atom.w; 
     }
     
-    public Vector3f ReturnCoordinates(){
-        return new Vector3f(x,y,z);    
+    public Vector4f ReturnCoordinates(){
+        return new Vector4f(x,y,z,radius);    
     }
+    
     
     public void Highlight(){
         IsHighlighted = true;

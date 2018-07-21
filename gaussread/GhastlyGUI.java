@@ -11,6 +11,9 @@
 import OpenGLEngine.MoleculeDisplay;
 import FileReading.GaussFile;
 import GhostAtom.*;
+import MeanPlane.Plane;
+import java.awt.Color;
+import java.nio.file.*;
 import java.io.File;
 import java.util.Observer;
 import java.util.Observable;
@@ -20,6 +23,9 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
+
+
+
 
 /**
  *
@@ -35,19 +41,22 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
 
     GhostAtomSet Ghastly = new GhostAtomSet();        
     
-    FileNameExtensionFilter filter = new FileNameExtensionFilter("Gaussian Input File", "com");
+    Object GhastlyLock = new Object();
+    //FileNameExtensionFilter filter = new FileNameExtensionFilter("Gaussian Input File", "com");
     
     int tempclickcounter = 0;
     int TempIndex;
+   
+    boolean GlobalCoordinateGrid = false; 
     
-   // boolean NICS0 = false, NICS1 = false, NICSscan = false, NICSplane = false;
+   boolean NICS0 = false, NICS1 = false, NICSSCAN = false, NICSGRID = false;
             
     /**
      * Creates new form Ghastly
      */
     public GhastlyGUI(MoleculeDisplay moleculePassed, GhostAtomSet GhastlyPassed) {
         molecule = moleculePassed;
-        Ghastly = GhastlyPassed;
+        Ghastly = GhastlyPassed;        
         initComponents();
     }
     
@@ -79,7 +88,7 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         GhostAtomTable.setDefaultRenderer(Integer.class, Renderer);
         // done with the added code
         ComboBoxGhostType = new javax.swing.JComboBox<>();
-        FileOpen = new javax.swing.JFileChooser();
+        FileChooser = new javax.swing.JFileChooser();
         NICSO_dialog = new javax.swing.JFrame();
         NICS0_dialog_cancelButton = new javax.swing.JButton();
         NICS0_dialog_calculateButton = new javax.swing.JButton();
@@ -97,6 +106,89 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         jSeparator2 = new javax.swing.JSeparator();
         NICS1_dialog_saveButton = new javax.swing.JButton();
         NICS1_dialog_ChoosePlane = new javax.swing.JComboBox<>();
+        NICS_Scan_dialog = new javax.swing.JFrame();
+        NICS_Scan_dialog_saveButton = new javax.swing.JButton();
+        NICS_Scan_dialog_saveReturnButton = new javax.swing.JButton();
+        NICS_Scan_cancelButton = new javax.swing.JButton();
+        NICS_Scan_dialog_clearAtomButton = new javax.swing.JButton();
+        NICS_Scan_dialog_textField = new javax.swing.JTextField();
+        NICS_Scan_Theta_textField = new javax.swing.JTextField();
+        NICS_Scan_Phi_textField = new javax.swing.JTextField();
+        NICS_Scan_Theta_label = new javax.swing.JTextField();
+        NICS_Scan_Phi_label = new javax.swing.JTextField();
+        NICS_Scan_MinRange_label = new javax.swing.JTextField();
+        NICS_Scan_MaxRange_label = new javax.swing.JTextField();
+        NICS_Scan_Delta_label = new javax.swing.JTextField();
+        NICS_Scan_MinRange_textField = new javax.swing.JTextField();
+        NICS_Scan_MaxRange_textField = new javax.swing.JTextField();
+        NICS_Scan_Delta_textField = new javax.swing.JTextField();
+        NICS_Scan_dialog_clearParameterButton = new javax.swing.JButton();
+        jTextField1 = new javax.swing.JTextField();
+        NICS_Scan_NumberPoints_textField = new javax.swing.JTextField();
+        NICS_Scan_ByDelta_jRadioButton = new javax.swing.JRadioButton();
+        NICS_Scan_ByPoints_jRadioButton = new javax.swing.JRadioButton();
+        jSeparator3 = new javax.swing.JSeparator();
+        jSeparator4 = new javax.swing.JSeparator();
+        NICS_Scan_buttonGroup = new javax.swing.ButtonGroup();
+        NICS_Grid_dialog = new javax.swing.JFrame();
+        jPanel1 = new javax.swing.JPanel();
+        jPanel6 = new javax.swing.JPanel();
+        YParameters = new javax.swing.JPanel();
+        NICS_Grid_Points_label = new javax.swing.JTextField();
+        NICS_Grid_YDelta_textField = new javax.swing.JTextField();
+        NICS_Grid_YNumberPoints_textField = new javax.swing.JTextField();
+        NICS_Grid_YMinRange_textField = new javax.swing.JTextField();
+        NICS_Grid_MinRange_label = new javax.swing.JTextField();
+        NICS_Grid_MaxRange_label = new javax.swing.JTextField();
+        NICS_Grid_YMaxRange_textField = new javax.swing.JTextField();
+        NICS_Grid_Delta_label = new javax.swing.JTextField();
+        ZParameters = new javax.swing.JPanel();
+        NICS_Grid_Points_label2 = new javax.swing.JTextField();
+        NICS_Grid_ZDelta_textField = new javax.swing.JTextField();
+        NICS_Grid_ZNumberPoints_textField = new javax.swing.JTextField();
+        NICS_Grid_ZMinRange_textField = new javax.swing.JTextField();
+        NICS_Grid_MinRange_label2 = new javax.swing.JTextField();
+        NICS_Grid_MaxRange_label2 = new javax.swing.JTextField();
+        NICS_Grid_ZMaxRange_textField = new javax.swing.JTextField();
+        NICS_Grid_Delta_label2 = new javax.swing.JTextField();
+        XParameters = new javax.swing.JPanel();
+        NICS_Grid_Points_label1 = new javax.swing.JTextField();
+        NICS_Grid_XDelta_textField = new javax.swing.JTextField();
+        NICS_Grid_XNumberPoints_textField = new javax.swing.JTextField();
+        NICS_Grid_XMinRange_textField = new javax.swing.JTextField();
+        NICS_Grid_MinRange_label1 = new javax.swing.JTextField();
+        NICS_Grid_MaxRange_label1 = new javax.swing.JTextField();
+        NICS_Grid_XMaxRange_textField = new javax.swing.JTextField();
+        NICS_Grid_Delta_label1 = new javax.swing.JTextField();
+        jPanel8 = new javax.swing.JPanel();
+        NICS_Grid_ByPoints_RadioButton = new javax.swing.JRadioButton();
+        NICS_Grid_ByDelta_RadioButton = new javax.swing.JRadioButton();
+        jPanel2 = new javax.swing.JPanel();
+        jPanel7 = new javax.swing.JPanel();
+        NICS_Grid_Phi_label = new javax.swing.JTextField();
+        NICS_Grid_Theta_label = new javax.swing.JTextField();
+        NICS_Grid_Phi_textField = new javax.swing.JTextField();
+        NICS_Grid_Theta_textField = new javax.swing.JTextField();
+        jPanel3 = new javax.swing.JPanel();
+        jPanel4 = new javax.swing.JPanel();
+        NICS_Grid_dialog_clearAtomButton = new javax.swing.JButton();
+        NICS_Grid_By_Atom_Specified_Plane_Radio = new javax.swing.JRadioButton();
+        jTextField4 = new javax.swing.JTextField();
+        NICS_Grid_dialog_textField = new javax.swing.JTextField();
+        jTextField3 = new javax.swing.JTextField();
+        jTextField2 = new javax.swing.JTextField();
+        NICS_Grid_By_Global_Coordinate_Plane_Radio = new javax.swing.JRadioButton();
+        NICS_Grid_YExternal_Text = new javax.swing.JTextField();
+        NICS_Grid_XExternal_Text = new javax.swing.JTextField();
+        NICS_Grid_ZExternal_Text = new javax.swing.JTextField();
+        jPanel5 = new javax.swing.JPanel();
+        NICS_Grid_cancelButton = new javax.swing.JButton();
+        NICS_Grid_dialog_clearParameterButton = new javax.swing.JButton();
+        NICS_Grid_dialog_saveReturnButton = new javax.swing.JButton();
+        NICS_Grid_dialog_saveButton = new javax.swing.JButton();
+        NICS_Grid_buttonGroup = new javax.swing.ButtonGroup();
+        NICS_Grid_AtomSelection_buttonGroup = new javax.swing.ButtonGroup();
+        jOptionPane1 = new javax.swing.JOptionPane();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTextAreaCompletedCalculation = new javax.swing.JTextArea();
         MainMenu = new javax.swing.JMenuBar();
@@ -105,9 +197,9 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         jMenuItem2 = new javax.swing.JMenuItem();
         ExitMenu = new javax.swing.JMenuItem();
         GhostAtomMenu = new javax.swing.JMenu();
-        jMenuItem4 = new javax.swing.JMenuItem();
-        jMenuItem6 = new javax.swing.JMenuItem();
-        jMenuItem7 = new javax.swing.JMenuItem();
+        NewGhostAtom = new javax.swing.JMenuItem();
+        ClearGhostAtom = new javax.swing.JMenuItem();
+        SaveGhostAtom = new javax.swing.JMenuItem();
 
         GhostAtomForm.setMinimumSize(new java.awt.Dimension(560, 500));
         GhostAtomForm.setResizable(false);
@@ -197,7 +289,7 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
             .addGroup(GhostAtomFormLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(GhostAtomFormLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 540, Short.MAX_VALUE)
+                    .addComponent(jScrollPane3)
                     .addGroup(GhostAtomFormLayout.createSequentialGroup()
                         .addComponent(ComboBoxGhostType, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -223,9 +315,8 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         );
 
         NICSO_dialog.setTitle("NICS(0) ");
-        NICSO_dialog.setAlwaysOnTop(true);
-        NICSO_dialog.setMinimumSize(new java.awt.Dimension(400, 200));
-        NICSO_dialog.setPreferredSize(new java.awt.Dimension(400, 200));
+        NICSO_dialog.setMinimumSize(new java.awt.Dimension(500, 250));
+        NICSO_dialog.setUndecorated(true);
         NICSO_dialog.setSize(new java.awt.Dimension(400, 200));
         NICSO_dialog.getContentPane().setLayout(new java.awt.GridBagLayout());
 
@@ -257,9 +348,13 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         gridBagConstraints.ipady = 5;
         NICSO_dialog.getContentPane().add(NICS0_dialog_calculateButton, gridBagConstraints);
 
-        NICS0_dialog_textField.setEditable(false);
         NICS0_dialog_textField.setHorizontalAlignment(javax.swing.JTextField.CENTER);
         NICS0_dialog_textField.setText("Define Atom Plane");
+        NICS0_dialog_textField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS0_dialog_textFieldActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
@@ -320,8 +415,7 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         NICSO_dialog.getContentPane().add(NICS0_dialog_saveButton, gridBagConstraints);
 
         NICS1_dialog.setTitle("NICS(0) ");
-        NICS1_dialog.setAlwaysOnTop(true);
-        NICS1_dialog.setMinimumSize(new java.awt.Dimension(400, 200));
+        NICS1_dialog.setMinimumSize(new java.awt.Dimension(500, 250));
         NICS1_dialog.setSize(new java.awt.Dimension(400, 200));
         NICS1_dialog.getContentPane().setLayout(new java.awt.GridBagLayout());
 
@@ -427,6 +521,1080 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         gridBagConstraints.gridy = 2;
         NICS1_dialog.getContentPane().add(NICS1_dialog_ChoosePlane, gridBagConstraints);
 
+        NICS_Scan_dialog.setMinimumSize(new java.awt.Dimension(800, 800));
+        NICS_Scan_dialog.setResizable(false);
+
+        NICS_Scan_dialog_saveButton.setText("Save");
+        NICS_Scan_dialog_saveButton.setEnabled(false);
+        NICS_Scan_dialog_saveButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Scan_dialog_saveButtonActionPerformed(evt);
+            }
+        });
+
+        NICS_Scan_dialog_saveReturnButton.setText("Save and Return");
+        NICS_Scan_dialog_saveReturnButton.setEnabled(false);
+        NICS_Scan_dialog_saveReturnButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Scan_dialog_saveReturnButtonActionPerformed(evt);
+            }
+        });
+
+        NICS_Scan_cancelButton.setText("Quit");
+        NICS_Scan_cancelButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Scan_cancelButtonActionPerformed(evt);
+            }
+        });
+
+        NICS_Scan_dialog_clearAtomButton.setText("Clear Atoms");
+        NICS_Scan_dialog_clearAtomButton.setEnabled(false);
+        NICS_Scan_dialog_clearAtomButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        NICS_Scan_dialog_clearAtomButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Scan_dialog_clearAtomButtonActionPerformed(evt);
+            }
+        });
+
+        NICS_Scan_dialog_textField.setEditable(false);
+        NICS_Scan_dialog_textField.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Scan_dialog_textField.setText("Define Atom Plane");
+
+        NICS_Scan_Theta_textField.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Scan_Theta_textField.setText("0.0");
+        NICS_Scan_Theta_textField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                NICS_Scan_Text_Focus_Lost(evt);
+            }
+        });
+        NICS_Scan_Theta_textField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Scan_Text_Action_Performed(evt);
+            }
+        });
+
+        NICS_Scan_Phi_textField.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Scan_Phi_textField.setText("0.0");
+        NICS_Scan_Phi_textField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                NICS_Scan_Text_Focus_Lost(evt);
+            }
+        });
+        NICS_Scan_Phi_textField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Scan_Text_Action_Performed(evt);
+            }
+        });
+
+        NICS_Scan_Theta_label.setEditable(false);
+        NICS_Scan_Theta_label.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Scan_Theta_label.setText("Theta (degrees)");
+
+        NICS_Scan_Phi_label.setEditable(false);
+        NICS_Scan_Phi_label.setText("Phi (Degrees)");
+
+        NICS_Scan_MinRange_label.setEditable(false);
+        NICS_Scan_MinRange_label.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Scan_MinRange_label.setText("Minimum");
+
+        NICS_Scan_MaxRange_label.setEditable(false);
+        NICS_Scan_MaxRange_label.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Scan_MaxRange_label.setText("Maximum");
+
+        NICS_Scan_Delta_label.setEditable(false);
+        NICS_Scan_Delta_label.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Scan_Delta_label.setText("Delta");
+
+        NICS_Scan_MinRange_textField.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Scan_MinRange_textField.setText("-5.0");
+        NICS_Scan_MinRange_textField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                NICS_Scan_Text_Focus_Lost(evt);
+            }
+        });
+        NICS_Scan_MinRange_textField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Scan_Text_Action_Performed(evt);
+            }
+        });
+
+        NICS_Scan_MaxRange_textField.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Scan_MaxRange_textField.setText("5.0");
+        NICS_Scan_MaxRange_textField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                NICS_Scan_Text_Focus_Lost(evt);
+            }
+        });
+        NICS_Scan_MaxRange_textField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Scan_Text_Action_Performed(evt);
+            }
+        });
+
+        NICS_Scan_Delta_textField.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Scan_Delta_textField.setText("1.0");
+        NICS_Scan_Delta_textField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                NICS_Scan_Text_Focus_Lost(evt);
+            }
+        });
+        NICS_Scan_Delta_textField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Scan_Text_Action_Performed(evt);
+            }
+        });
+
+        NICS_Scan_dialog_clearParameterButton.setText("Clear Parameters");
+        NICS_Scan_dialog_clearParameterButton.setEnabled(false);
+        NICS_Scan_dialog_clearParameterButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Scan_dialog_clearParameterButtonActionPerformed(evt);
+            }
+        });
+
+        jTextField1.setEditable(false);
+        jTextField1.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        jTextField1.setText("Points");
+
+        NICS_Scan_NumberPoints_textField.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Scan_NumberPoints_textField.setText("11");
+        NICS_Scan_NumberPoints_textField.setAutoscrolls(false);
+        NICS_Scan_NumberPoints_textField.setEnabled(false);
+        NICS_Scan_NumberPoints_textField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                NICS_Scan_Text_Focus_Lost(evt);
+            }
+        });
+        NICS_Scan_NumberPoints_textField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Scan_Text_Action_Performed(evt);
+            }
+        });
+
+        NICS_Scan_buttonGroup.add(NICS_Scan_ByDelta_jRadioButton);
+        NICS_Scan_ByDelta_jRadioButton.setText(" Interval By Delta");
+        NICS_Scan_ByDelta_jRadioButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Scan_IntervelByDelta_Radio_Action(evt);
+            }
+        });
+
+        NICS_Scan_buttonGroup.add(NICS_Scan_ByPoints_jRadioButton);
+        NICS_Scan_ByPoints_jRadioButton.setText(" Interval By Points");
+        NICS_Scan_ByPoints_jRadioButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Scan_IntervalByPoint_Radio_Action(evt);
+            }
+        });
+
+        javax.swing.GroupLayout NICS_Scan_dialogLayout = new javax.swing.GroupLayout(NICS_Scan_dialog.getContentPane());
+        NICS_Scan_dialog.getContentPane().setLayout(NICS_Scan_dialogLayout);
+        NICS_Scan_dialogLayout.setHorizontalGroup(
+            NICS_Scan_dialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(NICS_Scan_dialogLayout.createSequentialGroup()
+                .addGap(320, 320, 320)
+                .addComponent(NICS_Scan_dialog_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGroup(NICS_Scan_dialogLayout.createSequentialGroup()
+                .addGap(350, 350, 350)
+                .addComponent(NICS_Scan_dialog_clearAtomButton))
+            .addGroup(NICS_Scan_dialogLayout.createSequentialGroup()
+                .addGap(10, 10, 10)
+                .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, 860, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGroup(NICS_Scan_dialogLayout.createSequentialGroup()
+                .addGap(300, 300, 300)
+                .addComponent(NICS_Scan_MinRange_label, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(79, 79, 79)
+                .addComponent(NICS_Scan_MaxRange_label, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGroup(NICS_Scan_dialogLayout.createSequentialGroup()
+                .addGap(300, 300, 300)
+                .addComponent(NICS_Scan_MinRange_textField, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(79, 79, 79)
+                .addComponent(NICS_Scan_MaxRange_textField, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGroup(NICS_Scan_dialogLayout.createSequentialGroup()
+                .addGap(10, 10, 10)
+                .addComponent(jSeparator4, javax.swing.GroupLayout.PREFERRED_SIZE, 860, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGroup(NICS_Scan_dialogLayout.createSequentialGroup()
+                .addGap(100, 100, 100)
+                .addComponent(NICS_Scan_Delta_label, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(79, 79, 79)
+                .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(49, 49, 49)
+                .addComponent(NICS_Scan_ByDelta_jRadioButton))
+            .addGroup(NICS_Scan_dialogLayout.createSequentialGroup()
+                .addGap(110, 110, 110)
+                .addComponent(NICS_Scan_Delta_textField, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(69, 69, 69)
+                .addComponent(NICS_Scan_NumberPoints_textField, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(49, 49, 49)
+                .addComponent(NICS_Scan_ByPoints_jRadioButton))
+            .addGroup(NICS_Scan_dialogLayout.createSequentialGroup()
+                .addGap(200, 200, 200)
+                .addComponent(NICS_Scan_Theta_label, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(34, 34, 34)
+                .addComponent(NICS_Scan_Phi_label, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGroup(NICS_Scan_dialogLayout.createSequentialGroup()
+                .addGap(260, 260, 260)
+                .addComponent(NICS_Scan_Theta_textField, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(79, 79, 79)
+                .addComponent(NICS_Scan_Phi_textField, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGroup(NICS_Scan_dialogLayout.createSequentialGroup()
+                .addGap(300, 300, 300)
+                .addComponent(NICS_Scan_dialog_clearParameterButton, javax.swing.GroupLayout.PREFERRED_SIZE, 268, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGroup(NICS_Scan_dialogLayout.createSequentialGroup()
+                .addGap(191, 191, 191)
+                .addComponent(NICS_Scan_dialog_saveButton)
+                .addGap(43, 43, 43)
+                .addComponent(NICS_Scan_dialog_saveReturnButton)
+                .addGap(35, 35, 35)
+                .addComponent(NICS_Scan_cancelButton))
+        );
+        NICS_Scan_dialogLayout.setVerticalGroup(
+            NICS_Scan_dialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(NICS_Scan_dialogLayout.createSequentialGroup()
+                .addGap(30, 30, 30)
+                .addComponent(NICS_Scan_dialog_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(11, 11, 11)
+                .addComponent(NICS_Scan_dialog_clearAtomButton)
+                .addGap(39, 39, 39)
+                .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(20, 20, 20)
+                .addGroup(NICS_Scan_dialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(NICS_Scan_MinRange_label, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(NICS_Scan_MaxRange_label, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(11, 11, 11)
+                .addGroup(NICS_Scan_dialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(NICS_Scan_MinRange_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(NICS_Scan_MaxRange_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(21, 21, 21)
+                .addComponent(jSeparator4, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(50, 50, 50)
+                .addGroup(NICS_Scan_dialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(NICS_Scan_Delta_label, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(NICS_Scan_ByDelta_jRadioButton))
+                .addGap(19, 19, 19)
+                .addGroup(NICS_Scan_dialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(NICS_Scan_Delta_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(NICS_Scan_NumberPoints_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(NICS_Scan_ByPoints_jRadioButton))
+                .addGap(69, 69, 69)
+                .addGroup(NICS_Scan_dialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(NICS_Scan_Theta_label, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(NICS_Scan_dialogLayout.createSequentialGroup()
+                        .addGap(10, 10, 10)
+                        .addComponent(NICS_Scan_Phi_label, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(11, 11, 11)
+                .addGroup(NICS_Scan_dialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(NICS_Scan_Theta_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(NICS_Scan_Phi_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(41, 41, 41)
+                .addComponent(NICS_Scan_dialog_clearParameterButton)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(NICS_Scan_dialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(NICS_Scan_dialog_saveButton)
+                    .addComponent(NICS_Scan_dialog_saveReturnButton)
+                    .addComponent(NICS_Scan_cancelButton))
+                .addGap(17, 17, 17))
+        );
+
+        NICS_Grid_dialog.setTitle("NICS Grid Calculation");
+        NICS_Grid_dialog.setMaximumSize(new java.awt.Dimension(2000, 2000));
+        NICS_Grid_dialog.setMinimumSize(new java.awt.Dimension(900, 1100));
+        NICS_Grid_dialog.setPreferredSize(new java.awt.Dimension(900, 1100));
+        NICS_Grid_dialog.setResizable(false);
+
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Grid Coordinates", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION));
+
+        YParameters.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Y Parameters", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION));
+
+        NICS_Grid_Points_label.setEditable(false);
+        NICS_Grid_Points_label.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Grid_Points_label.setText("Points");
+        NICS_Grid_Points_label.setBorder(null);
+
+        NICS_Grid_YDelta_textField.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Grid_YDelta_textField.setText("1.0");
+        NICS_Grid_YDelta_textField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                NICS_Grid_Text_Focus_Lost(evt);
+            }
+        });
+        NICS_Grid_YDelta_textField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Grid_Text_Action_Performed(evt);
+            }
+        });
+
+        NICS_Grid_YNumberPoints_textField.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Grid_YNumberPoints_textField.setText("11");
+        NICS_Grid_YNumberPoints_textField.setAutoscrolls(false);
+        NICS_Grid_YNumberPoints_textField.setEnabled(false);
+        NICS_Grid_YNumberPoints_textField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                NICS_Grid_Text_Focus_Lost(evt);
+            }
+        });
+        NICS_Grid_YNumberPoints_textField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Grid_Text_Action_Performed(evt);
+            }
+        });
+
+        NICS_Grid_YMinRange_textField.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Grid_YMinRange_textField.setText("-2.0");
+        NICS_Grid_YMinRange_textField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                NICS_Grid_Text_Focus_Lost(evt);
+            }
+        });
+        NICS_Grid_YMinRange_textField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Grid_Text_Action_Performed(evt);
+            }
+        });
+
+        NICS_Grid_MinRange_label.setEditable(false);
+        NICS_Grid_MinRange_label.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Grid_MinRange_label.setText("Minimum");
+        NICS_Grid_MinRange_label.setBorder(null);
+        NICS_Grid_MinRange_label.setPreferredSize(new java.awt.Dimension(55, 20));
+
+        NICS_Grid_MaxRange_label.setEditable(false);
+        NICS_Grid_MaxRange_label.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Grid_MaxRange_label.setText("Maximum");
+        NICS_Grid_MaxRange_label.setBorder(null);
+        NICS_Grid_MaxRange_label.setPreferredSize(new java.awt.Dimension(55, 20));
+
+        NICS_Grid_YMaxRange_textField.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Grid_YMaxRange_textField.setText("2.0");
+        NICS_Grid_YMaxRange_textField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                NICS_Grid_Text_Focus_Lost(evt);
+            }
+        });
+        NICS_Grid_YMaxRange_textField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Grid_Text_Action_Performed(evt);
+            }
+        });
+
+        NICS_Grid_Delta_label.setEditable(false);
+        NICS_Grid_Delta_label.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Grid_Delta_label.setText("Delta");
+        NICS_Grid_Delta_label.setBorder(null);
+
+        javax.swing.GroupLayout YParametersLayout = new javax.swing.GroupLayout(YParameters);
+        YParameters.setLayout(YParametersLayout);
+        YParametersLayout.setHorizontalGroup(
+            YParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(YParametersLayout.createSequentialGroup()
+                .addGap(10, 10, 10)
+                .addGroup(YParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(NICS_Grid_YDelta_textField)
+                    .addComponent(NICS_Grid_Delta_label)
+                    .addComponent(NICS_Grid_YMinRange_textField)
+                    .addComponent(NICS_Grid_MinRange_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(YParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(NICS_Grid_YNumberPoints_textField, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(NICS_Grid_Points_label)
+                    .addComponent(NICS_Grid_YMaxRange_textField)
+                    .addComponent(NICS_Grid_MaxRange_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        YParametersLayout.setVerticalGroup(
+            YParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(YParametersLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(YParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(NICS_Grid_MinRange_label, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(NICS_Grid_MaxRange_label, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(YParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(NICS_Grid_YMinRange_textField)
+                    .addComponent(NICS_Grid_YMaxRange_textField))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(YParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(NICS_Grid_Delta_label, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(NICS_Grid_Points_label, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(YParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(NICS_Grid_YDelta_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(NICS_Grid_YNumberPoints_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        ZParameters.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Z Parameters", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION));
+
+        NICS_Grid_Points_label2.setEditable(false);
+        NICS_Grid_Points_label2.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Grid_Points_label2.setText("Points");
+        NICS_Grid_Points_label2.setBorder(null);
+
+        NICS_Grid_ZDelta_textField.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Grid_ZDelta_textField.setText("1.0");
+        NICS_Grid_ZDelta_textField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                NICS_Grid_Text_Focus_Lost(evt);
+            }
+        });
+        NICS_Grid_ZDelta_textField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Grid_Text_Action_Performed(evt);
+            }
+        });
+
+        NICS_Grid_ZNumberPoints_textField.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Grid_ZNumberPoints_textField.setText("11");
+        NICS_Grid_ZNumberPoints_textField.setAutoscrolls(false);
+        NICS_Grid_ZNumberPoints_textField.setEnabled(false);
+        NICS_Grid_ZNumberPoints_textField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                NICS_Grid_Text_Focus_Lost(evt);
+            }
+        });
+        NICS_Grid_ZNumberPoints_textField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Grid_Text_Action_Performed(evt);
+            }
+        });
+
+        NICS_Grid_ZMinRange_textField.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Grid_ZMinRange_textField.setText("-2.0");
+        NICS_Grid_ZMinRange_textField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                NICS_Grid_Text_Focus_Lost(evt);
+            }
+        });
+        NICS_Grid_ZMinRange_textField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Grid_Text_Action_Performed(evt);
+            }
+        });
+
+        NICS_Grid_MinRange_label2.setEditable(false);
+        NICS_Grid_MinRange_label2.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Grid_MinRange_label2.setText("Minimum");
+        NICS_Grid_MinRange_label2.setBorder(null);
+        NICS_Grid_MinRange_label2.setPreferredSize(new java.awt.Dimension(55, 20));
+
+        NICS_Grid_MaxRange_label2.setEditable(false);
+        NICS_Grid_MaxRange_label2.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Grid_MaxRange_label2.setText("Maximum");
+        NICS_Grid_MaxRange_label2.setBorder(null);
+        NICS_Grid_MaxRange_label2.setPreferredSize(new java.awt.Dimension(55, 20));
+
+        NICS_Grid_ZMaxRange_textField.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Grid_ZMaxRange_textField.setText("2.0");
+        NICS_Grid_ZMaxRange_textField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                NICS_Grid_Text_Focus_Lost(evt);
+            }
+        });
+        NICS_Grid_ZMaxRange_textField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Grid_Text_Action_Performed(evt);
+            }
+        });
+
+        NICS_Grid_Delta_label2.setEditable(false);
+        NICS_Grid_Delta_label2.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Grid_Delta_label2.setText("Delta");
+        NICS_Grid_Delta_label2.setBorder(null);
+
+        javax.swing.GroupLayout ZParametersLayout = new javax.swing.GroupLayout(ZParameters);
+        ZParameters.setLayout(ZParametersLayout);
+        ZParametersLayout.setHorizontalGroup(
+            ZParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(ZParametersLayout.createSequentialGroup()
+                .addGap(10, 10, 10)
+                .addGroup(ZParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(NICS_Grid_Delta_label2, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(NICS_Grid_ZMinRange_textField, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(NICS_Grid_MinRange_label2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(NICS_Grid_ZDelta_textField))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(ZParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(NICS_Grid_Points_label2, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(NICS_Grid_ZMaxRange_textField, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(NICS_Grid_MaxRange_label2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(NICS_Grid_ZNumberPoints_textField))
+                .addGap(10, 10, 10))
+        );
+        ZParametersLayout.setVerticalGroup(
+            ZParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(ZParametersLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(ZParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(NICS_Grid_MinRange_label2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(NICS_Grid_MaxRange_label2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(ZParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(NICS_Grid_ZMinRange_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(NICS_Grid_ZMaxRange_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(ZParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(NICS_Grid_Delta_label2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(NICS_Grid_Points_label2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(ZParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(NICS_Grid_ZDelta_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(NICS_Grid_ZNumberPoints_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        XParameters.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "X Parameters", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION));
+        XParameters.setPreferredSize(new java.awt.Dimension(200, 158));
+
+        NICS_Grid_Points_label1.setEditable(false);
+        NICS_Grid_Points_label1.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Grid_Points_label1.setText("Points");
+        NICS_Grid_Points_label1.setBorder(null);
+
+        NICS_Grid_XDelta_textField.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Grid_XDelta_textField.setText("1.0");
+        NICS_Grid_XDelta_textField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                NICS_Grid_Text_Focus_Lost(evt);
+            }
+        });
+        NICS_Grid_XDelta_textField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Grid_Text_Action_Performed(evt);
+            }
+        });
+
+        NICS_Grid_XNumberPoints_textField.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Grid_XNumberPoints_textField.setText("11");
+        NICS_Grid_XNumberPoints_textField.setAutoscrolls(false);
+        NICS_Grid_XNumberPoints_textField.setEnabled(false);
+        NICS_Grid_XNumberPoints_textField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                NICS_Grid_Text_Focus_Lost(evt);
+            }
+        });
+        NICS_Grid_XNumberPoints_textField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Grid_Text_Action_Performed(evt);
+            }
+        });
+
+        NICS_Grid_XMinRange_textField.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Grid_XMinRange_textField.setText("-2.0");
+        NICS_Grid_XMinRange_textField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                NICS_Grid_Text_Focus_Lost(evt);
+            }
+        });
+        NICS_Grid_XMinRange_textField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Grid_Text_Action_Performed(evt);
+            }
+        });
+
+        NICS_Grid_MinRange_label1.setEditable(false);
+        NICS_Grid_MinRange_label1.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Grid_MinRange_label1.setText("Minimum");
+        NICS_Grid_MinRange_label1.setBorder(null);
+        NICS_Grid_MinRange_label1.setPreferredSize(new java.awt.Dimension(55, 20));
+
+        NICS_Grid_MaxRange_label1.setEditable(false);
+        NICS_Grid_MaxRange_label1.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Grid_MaxRange_label1.setText("Maximum");
+        NICS_Grid_MaxRange_label1.setBorder(null);
+        NICS_Grid_MaxRange_label1.setPreferredSize(new java.awt.Dimension(55, 20));
+
+        NICS_Grid_XMaxRange_textField.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Grid_XMaxRange_textField.setText("2.0");
+        NICS_Grid_XMaxRange_textField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                NICS_Grid_Text_Focus_Lost(evt);
+            }
+        });
+        NICS_Grid_XMaxRange_textField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Grid_Text_Action_Performed(evt);
+            }
+        });
+
+        NICS_Grid_Delta_label1.setEditable(false);
+        NICS_Grid_Delta_label1.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Grid_Delta_label1.setText("Delta");
+        NICS_Grid_Delta_label1.setBorder(null);
+
+        javax.swing.GroupLayout XParametersLayout = new javax.swing.GroupLayout(XParameters);
+        XParameters.setLayout(XParametersLayout);
+        XParametersLayout.setHorizontalGroup(
+            XParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(XParametersLayout.createSequentialGroup()
+                .addGap(10, 10, 10)
+                .addGroup(XParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(NICS_Grid_MinRange_label1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(NICS_Grid_XMinRange_textField)
+                    .addComponent(NICS_Grid_Delta_label1)
+                    .addComponent(NICS_Grid_XDelta_textField))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(XParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(NICS_Grid_XMaxRange_textField, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(NICS_Grid_MaxRange_label1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(NICS_Grid_Points_label1, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(NICS_Grid_XNumberPoints_textField, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(10, 10, 10))
+        );
+        XParametersLayout.setVerticalGroup(
+            XParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(XParametersLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(XParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(NICS_Grid_MinRange_label1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(NICS_Grid_MaxRange_label1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(XParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(NICS_Grid_XMinRange_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(NICS_Grid_XMaxRange_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(XParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(NICS_Grid_Delta_label1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(NICS_Grid_Points_label1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(XParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(NICS_Grid_XDelta_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(NICS_Grid_XNumberPoints_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(22, Short.MAX_VALUE))
+        );
+
+        javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
+        jPanel6.setLayout(jPanel6Layout);
+        jPanel6Layout.setHorizontalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addGap(2, 2, 2)
+                .addComponent(XParameters, javax.swing.GroupLayout.PREFERRED_SIZE, 148, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(5, 5, 5)
+                .addComponent(YParameters, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(5, 5, 5)
+                .addComponent(ZParameters, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(40, Short.MAX_VALUE))
+        );
+        jPanel6Layout.setVerticalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addGap(2, 2, 2)
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(YParameters, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(ZParameters, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(XParameters, javax.swing.GroupLayout.DEFAULT_SIZE, 163, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        NICS_Grid_buttonGroup.add(NICS_Grid_ByPoints_RadioButton);
+        NICS_Grid_ByPoints_RadioButton.setText(" Interval By Points");
+        NICS_Grid_ByPoints_RadioButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Grid_ByPoints_RadioButtonNICS_Scan_IntervalByPoint_Radio_Action(evt);
+            }
+        });
+
+        NICS_Grid_buttonGroup.add(NICS_Grid_ByDelta_RadioButton);
+        NICS_Grid_ByDelta_RadioButton.setSelected(true);
+        NICS_Grid_ByDelta_RadioButton.setText(" Interval By Delta");
+        NICS_Grid_ByDelta_RadioButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Grid_ByDelta_RadioButtonNICS_Scan_IntervelByDelta_Radio_Action(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel8Layout = new javax.swing.GroupLayout(jPanel8);
+        jPanel8.setLayout(jPanel8Layout);
+        jPanel8Layout.setHorizontalGroup(
+            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel8Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(NICS_Grid_ByDelta_RadioButton)
+                .addGap(18, 18, 18)
+                .addComponent(NICS_Grid_ByPoints_RadioButton)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel8Layout.setVerticalGroup(
+            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel8Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(NICS_Grid_ByPoints_RadioButton)
+                    .addComponent(NICS_Grid_ByDelta_RadioButton))
+                .addGap(27, 27, 27))
+        );
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(0, 225, Short.MAX_VALUE))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(140, 140, 140))
+        );
+
+        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Grid Polar Angle", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION));
+
+        NICS_Grid_Phi_label.setEditable(false);
+        NICS_Grid_Phi_label.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Grid_Phi_label.setText("Phi (Degrees)");
+        NICS_Grid_Phi_label.setBorder(null);
+        NICS_Grid_Phi_label.setPreferredSize(new java.awt.Dimension(100, 20));
+
+        NICS_Grid_Theta_label.setEditable(false);
+        NICS_Grid_Theta_label.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Grid_Theta_label.setText("Theta (degrees)");
+        NICS_Grid_Theta_label.setBorder(null);
+        NICS_Grid_Theta_label.setPreferredSize(new java.awt.Dimension(100, 20));
+
+        NICS_Grid_Phi_textField.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Grid_Phi_textField.setText("0.0");
+        NICS_Grid_Phi_textField.setPreferredSize(new java.awt.Dimension(55, 20));
+        NICS_Grid_Phi_textField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                NICS_Grid_Text_Focus_Lost(evt);
+            }
+        });
+        NICS_Grid_Phi_textField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Grid_Text_Action_Performed(evt);
+            }
+        });
+
+        NICS_Grid_Theta_textField.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Grid_Theta_textField.setText("0.0");
+        NICS_Grid_Theta_textField.setPreferredSize(new java.awt.Dimension(55, 20));
+        NICS_Grid_Theta_textField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                NICS_Grid_Text_Focus_Lost(evt);
+            }
+        });
+        NICS_Grid_Theta_textField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Grid_Text_Action_Performed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
+        jPanel7.setLayout(jPanel7Layout);
+        jPanel7Layout.setHorizontalGroup(
+            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel7Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addComponent(NICS_Grid_Theta_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(NICS_Grid_Theta_label, javax.swing.GroupLayout.PREFERRED_SIZE, 212, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel7Layout.createSequentialGroup()
+                        .addComponent(NICS_Grid_Phi_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(122, 144, Short.MAX_VALUE))
+                    .addGroup(jPanel7Layout.createSequentialGroup()
+                        .addComponent(NICS_Grid_Phi_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addContainerGap())))
+        );
+        jPanel7Layout.setVerticalGroup(
+            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel7Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(NICS_Grid_Phi_label, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(NICS_Grid_Theta_label, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(NICS_Grid_Phi_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(NICS_Grid_Theta_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
+        );
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addGap(84, 84, 84)
+                .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(305, Short.MAX_VALUE))
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+
+        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Grid Coordinate Center", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION));
+        jPanel3.setPreferredSize(new java.awt.Dimension(1186, 150));
+
+        NICS_Grid_dialog_clearAtomButton.setText("Clear");
+        NICS_Grid_dialog_clearAtomButton.setEnabled(false);
+        NICS_Grid_dialog_clearAtomButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        NICS_Grid_dialog_clearAtomButton.setPreferredSize(new java.awt.Dimension(100, 20));
+        NICS_Grid_dialog_clearAtomButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Grid_dialog_clearAtomButtonActionPerformed(evt);
+            }
+        });
+
+        NICS_Grid_AtomSelection_buttonGroup.add(NICS_Grid_By_Atom_Specified_Plane_Radio);
+        NICS_Grid_By_Atom_Specified_Plane_Radio.setSelected(true);
+        NICS_Grid_By_Atom_Specified_Plane_Radio.setText("Atom Plane Coordinate Grid");
+        NICS_Grid_By_Atom_Specified_Plane_Radio.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Grid_By_Atom_Specified_Plane_RadioActionPerformed(evt);
+            }
+        });
+
+        jTextField4.setEditable(false);
+        jTextField4.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        jTextField4.setText("Z Center");
+        jTextField4.setBorder(null);
+        jTextField4.setPreferredSize(new java.awt.Dimension(58, 20));
+
+        NICS_Grid_dialog_textField.setEditable(false);
+        NICS_Grid_dialog_textField.setBackground(new java.awt.Color(255, 0, 0));
+        NICS_Grid_dialog_textField.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Grid_dialog_textField.setText("Define Atom Plane");
+        NICS_Grid_dialog_textField.setPreferredSize(new java.awt.Dimension(100, 20));
+
+        jTextField3.setEditable(false);
+        jTextField3.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        jTextField3.setText("Y Center");
+        jTextField3.setBorder(null);
+        jTextField3.setPreferredSize(new java.awt.Dimension(58, 20));
+
+        jTextField2.setEditable(false);
+        jTextField2.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        jTextField2.setText("X Center");
+        jTextField2.setBorder(null);
+        jTextField2.setPreferredSize(new java.awt.Dimension(58, 20));
+
+        NICS_Grid_AtomSelection_buttonGroup.add(NICS_Grid_By_Global_Coordinate_Plane_Radio);
+        NICS_Grid_By_Global_Coordinate_Plane_Radio.setText("Global Coordinate Grid");
+        NICS_Grid_By_Global_Coordinate_Plane_Radio.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Grid_By_Global_Coordinate_Plane_RadioActionPerformed(evt);
+            }
+        });
+
+        NICS_Grid_YExternal_Text.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Grid_YExternal_Text.setText("0.0");
+        NICS_Grid_YExternal_Text.setEnabled(false);
+        NICS_Grid_YExternal_Text.setMaximumSize(new java.awt.Dimension(121, 39));
+        NICS_Grid_YExternal_Text.setMinimumSize(new java.awt.Dimension(121, 39));
+        NICS_Grid_YExternal_Text.setPreferredSize(new java.awt.Dimension(58, 20));
+        NICS_Grid_YExternal_Text.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                NICS_Grid_External_Grid_Focus_Lost(evt);
+            }
+        });
+        NICS_Grid_YExternal_Text.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Grid_External_Grid_Text_Action_Performed(evt);
+            }
+        });
+
+        NICS_Grid_XExternal_Text.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Grid_XExternal_Text.setText("0.0");
+        NICS_Grid_XExternal_Text.setEnabled(false);
+        NICS_Grid_XExternal_Text.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                NICS_Grid_External_Grid_Focus_Lost(evt);
+            }
+        });
+        NICS_Grid_XExternal_Text.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Grid_External_Grid_Text_Action_Performed(evt);
+            }
+        });
+
+        NICS_Grid_ZExternal_Text.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Grid_ZExternal_Text.setText("0.0");
+        NICS_Grid_ZExternal_Text.setEnabled(false);
+        NICS_Grid_ZExternal_Text.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                NICS_Grid_External_Grid_Focus_Lost(evt);
+            }
+        });
+        NICS_Grid_ZExternal_Text.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Grid_External_Grid_Text_Action_Performed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
+        jPanel4.setLayout(jPanel4Layout);
+        jPanel4Layout.setHorizontalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(NICS_Grid_dialog_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(NICS_Grid_dialog_clearAtomButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(NICS_Grid_XExternal_Text, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(6, 6, 6)
+                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel4Layout.createSequentialGroup()
+                                .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel4Layout.createSequentialGroup()
+                                .addComponent(NICS_Grid_YExternal_Text, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(NICS_Grid_ZExternal_Text, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addComponent(NICS_Grid_By_Atom_Specified_Plane_Radio)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(NICS_Grid_By_Global_Coordinate_Plane_Radio)))
+                .addGap(79, 79, 79))
+        );
+        jPanel4Layout.setVerticalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(NICS_Grid_dialog_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(NICS_Grid_YExternal_Text, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(NICS_Grid_dialog_clearAtomButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(NICS_Grid_XExternal_Text, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(NICS_Grid_ZExternal_Text, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(4, 4, 4)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(NICS_Grid_By_Atom_Specified_Plane_Radio)
+                    .addComponent(NICS_Grid_By_Global_Coordinate_Plane_Radio))
+                .addGap(38, 38, 38))
+        );
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap(73, Short.MAX_VALUE)
+                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(84, 84, 84))
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 16, Short.MAX_VALUE))
+        );
+
+        NICS_Grid_cancelButton.setText("Quit");
+        NICS_Grid_cancelButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Grid_cancelButtonActionPerformed(evt);
+            }
+        });
+
+        NICS_Grid_dialog_clearParameterButton.setText("Clear Parameters");
+        NICS_Grid_dialog_clearParameterButton.setEnabled(false);
+        NICS_Grid_dialog_clearParameterButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Grid_dialog_clearParameterButtonActionPerformed(evt);
+            }
+        });
+
+        NICS_Grid_dialog_saveReturnButton.setText("Save and Return");
+        NICS_Grid_dialog_saveReturnButton.setEnabled(false);
+        NICS_Grid_dialog_saveReturnButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Grid_dialog_saveReturnButtonActionPerformed(evt);
+            }
+        });
+
+        NICS_Grid_dialog_saveButton.setText("Save");
+        NICS_Grid_dialog_saveButton.setEnabled(false);
+        NICS_Grid_dialog_saveButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Grid_dialog_saveButtonActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
+        jPanel5.setLayout(jPanel5Layout);
+        jPanel5Layout.setHorizontalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(NICS_Grid_dialog_clearParameterButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel5Layout.createSequentialGroup()
+                        .addComponent(NICS_Grid_dialog_saveButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(NICS_Grid_dialog_saveReturnButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(NICS_Grid_cancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
+        );
+        jPanel5Layout.setVerticalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(NICS_Grid_dialog_clearParameterButton)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(NICS_Grid_dialog_saveButton)
+                    .addComponent(NICS_Grid_dialog_saveReturnButton)
+                    .addComponent(NICS_Grid_cancelButton))
+                .addContainerGap())
+        );
+
+        javax.swing.GroupLayout NICS_Grid_dialogLayout = new javax.swing.GroupLayout(NICS_Grid_dialog.getContentPane());
+        NICS_Grid_dialog.getContentPane().setLayout(NICS_Grid_dialogLayout);
+        NICS_Grid_dialogLayout.setHorizontalGroup(
+            NICS_Grid_dialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(NICS_Grid_dialogLayout.createSequentialGroup()
+                .addGroup(NICS_Grid_dialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(NICS_Grid_dialogLayout.createSequentialGroup()
+                        .addGap(111, 111, 111)
+                        .addGroup(NICS_Grid_dialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(NICS_Grid_dialogLayout.createSequentialGroup()
+                        .addGap(8, 8, 8)
+                        .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 550, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, NICS_Grid_dialogLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(92, Short.MAX_VALUE))
+        );
+        NICS_Grid_dialogLayout.setVerticalGroup(
+            NICS_Grid_dialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(NICS_Grid_dialogLayout.createSequentialGroup()
+                .addGap(10, 10, 10)
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 39, Short.MAX_VALUE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(35, 35, 35)
+                .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(106, 106, 106))
+        );
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Ghastly Version 0.1");
 
@@ -467,19 +1635,24 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         GhostAtomMenu.setText("Ghost Atom");
         GhostAtomMenu.setEnabled(false);
 
-        jMenuItem4.setText("New");
-        jMenuItem4.addActionListener(new java.awt.event.ActionListener() {
+        NewGhostAtom.setText("New");
+        NewGhostAtom.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItem4ActionPerformed(evt);
+                NewGhostAtomActionPerformed(evt);
             }
         });
-        GhostAtomMenu.add(jMenuItem4);
+        GhostAtomMenu.add(NewGhostAtom);
 
-        jMenuItem6.setText("Clear");
-        GhostAtomMenu.add(jMenuItem6);
+        ClearGhostAtom.setText("Clear");
+        GhostAtomMenu.add(ClearGhostAtom);
 
-        jMenuItem7.setText("Write to File");
-        GhostAtomMenu.add(jMenuItem7);
+        SaveGhostAtom.setText("Save");
+        SaveGhostAtom.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                SaveGhostAtomActionPerformed(evt);
+            }
+        });
+        GhostAtomMenu.add(SaveGhostAtom);
 
         MainMenu.add(GhostAtomMenu);
 
@@ -506,19 +1679,25 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
     }// </editor-fold>//GEN-END:initComponents
 
     private void CloseMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CloseMenuActionPerformed
-        // TODO add your handling code here:
-        FileOpen.setFileFilter(filter);
+        FileChooser.setDialogTitle("Open Molecular Coordinate File");
+        FileChooser.resetChoosableFileFilters();
+        FileChooser.addChoosableFileFilter(new FileNameExtensionFilter("Gaussian input file (.com)", "com"));  
+        FileChooser.addChoosableFileFilter(new FileNameExtensionFilter("xyz (.xyz) file", "xyz"));
+        FileChooser.addChoosableFileFilter(new FileNameExtensionFilter("mdl (.mol) file", "mol"));
+        FileChooser.addChoosableFileFilter(new FileNameExtensionFilter("tripos (.mol2) file", "mol2"));
+        FileChooser.addChoosableFileFilter(new FileNameExtensionFilter("protein databank (.pdb) file", "pdb"));
+        //setFileFilter(filter);
         
-        int result = FileOpen.showOpenDialog(this);
+        int result = FileChooser.showOpenDialog(this);
 	if(result == JFileChooser.CANCEL_OPTION) return;
 	try {
-		File file = FileOpen.getSelectedFile();
+		File file = FileChooser.getSelectedFile();
 		//java.net.URL url = file.toURI().toURL();
-		moleculeData = new GaussFile(file, FileOpen.getTypeDescription(file));
+		moleculeData = new GaussFile(file, FileChooser.getTypeDescription(file));
 		if(moleculeData != null){
 			moleculeDataLoaded = true;
 			
-			molecule.PassInterfaceParameters(moleculeData.AtomicCoordinates(false), moleculeData.BondArray(), moleculeData.BondGeometry(false), Ghastly);			
+			molecule.PassInterfaceParameters(moleculeData.AtomicCoordinates(false), moleculeData.BondArray(), moleculeData.BondGeometry(false), Ghastly, GhastlyLock);			
                         
                         GhostAtomMenu.setEnabled(true);
                         
@@ -532,15 +1711,15 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
 	}
     }//GEN-LAST:event_CloseMenuActionPerformed
 
-    private void jMenuItem4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem4ActionPerformed
+    private void NewGhostAtomActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NewGhostAtomActionPerformed
         GhostAtomForm.setVisible(true);// TODO add your handling code here:
-    }//GEN-LAST:event_jMenuItem4ActionPerformed
+    }//GEN-LAST:event_NewGhostAtomActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         // TODO add your handling code here:
          GhostAtomForm.setVisible(false);
          
-         jTextAreaCompletedCalculation.setText(Ghastly.GetGhostAtomString());
+         //jTextAreaCompletedCalculation.setText(Ghastly.GetGhostAtomString());
          
     }//GEN-LAST:event_jButton3ActionPerformed
 
@@ -554,21 +1733,33 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         String GhostComboType = (String)ComboBoxGhostType.getSelectedItem();
         
         if(GhostComboType.equals("NICS(0)")){
-            
-            Ghastly.LockSelection=false;
-            AddNewGhostAtomType.setEnabled(false);
-            NICSO_dialog.setVisible(true);
-                                    
+            synchronized(GhastlyLock){
+                Ghastly.LockSelection=false;
+                AddNewGhostAtomType.setEnabled(false);
+                NICSO_dialog.setVisible(true);
+                NICS0 = true;     
+            }
         }else if(GhostComboType.equals("NICS(1)")){
-            
-            Ghastly.LockSelection=false;
-            AddNewGhostAtomType.setEnabled(false);
-            NICS1_dialog.setVisible(true);
-           
+            synchronized(GhastlyLock){
+                Ghastly.LockSelection=false;
+                AddNewGhostAtomType.setEnabled(false);
+                NICS1_dialog.setVisible(true);
+                NICS1 = true;
+            }
         }else if(GhostComboType.equals("NICS-scan")){
-           
+            synchronized(GhastlyLock){
+                Ghastly.LockSelection=false;
+                AddNewGhostAtomType.setEnabled(false);
+                NICS_Scan_dialog.setVisible(true);
+                NICSSCAN = true;
+            }
         }else if(GhostComboType.equals("NICS-grid")){
-            
+            synchronized(GhastlyLock){
+                Ghastly.LockSelection=false;
+                AddNewGhostAtomType.setEnabled(false);
+                NICS_Grid_dialog.setVisible(true);
+                NICSGRID = true;
+            }
         }
         
     }//GEN-LAST:event_AddNewGhostAtomTypeActionPerformed
@@ -579,27 +1770,72 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
     @Override
     public void update(Observable o, Object arg){
         // what to do if no plane
+        
         if(!Ghastly.PlaneCalculated()){
             
-                NICS0_dialog_textField.setText("Define Atom Plane");
-                NICS1_dialog_textField.setText("Define Atom Plane");
-                jTextAreaCompletedCalculation.setText("");
-                
-                NICS0_dialog_calculateButton.setEnabled(false);
+            if(NICS0)NICS0_dialog_textField.setText("Define Atom Plane");                
+            if(NICS1)NICS1_dialog_textField.setText("Define Atom Plane");
+            if(NICSSCAN)NICS_Scan_dialog_textField.setText("Define Atom Plane");
+            if(NICSGRID)NICS_Grid_dialog_textField.setText("Define Atom Plane");
+            
+            if(NICS0)NICS0_dialog_calculateButton.setEnabled(false);
+            if(NICS1){
                 NICS1_dialog_calculateButton.setEnabled(false);
                 NICS1_dialog_ChoosePlane.setEnabled(false);
-                
-            
+            };
+
+            if(NICSSCAN)NICS_Scan_Calculate_Release();                           
+            if(NICSGRID){
+                NICS_Grid_Calculate_Release();
+                /*
+                synchronized(GhastlyLock){
+                    Ghastly.RenderSelectionCursorSolid = false;
+                    Ghastly.RenderHighlightCursorSolid = false;
+                }
+                */
+                if(!GlobalCoordinateGrid)NICS_Grid_dialog_textField.setBackground(Color.RED);                                
+            }
+       
+             jTextAreaCompletedCalculation.setText("");
+             
         // what to do if a plane is there
         }else{
             
-                NICS0_dialog_textField.setText("Atom Plane Defined");
-                NICS1_dialog_textField.setText("Atom Plane Defined");
-                jTextAreaCompletedCalculation.setText(Ghastly.GetPlaneNormal());
-                
-                NICS0_dialog_calculateButton.setEnabled(true);
+            if(NICS0)NICS0_dialog_textField.setText("Atom Plane Defined");
+            if(NICS1)NICS1_dialog_textField.setText("Atom Plane Defined");
+            if(NICSSCAN)NICS_Scan_dialog_textField.setText("Atom Plane Defined");
+            if(NICSGRID)NICS_Grid_dialog_textField.setText("Atom Plane Defined");
+            
+            if(NICS0)NICS0_dialog_calculateButton.setEnabled(true);
+            if(NICS1){
                 NICS1_dialog_calculateButton.setEnabled(true);
                 NICS1_dialog_ChoosePlane.setEnabled(true);
+            };
+            
+            
+             if(NICSSCAN){             
+                if(NICS_Scan_ByPoints_jRadioButton.isSelected()){
+                    NICS_Scan_NumberPoints_Calculate();
+                }else{
+                    NICS_Scan_Delta_Calculate(); 
+                }
+            }    
+            if(NICSGRID){
+                if(NICS_Grid_ByPoints_RadioButton.isSelected()){
+                    NICS_Grid_NumberPoints_Calculate();
+                }else{
+                    NICS_Grid_Delta_Calculate();
+                }
+                /*
+                synchronized(GhastlyLock){
+                    Ghastly.RenderSelectionCursorSolid = true;
+                    Ghastly.RenderHighlightCursorSolid = true;
+                }
+                */
+                if(!GlobalCoordinateGrid)NICS_Grid_dialog_textField.setBackground(Color.GREEN);    
+            }
+            
+            jTextAreaCompletedCalculation.setText(Ghastly.GetPlaneNormal());
         }
     }
     
@@ -621,31 +1857,36 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         // let the user have the option of clearing the choice 
         // or saving the new ghost atom
         // remove access to the calulate button
-        NICS_0 Temp = new NICS_0();
-        Temp.Define(0, Ghastly.GetPlane());
-        Ghastly.NewProposed(Temp);
-        Ghastly.LockSelection = true;
-        Ghastly.DisplayProposed = true;        
-        NICS0_dialog_clearButton.setEnabled(true);
-        NICS0_dialog_saveReturnButton.setEnabled(true);
-        NICS0_dialog_saveButton.setEnabled(true);
-        NICS0_dialog_calculateButton.setEnabled(false);
+        synchronized(GhastlyLock){
+            NICS_0 Temp = new NICS_0();
+            Temp.Define(0, Ghastly.GetPlane());
+            Ghastly.NewProposed(Temp);
+            Ghastly.LockSelection = true;
+            Ghastly.DisplayProposed = true;        
+            NICS0_dialog_clearButton.setEnabled(true);
+            NICS0_dialog_saveReturnButton.setEnabled(true);
+            NICS0_dialog_saveButton.setEnabled(true);
+            NICS0_dialog_calculateButton.setEnabled(false);
+        }
     }//GEN-LAST:event_NICS0_dialog_calculateButtonActionPerformed
 
     private void NICS0_dialog_cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS0_dialog_cancelButtonActionPerformed
         // TODO add your handling code here:
         
         // make sure no atoms are saved
-        Ghastly.DisplayProposed = false; 
-        Ghastly.LockSelection = true;
-        Ghastly.UnselectAtoms = true;
-        Ghastly.ExcludeProposed();       
-        NICS0_dialog_clearButton.setEnabled(false);
-        NICS0_dialog_saveReturnButton.setEnabled(false);
-        NICS0_dialog_saveButton.setEnabled(false);
-        NICS0_dialog_calculateButton.setEnabled(false);
-        AddNewGhostAtomType.setEnabled(true);
-        NICSO_dialog.setVisible(false);
+        synchronized(GhastlyLock){
+            Ghastly.DisplayProposed = false; 
+            Ghastly.LockSelection = true;
+            Ghastly.UnselectAtoms = true;
+            Ghastly.ExcludeProposed();       
+            NICS0_dialog_clearButton.setEnabled(false);
+            NICS0_dialog_saveReturnButton.setEnabled(false);
+            NICS0_dialog_saveButton.setEnabled(false);
+            NICS0_dialog_calculateButton.setEnabled(false);
+            AddNewGhostAtomType.setEnabled(true);
+            NICSO_dialog.setVisible(false);
+            NICS0=false;
+        }
     }//GEN-LAST:event_NICS0_dialog_cancelButtonActionPerformed
 
     private void NICS0_dialog_saveReturnButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS0_dialog_saveReturnButtonActionPerformed
@@ -657,30 +1898,32 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         // unselect all selected atoms
         // and disable clear button as well as save button
         // finally quite whole dialog
-        TempIndex = Ghastly.AddProposed();        
-        Ghastly.LockSelection = true;
-        Ghastly.DisplayProposed = false;
-        Ghastly.UnselectAtoms = true;
-        NICS0_dialog_calculateButton.setEnabled(false);
-        NICS0_dialog_clearButton.setEnabled(false);
-        NICS0_dialog_saveReturnButton.setEnabled(false);
-        NICS0_dialog_saveButton.setEnabled(false);
-        
-        // Add to the Ghost Atom Table
-        
-        Object[] NewRow = {TempIndex, "NICS(0)", new Integer(1),  new Boolean(false),  new Boolean (false)};
-        DefaultTableModel model = (DefaultTableModel) GhostAtomTable.getModel();
-        /*
-        // all this gobledygook just to center integers and strings in the table, needs to be somewhere else probably
-        DefaultTableCellRenderer Renderer = new DefaultTableCellRenderer();
-        Renderer.setHorizontalAlignment(JLabel.CENTER);
-        GhostAtomTable.setDefaultRenderer(String.class, Renderer);
-        GhostAtomTable.setDefaultRenderer(Integer.class, Renderer);
-        */
-        model.addRow(NewRow);
-        AddNewGhostAtomType.setEnabled(true);
-        NICSO_dialog.setVisible(false);
-        
+        synchronized(GhastlyLock){
+            TempIndex = Ghastly.AddProposed();        
+            Ghastly.LockSelection = true;
+            Ghastly.DisplayProposed = false;
+            Ghastly.UnselectAtoms = true;
+            NICS0_dialog_calculateButton.setEnabled(false);
+            NICS0_dialog_clearButton.setEnabled(false);
+            NICS0_dialog_saveReturnButton.setEnabled(false);
+            NICS0_dialog_saveButton.setEnabled(false);
+            NICS0=false;
+            // Add to the Ghost Atom Table
+
+            Object[] NewRow = {TempIndex, "NICS(0)", new Integer(1),  new Boolean(false),  new Boolean (false)};
+            DefaultTableModel model = (DefaultTableModel) GhostAtomTable.getModel();
+            /*
+            // all this gobledygook just to center integers and strings in the table, needs to be somewhere else probably
+            DefaultTableCellRenderer Renderer = new DefaultTableCellRenderer();
+            Renderer.setHorizontalAlignment(JLabel.CENTER);
+            GhostAtomTable.setDefaultRenderer(String.class, Renderer);
+            GhostAtomTable.setDefaultRenderer(Integer.class, Renderer);
+            */
+            model.addRow(NewRow);
+            AddNewGhostAtomType.setEnabled(true);
+            NICSO_dialog.setVisible(false);
+            NICS0 = false;
+        }
     }//GEN-LAST:event_NICS0_dialog_saveReturnButtonActionPerformed
 
     private void NICS0_dialog_clearButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS0_dialog_clearButtonActionPerformed
@@ -692,16 +1935,16 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         // and remove the propsed atom from the list
         // remove clear button and save button option
         // and enable calculate button
-        Ghastly.DisplayProposed = false; 
-        Ghastly.LockSelection = false;
-        Ghastly.UnselectAtoms = true;
-        Ghastly.ExcludeProposed();       
-        NICS0_dialog_clearButton.setEnabled(false);
-        NICS0_dialog_saveReturnButton.setEnabled(false);
-        NICS0_dialog_saveButton.setEnabled(false);
-        NICS0_dialog_calculateButton.setEnabled(false);
-   
-        
+        synchronized(GhastlyLock){
+            Ghastly.DisplayProposed = false; 
+            Ghastly.LockSelection = false;
+            Ghastly.UnselectAtoms = true;
+            Ghastly.ExcludeProposed();       
+            NICS0_dialog_clearButton.setEnabled(false);
+            NICS0_dialog_saveReturnButton.setEnabled(false);
+            NICS0_dialog_saveButton.setEnabled(false);
+            NICS0_dialog_calculateButton.setEnabled(false);
+        }        
     }//GEN-LAST:event_NICS0_dialog_clearButtonActionPerformed
 
     private void ExitMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ExitMenuActionPerformed
@@ -723,28 +1966,28 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         // TODO add your handling code here:
         //go through the table, look for a row to delete
         // resetting the for loop for each deletion (table size decreases)
-        boolean DoneDeleting = false;
-        
-        while(!DoneDeleting){
-            for(int itor = 0; itor < GhostAtomTable.getRowCount(); itor++){
-                // see if the last column is asking for a deletion
-                if((boolean)GhostAtomTable.getModel().getValueAt(itor, 4)){
-                    // remove from data structure
-                    Ghastly.RemoveType((Integer)GhostAtomTable.getModel().getValueAt(itor, 0));
-                    // delete row from the table
-                    DefaultTableModel TempRowDelete = (DefaultTableModel)GhostAtomTable.getModel();
-                    TempRowDelete.removeRow(itor);
-                    break;
+        synchronized(GhastlyLock){
+            boolean DoneDeleting = false;
+            while(!DoneDeleting){
+                for(int itor = 0; itor < GhostAtomTable.getRowCount(); itor++){
+                    // see if the last column is asking for a deletion
+                    if((boolean)GhostAtomTable.getModel().getValueAt(itor, 4)){
+                        // remove from data structure
+                        Ghastly.RemoveType((Integer)GhostAtomTable.getModel().getValueAt(itor, 0));
+                        // delete row from the table
+                        DefaultTableModel TempRowDelete = (DefaultTableModel)GhostAtomTable.getModel();
+                        TempRowDelete.removeRow(itor);
+                        break;
+                    }
+                    if(itor == (GhostAtomTable.getRowCount() - 1))DoneDeleting = true;
+
+                   // edge case, deleted all
+                    if(GhostAtomTable.getRowCount() == 0)DoneDeleting = true;
                 }
-                if(itor == (GhostAtomTable.getRowCount() - 1))DoneDeleting = true;
-                
-               // edge case, deleted all
+                //edge case, deleted all
                 if(GhostAtomTable.getRowCount() == 0)DoneDeleting = true;
             }
-            //edge case, deleted all
-            if(GhostAtomTable.getRowCount() == 0)DoneDeleting = true;
         }
-        
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void NICS0_dialog_saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS0_dialog_saveButtonActionPerformed
@@ -757,40 +2000,43 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         // unselect all selected atoms
         // and disable clear button as well as save button
         // finally quite whole dialog
-        TempIndex = Ghastly.AddProposed();        
-        Ghastly.LockSelection = false;
-        Ghastly.DisplayProposed = false;
-        Ghastly.UnselectAtoms = true;
-        NICS0_dialog_calculateButton.setEnabled(false);
-        NICS0_dialog_clearButton.setEnabled(false);
-        NICS0_dialog_saveReturnButton.setEnabled(false);
-        NICS0_dialog_saveButton.setEnabled(false);
-        // Add to the Ghost Atom Table
-        
-        Object[] NewRow = {TempIndex, "NICS(0)", new Integer(1),  new Boolean(false),  new Boolean (false)};
-        DefaultTableModel model = (DefaultTableModel) GhostAtomTable.getModel();        
-        model.addRow(NewRow);
-     
+        synchronized(GhastlyLock){
+            TempIndex = Ghastly.AddProposed();        
+            Ghastly.LockSelection = false;
+            Ghastly.DisplayProposed = false;
+            Ghastly.UnselectAtoms = true;
+            NICS0_dialog_calculateButton.setEnabled(false);
+            NICS0_dialog_clearButton.setEnabled(false);
+            NICS0_dialog_saveReturnButton.setEnabled(false);
+            NICS0_dialog_saveButton.setEnabled(false);
+            // Add to the Ghost Atom Table
+
+            Object[] NewRow = {TempIndex, "NICS(0)", new Integer(1),  new Boolean(false),  new Boolean (false)};
+            DefaultTableModel model = (DefaultTableModel) GhostAtomTable.getModel();        
+            model.addRow(NewRow);
+        }
     }//GEN-LAST:event_NICS0_dialog_saveButtonActionPerformed
 
     private void NICS1_dialog_cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS1_dialog_cancelButtonActionPerformed
         // TODO add your handling code here:
-        Ghastly.DisplayProposed = false; 
-        Ghastly.LockSelection = true;
-        Ghastly.UnselectAtoms = true;
-        Ghastly.ExcludeProposed();       
-        NICS1_dialog_clearButton.setEnabled(false);
-        NICS1_dialog_saveReturnButton.setEnabled(false);
-        NICS1_dialog_saveButton.setEnabled(false);
-        NICS1_dialog_calculateButton.setEnabled(false);
-        NICS1_dialog_ChoosePlane.setEnabled(false);
-        AddNewGhostAtomType.setEnabled(true);
-        NICS1_dialog.setVisible(false);
+        synchronized(GhastlyLock){
+            Ghastly.DisplayProposed = false; 
+            Ghastly.LockSelection = true;
+            Ghastly.UnselectAtoms = true;
+            Ghastly.ExcludeProposed();       
+            NICS1_dialog_clearButton.setEnabled(false);
+            NICS1_dialog_saveReturnButton.setEnabled(false);
+            NICS1_dialog_saveButton.setEnabled(false);
+            NICS1_dialog_calculateButton.setEnabled(false);
+            NICS1_dialog_ChoosePlane.setEnabled(false);
+            AddNewGhostAtomType.setEnabled(true);
+            NICS1_dialog.setVisible(false);
+            NICS1=false;
+        }
     }//GEN-LAST:event_NICS1_dialog_cancelButtonActionPerformed
 
     private void NICS1_dialog_calculateButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS1_dialog_calculateButtonActionPerformed
-        // TODO add your handling code here:
-          // TODO add your handling code here:
+      
         // plane must be defined or button would be unavailable
         // create a ghost atom, add it to the proposed list
         // lock the atom selection so that it can't change during
@@ -799,37 +2045,35 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         // let the user have the option of clearing the choice 
         // or saving the new ghost atom
         // remove access to the calulate button
-        NICS_1 Temp = new NICS_1();
-        
-        String PlaneType = (String)NICS1_dialog_ChoosePlane.getSelectedItem();
-        if(PlaneType.equals("Above Plane")){
-            Temp.Define(0, Ghastly.GetPlane(), 1);
-            System.out.println("Positive");
-        }else if(PlaneType.equals("Below Plane")){
-            Temp.Define(0, Ghastly.GetPlane(), -1);
-            System.out.println("Negative");
-        }else if(PlaneType.equals("Both")){
-            Temp.Define(0, Ghastly.GetPlane(), 0);
-            System.out.println("Both");
-        }else{
-            System.out.println("Shouldn't be here");
-        }        
-        Ghastly.NewProposed(Temp);
-        Ghastly.LockSelection = true;
-        Ghastly.DisplayProposed = true;        
-        NICS1_dialog_clearButton.setEnabled(true);
-        NICS1_dialog_saveReturnButton.setEnabled(true);
-        NICS1_dialog_saveButton.setEnabled(true);
-        // leave these enabled so the user can immediately choose another plane setting
-        //NICS1_dialog_calculateButton.setEnabled(false);
-        //NICS1_dialog_ChoosePlane.setEnabled(false);
+        synchronized(GhastlyLock){
+            NICS_1 Temp = new NICS_1();
+
+            String PlaneType = (String)NICS1_dialog_ChoosePlane.getSelectedItem();
+            if(PlaneType.equals("Above Plane")){
+                Temp.Define(0, Ghastly.GetPlane(), 1);
+
+            }else if(PlaneType.equals("Below Plane")){
+                Temp.Define(0, Ghastly.GetPlane(), -1);
+
+            }else if(PlaneType.equals("Both")){
+                Temp.Define(0, Ghastly.GetPlane(), 0);
+
+            }else{
+                System.out.println("Shouldn't be here: NICS1_dialog_calculateButtonActionPerformed");
+                assert(false);
+            }        
+            Ghastly.NewProposed(Temp);
+            Ghastly.LockSelection = true;
+            Ghastly.DisplayProposed = true;        
+            NICS1_dialog_clearButton.setEnabled(true);
+            NICS1_dialog_saveReturnButton.setEnabled(true);
+            NICS1_dialog_saveButton.setEnabled(true);
+        }     
     }//GEN-LAST:event_NICS1_dialog_calculateButtonActionPerformed
 
     private void NICS1_dialog_saveReturnButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS1_dialog_saveReturnButtonActionPerformed
         // TODO add your handling code here:
-         // TODO add your handling code here:
-         // TODO add your handling code here:
-         // TODO add your handling code here:
+         
         //transfer proposed to full atom list
         // undo selection display mode
         // unlock selection
@@ -837,22 +2081,25 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         // unselect all selected atoms
         // and disable clear button as well as save button
         // finally quite whole dialog
-        TempIndex = Ghastly.AddProposed();        
-        Ghastly.LockSelection = false;
-        Ghastly.DisplayProposed = false;
-        Ghastly.UnselectAtoms = true;
-        NICS1_dialog_calculateButton.setEnabled(false);
-        NICS1_dialog_ChoosePlane.setEnabled(false);
-        NICS1_dialog_clearButton.setEnabled(false);
-        NICS1_dialog_saveReturnButton.setEnabled(false);
-        NICS1_dialog_saveButton.setEnabled(false);
-        // Add to the Ghost Atom Table
-        
-        Object[] NewRow = {TempIndex, "NICS(1)", Ghastly.GetAtomsInType(TempIndex),  new Boolean(false),  new Boolean (false)};
-        DefaultTableModel model = (DefaultTableModel) GhostAtomTable.getModel();        
-        model.addRow(NewRow);
-        AddNewGhostAtomType.setEnabled(true);
-        NICS1_dialog.setVisible(false);
+        synchronized(GhastlyLock){
+            TempIndex = Ghastly.AddProposed();        
+            Ghastly.LockSelection = false;
+            Ghastly.DisplayProposed = false;
+            Ghastly.UnselectAtoms = true;
+            NICS1_dialog_calculateButton.setEnabled(false);
+            NICS1_dialog_ChoosePlane.setEnabled(false);
+            NICS1_dialog_clearButton.setEnabled(false);
+            NICS1_dialog_saveReturnButton.setEnabled(false);
+            NICS1_dialog_saveButton.setEnabled(false);
+            // Add to the Ghost Atom Table
+
+            Object[] NewRow = {TempIndex, "NICS(1)", Ghastly.GetAtomsInType(TempIndex),  new Boolean(false),  new Boolean (false)};
+            DefaultTableModel model = (DefaultTableModel) GhostAtomTable.getModel();        
+            model.addRow(NewRow);
+            AddNewGhostAtomType.setEnabled(true);
+            NICS1_dialog.setVisible(false);
+            NICS1=false;
+        }
     }//GEN-LAST:event_NICS1_dialog_saveReturnButtonActionPerformed
 
     private void NICS1_dialog_clearButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS1_dialog_clearButtonActionPerformed
@@ -864,23 +2111,21 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         // and remove the propsed atom from the list
         // remove clear button and save button option
         // and disable calculate button
-        Ghastly.DisplayProposed = false; 
-        Ghastly.LockSelection = false;
-        Ghastly.UnselectAtoms = true;
-        Ghastly.ExcludeProposed();       
-        NICS1_dialog_clearButton.setEnabled(false);
-        NICS1_dialog_saveReturnButton.setEnabled(false);
-        NICS1_dialog_saveButton.setEnabled(false);
-        NICS1_dialog_calculateButton.setEnabled(false);
-        NICS1_dialog_ChoosePlane.setEnabled(false);
-   
-        
+        synchronized(GhastlyLock){
+            Ghastly.DisplayProposed = false; 
+            Ghastly.LockSelection = false;
+            Ghastly.UnselectAtoms = true;
+            Ghastly.ExcludeProposed();       
+            NICS1_dialog_clearButton.setEnabled(false);
+            NICS1_dialog_saveReturnButton.setEnabled(false);
+            NICS1_dialog_saveButton.setEnabled(false);
+            NICS1_dialog_calculateButton.setEnabled(false);
+            NICS1_dialog_ChoosePlane.setEnabled(false);
+        }        
     }//GEN-LAST:event_NICS1_dialog_clearButtonActionPerformed
 
     private void NICS1_dialog_saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS1_dialog_saveButtonActionPerformed
-        // TODO add your handling code here:
-         // TODO add your handling code here:
-         // TODO add your handling code here:
+        
         //transfer proposed to full atom list
         // undo selection display mode
         // unlock selection
@@ -888,55 +2133,45 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         // unselect all selected atoms
         // and disable clear button as well as save button
         // finally quite whole dialog
-        TempIndex = Ghastly.AddProposed();        
-        Ghastly.LockSelection = false;
-        Ghastly.DisplayProposed = false;
-        Ghastly.UnselectAtoms = true;
-        NICS1_dialog_calculateButton.setEnabled(false);
-        NICS1_dialog_ChoosePlane.setEnabled(false);
-        NICS1_dialog_clearButton.setEnabled(false);
-        NICS1_dialog_saveReturnButton.setEnabled(false);
-        NICS1_dialog_saveButton.setEnabled(false);
-        // Add to the Ghost Atom Table
-        
-        Object[] NewRow = {TempIndex, "NICS(1)", Ghastly.GetAtomsInType(TempIndex),  new Boolean(false),  new Boolean (false)};
-        DefaultTableModel model = (DefaultTableModel) GhostAtomTable.getModel();        
-        model.addRow(NewRow);
-     
+        synchronized(GhastlyLock){
+            TempIndex = Ghastly.AddProposed();        
+            Ghastly.LockSelection = false;
+            Ghastly.DisplayProposed = false;
+            Ghastly.UnselectAtoms = true;
+            NICS1_dialog_calculateButton.setEnabled(false);
+            NICS1_dialog_ChoosePlane.setEnabled(false);
+            NICS1_dialog_clearButton.setEnabled(false);
+            NICS1_dialog_saveReturnButton.setEnabled(false);
+            NICS1_dialog_saveButton.setEnabled(false);
+            // Add to the Ghost Atom Table
+
+            Object[] NewRow = {TempIndex, "NICS(1)", Ghastly.GetAtomsInType(TempIndex),  new Boolean(false),  new Boolean (false)};
+            DefaultTableModel model = (DefaultTableModel) GhostAtomTable.getModel();        
+            model.addRow(NewRow);
+        }
     }//GEN-LAST:event_NICS1_dialog_saveButtonActionPerformed
 
     private void GhostAtomTableMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_GhostAtomTableMouseReleased
         // TODO add your handling code here:
          // check to see if a highlight changed or not when the mouse is pressed in the table
-        System.out.println("Mouse Clicked in Table." + tempclickcounter);
+       
         tempclickcounter++;
-        
-        ((AbstractTableModel)GhostAtomTable.getModel()).fireTableDataChanged();
-        // check for highlighting in the table and set the flag of all 
-         for(int itor = 0; itor < GhostAtomTable.getRowCount(); itor++){
+        synchronized(GhastlyLock){
+            ((AbstractTableModel)GhostAtomTable.getModel()).fireTableDataChanged();
+            // check for highlighting in the table and set the flag of all 
+            for(int itor = 0; itor < GhostAtomTable.getRowCount(); itor++){
                 // see if the table is asking for highlighting
                 
-                System.out.println(itor + " is Highlighted " + (boolean)GhostAtomTable.getModel().getValueAt(itor, 3));
                 if((boolean)GhostAtomTable.getModel().getValueAt(itor, 3)){
                     if(!(boolean)Ghastly.IsHighlighted((Integer)GhostAtomTable.getModel().getValueAt(itor, 0))){
                          Ghastly.HighlightType((Integer)GhostAtomTable.getModel().getValueAt(itor, 0));
                     };
-                   
+
                 }else{
                     Ghastly.UnHighlightType((Integer)GhostAtomTable.getModel().getValueAt(itor, 0));
-                }
-             /*
-                // see if the last column is asking for a deletion
-                if((boolean)GhostAtomTable.getModel().getValueAt(itor, 4)){
-                  
-                }else{
-                    
-                }
-                
-               */ 
-              
+                }                       
             }
-        
+        }
         
         
     }//GEN-LAST:event_GhostAtomTableMouseReleased
@@ -945,6 +2180,1375 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         // TODO add your handling code here:
     }//GEN-LAST:event_NICS1_dialog_ChoosePlaneActionPerformed
 
+    private void NICS_Scan_dialog_saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Scan_dialog_saveButtonActionPerformed
+        // TODO add your handling code here:
+        synchronized(GhastlyLock){
+            TempIndex = Ghastly.AddProposed();        
+            Ghastly.LockSelection = false;
+            Ghastly.DisplayProposed = false;
+            Ghastly.UnselectAtoms = true;
+            // clear proposed in memory
+            Ghastly.ExcludeProposed();
+            
+            NICS_Scan_dialog_clearParameterButton.setEnabled(false);
+            NICS_Scan_dialog_clearAtomButton.setEnabled(false);
+            NICS_Scan_dialog_saveReturnButton.setEnabled(false);
+            NICS_Scan_dialog_saveButton.setEnabled(false);
+            // Add to the Ghost Atom Table
+
+            Object[] NewRow = {TempIndex, "NICS SCAN", Ghastly.GetAtomsInType(TempIndex),  new Boolean(false),  new Boolean (false)};
+            DefaultTableModel model = (DefaultTableModel) GhostAtomTable.getModel();        
+            model.addRow(NewRow);
+        }
+    }//GEN-LAST:event_NICS_Scan_dialog_saveButtonActionPerformed
+
+    private void NICS_Scan_dialog_saveReturnButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Scan_dialog_saveReturnButtonActionPerformed
+        // TODO add your handling code here:
+        synchronized(GhastlyLock){
+            TempIndex = Ghastly.AddProposed();        
+            Ghastly.LockSelection = true;
+            Ghastly.DisplayProposed = false;
+            Ghastly.UnselectAtoms = true;
+            // clear proposed in memory
+            Ghastly.ExcludeProposed();
+     
+            NICS_Scan_dialog_clearParameterButton.setEnabled(false);
+            NICS_Scan_dialog_clearAtomButton.setEnabled(false);
+            NICS_Scan_dialog_saveReturnButton.setEnabled(false);
+            NICS_Scan_dialog_saveButton.setEnabled(false);
+            // Add to the Ghost Atom Table
+
+            Object[] NewRow = {TempIndex, "NICS SCAN", Ghastly.GetAtomsInType(TempIndex),  new Boolean(false),  new Boolean (false)};
+            DefaultTableModel model = (DefaultTableModel) GhostAtomTable.getModel();        
+            model.addRow(NewRow);
+            AddNewGhostAtomType.setEnabled(true);
+            NICS_Scan_dialog.setVisible(false);
+            NICSSCAN=false;
+        }                        
+    }//GEN-LAST:event_NICS_Scan_dialog_saveReturnButtonActionPerformed
+
+    private void NICS0_dialog_textFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS0_dialog_textFieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_NICS0_dialog_textFieldActionPerformed
+
+    private void NICS_Scan_cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Scan_cancelButtonActionPerformed
+        // TODO add your handling code here:
+        synchronized(GhastlyLock){
+            Ghastly.DisplayProposed = false; 
+            Ghastly.LockSelection = true;
+            Ghastly.UnselectAtoms = true;
+            Ghastly.ExcludeProposed();  
+            NICS_Scan_dialog.setVisible(false);
+            AddNewGhostAtomType.setEnabled(true);
+            NICSSCAN=false;
+        }
+    }//GEN-LAST:event_NICS_Scan_cancelButtonActionPerformed
+
+    private void NICS_Scan_dialog_clearAtomButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Scan_dialog_clearAtomButtonActionPerformed
+        // TODO add your handling code here:
+        synchronized(GhastlyLock){
+            Ghastly.DisplayProposed = false; 
+            Ghastly.LockSelection = false;
+            Ghastly.UnselectAtoms = true;
+            Ghastly.ExcludeProposed();   
+            NICS_Scan_dialog_clearAtomButton.setEnabled(false);
+            NICS_Scan_dialog_saveReturnButton.setEnabled(false);
+            NICS_Scan_dialog_saveButton.setEnabled(false);    
+        }
+    }//GEN-LAST:event_NICS_Scan_dialog_clearAtomButtonActionPerformed
+
+    private void NICS_Scan_Text_Focus_Lost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_NICS_Scan_Text_Focus_Lost
+        // pick operation based on number of points or delta, can't operate with both simultaneously
+        // and one will be adjusted with respect ot the other
+        if(NICS_Scan_ByPoints_jRadioButton.isSelected()){
+            NICS_Scan_NumberPoints_Calculate();
+        }else{
+            NICS_Scan_Delta_Calculate(); 
+        }                                  
+    }//GEN-LAST:event_NICS_Scan_Text_Focus_Lost
+
+    private void NICS_Scan_dialog_clearParameterButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Scan_dialog_clearParameterButtonActionPerformed
+        // TODO add your handling code here:
+        synchronized(GhastlyLock){    
+            Ghastly.DisplayProposed = false; 
+            Ghastly.LockSelection = false;      
+            NICS_Scan_MinRange_textField.setText("0.0");
+            NICS_Scan_MaxRange_textField.setText("0.0");
+            NICS_Scan_Delta_textField.setText("0.0");
+            NICS_Scan_NumberPoints_textField.setText("");
+            NICS_Scan_Theta_textField.setText("0.0");
+            NICS_Scan_Phi_textField.setText("0.0");               
+            Ghastly.ExcludeProposed();     
+            NICS_Scan_dialog_clearParameterButton.setEnabled(false);
+            NICS_Scan_dialog_saveReturnButton.setEnabled(false);
+            NICS_Scan_dialog_saveButton.setEnabled(false);                                                                
+        }
+    }//GEN-LAST:event_NICS_Scan_dialog_clearParameterButtonActionPerformed
+
+    private void NICS_Scan_Text_Action_Performed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Scan_Text_Action_Performed
+        // pick operation based on number of points or delta, can't operate with both simultaneously
+        // and one will be adjusted with respect ot the other
+        
+        if(NICS_Scan_ByPoints_jRadioButton.isSelected()){
+            NICS_Scan_NumberPoints_Calculate();
+        }else{
+            NICS_Scan_Delta_Calculate(); 
+        }
+        
+        
+    }//GEN-LAST:event_NICS_Scan_Text_Action_Performed
+
+    private void NICS_Scan_IntervalByPoint_Radio_Action(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Scan_IntervalByPoint_Radio_Action
+        // TODO add your handling code here:
+        if(NICS_Scan_ByPoints_jRadioButton.isSelected()){
+            NICS_Scan_Delta_textField.setEnabled(false);
+            NICS_Scan_NumberPoints_textField.setEnabled(true);
+        }
+    }//GEN-LAST:event_NICS_Scan_IntervalByPoint_Radio_Action
+
+    private void NICS_Scan_IntervelByDelta_Radio_Action(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Scan_IntervelByDelta_Radio_Action
+        // TODO add your handling code here:
+        if(NICS_Scan_ByDelta_jRadioButton.isSelected()){
+            NICS_Scan_Delta_textField.setEnabled(true);
+            NICS_Scan_NumberPoints_textField.setEnabled(false);
+        }
+    }//GEN-LAST:event_NICS_Scan_IntervelByDelta_Radio_Action
+
+    private void SaveGhostAtomActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SaveGhostAtomActionPerformed
+        String FileTypeFilter;
+                
+        
+        FileChooser.setDialogTitle("Save Ghost Atoms");
+        FileChooser.resetChoosableFileFilters();        
+        FileNameExtensionFilter TextFile = new FileNameExtensionFilter("Text File (.txt)", "txt");
+        FileNameExtensionFilter CSVFile = new FileNameExtensionFilter("Comma Separated Value File (.csv) file", "csv"); 
+        FileChooser.addChoosableFileFilter(TextFile);  
+        FileChooser.addChoosableFileFilter(CSVFile);
+        FileChooser.setAcceptAllFileFilterUsed(false);
+        
+        int result = FileChooser.showSaveDialog(this);
+	if(result == JFileChooser.CANCEL_OPTION) return;
+	try {     
+                Path NewFilePath = FileChooser.getSelectedFile().toPath();
+        
+                //File SaveFile = FileChooser.getSelectedFile();
+                //SaveFile.
+                
+                
+                if(FileChooser.getFileFilter().equals(TextFile)){
+                    FileTypeFilter = new String("txt");
+                }else if(FileChooser.getFileFilter().equals(CSVFile)){
+                    FileTypeFilter = new String("txt");
+                }else{
+                    FileTypeFilter = new String("");
+                }
+                synchronized(GhastlyLock){
+                    Ghastly.WriteGhostAtomFile(NewFilePath, FileTypeFilter);
+                }
+ 		return;
+		
+	}
+	catch (Exception e) {
+		System.out.println("Error Writing to File");
+		return;
+	}
+    }//GEN-LAST:event_SaveGhostAtomActionPerformed
+
+    private void NICS_Grid_dialog_saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Grid_dialog_saveButtonActionPerformed
+        // TODO add your handling code here:
+        synchronized(GhastlyLock){
+            TempIndex = Ghastly.AddProposed();
+            Ghastly.ExcludeProposed();
+            Ghastly.LockSelection = false;
+            Ghastly.DisplayProposed = false;
+            Ghastly.UnselectAtoms = true;
+
+            NICS_Grid_dialog_clearParameterButton.setEnabled(false);
+            NICS_Grid_dialog_clearAtomButton.setEnabled(false);
+            NICS_Grid_dialog_saveReturnButton.setEnabled(false);
+            NICS_Grid_dialog_saveButton.setEnabled(false);
+            // Add to the Ghost Atom Table
+
+            Object[] NewRow = {TempIndex, "NICS GRID", Ghastly.GetAtomsInType(TempIndex),  new Boolean(false),  new Boolean (false)};
+            DefaultTableModel model = (DefaultTableModel) GhostAtomTable.getModel();
+            model.addRow(NewRow);
+        }
+    }//GEN-LAST:event_NICS_Grid_dialog_saveButtonActionPerformed
+
+    private void NICS_Grid_dialog_saveReturnButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Grid_dialog_saveReturnButtonActionPerformed
+        // TODO add your handling code here:
+        synchronized(GhastlyLock){
+            TempIndex = Ghastly.AddProposed();
+            Ghastly.ExcludeProposed();
+            Ghastly.LockSelection = true;
+            Ghastly.DisplayProposed = false;
+            Ghastly.UnselectAtoms = true;
+
+            NICS_Grid_dialog_clearParameterButton.setEnabled(false);
+            NICS_Grid_dialog_clearAtomButton.setEnabled(false);
+            NICS_Grid_dialog_saveReturnButton.setEnabled(false);
+            NICS_Grid_dialog_saveButton.setEnabled(false);
+            // Add to the Ghost Atom Table
+
+            Object[] NewRow = {TempIndex, "NICS GRID", Ghastly.GetAtomsInType(TempIndex),  new Boolean(false),  new Boolean (false)};
+            DefaultTableModel model = (DefaultTableModel) GhostAtomTable.getModel();
+            model.addRow(NewRow);
+            AddNewGhostAtomType.setEnabled(true);
+            NICS_Grid_dialog.setVisible(false);
+            NICSGRID = false;
+        }
+    }//GEN-LAST:event_NICS_Grid_dialog_saveReturnButtonActionPerformed
+
+    private void NICS_Grid_dialog_clearParameterButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Grid_dialog_clearParameterButtonActionPerformed
+        // TODO add your handling code here:
+        synchronized(GhastlyLock){
+            Ghastly.DisplayProposed = false;
+            Ghastly.LockSelection = false;
+            NICS_Grid_XMinRange_textField.setText("0.0");
+            NICS_Grid_XMaxRange_textField.setText("0.0");
+            NICS_Grid_XDelta_textField.setText("0.0");
+            NICS_Grid_XNumberPoints_textField.setText("");
+            NICS_Grid_YMinRange_textField.setText("0.0");
+            NICS_Grid_YMaxRange_textField.setText("0.0");
+            NICS_Grid_YDelta_textField.setText("0.0");
+            NICS_Grid_YNumberPoints_textField.setText("");
+            NICS_Grid_ZMinRange_textField.setText("0.0");
+            NICS_Grid_ZMaxRange_textField.setText("0.0");
+            NICS_Grid_ZDelta_textField.setText("0.0");
+            NICS_Grid_ZNumberPoints_textField.setText("");
+            NICS_Grid_Theta_textField.setText("0.0");
+            NICS_Grid_Phi_textField.setText("0.0");
+            Ghastly.ExcludeProposed();
+            NICS_Scan_dialog_clearParameterButton.setEnabled(false);
+            NICS_Scan_dialog_saveReturnButton.setEnabled(false);
+            NICS_Scan_dialog_saveButton.setEnabled(false);
+        }
+    }//GEN-LAST:event_NICS_Grid_dialog_clearParameterButtonActionPerformed
+
+    private void NICS_Grid_cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Grid_cancelButtonActionPerformed
+        // TODO add your handling code here:
+        synchronized(GhastlyLock){
+            Ghastly.DisplayProposed = false;
+            Ghastly.LockSelection = true;
+            Ghastly.UnselectAtoms = true;
+            Ghastly.ExcludeProposed();
+            NICS_Grid_dialog.setVisible(false);
+            AddNewGhostAtomType.setEnabled(true);
+            NICSGRID=false;
+        }
+    }//GEN-LAST:event_NICS_Grid_cancelButtonActionPerformed
+
+    private void NICS_Grid_External_Grid_Text_Action_Performed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Grid_External_Grid_Text_Action_Performed
+        if(NICS_Scan_ByPoints_jRadioButton.isSelected()){
+            NICS_Grid_NumberPoints_Calculate();
+        }else{
+            NICS_Grid_Delta_Calculate();
+        }
+    }//GEN-LAST:event_NICS_Grid_External_Grid_Text_Action_Performed
+
+    private void NICS_Grid_External_Grid_Focus_Lost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_NICS_Grid_External_Grid_Focus_Lost
+        if(NICS_Scan_ByPoints_jRadioButton.isSelected()){
+            NICS_Grid_NumberPoints_Calculate();
+        }else{
+            NICS_Grid_Delta_Calculate();
+        }
+    }//GEN-LAST:event_NICS_Grid_External_Grid_Focus_Lost
+
+    private void NICS_Grid_By_Global_Coordinate_Plane_RadioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Grid_By_Global_Coordinate_Plane_RadioActionPerformed
+
+        if(NICS_Grid_By_Global_Coordinate_Plane_Radio.isSelected()){
+            // enable the center XYZ points to be selected by the user
+            NICS_Grid_XExternal_Text.setEnabled(true);
+            NICS_Grid_XExternal_Text.setEditable(true);
+            NICS_Grid_YExternal_Text.setEnabled(true);
+            NICS_Grid_YExternal_Text.setEditable(true);
+            NICS_Grid_ZExternal_Text.setEnabled(true);
+            NICS_Grid_ZExternal_Text.setEditable(true);
+            // turn off atom "Clear atom selection" button
+            NICS_Grid_dialog_clearAtomButton.setEnabled(false);
+            // gray out selection indicator
+            NICS_Grid_dialog_textField.setBackground(Color.GRAY);
+
+            // get rid of previous grid
+            synchronized(GhastlyLock){
+                Ghastly.ExcludeProposed();
+                // flag to unselect selected atoms
+                Ghastly.UnselectAtoms = true;
+                // don't allow atom selection
+                Ghastly.LockSelection = true;
+            }
+            // flag that we are working from global coordinates
+            GlobalCoordinateGrid = true;
+            // do a first pass calculation based on the user information already present
+            if(NICS_Grid_ByPoints_RadioButton.isSelected()){
+                NICS_Grid_NumberPoints_Calculate();
+            }else{
+                NICS_Grid_Delta_Calculate();
+            }
+
+        }
+    }//GEN-LAST:event_NICS_Grid_By_Global_Coordinate_Plane_RadioActionPerformed
+
+    private void NICS_Grid_By_Atom_Specified_Plane_RadioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Grid_By_Atom_Specified_Plane_RadioActionPerformed
+
+        if(NICS_Grid_By_Atom_Specified_Plane_Radio.isSelected()){
+
+            // disable the center XYZ points selected by the user
+            NICS_Grid_XExternal_Text.setEnabled(false);
+            NICS_Grid_YExternal_Text.setEnabled(false);
+            NICS_Grid_ZExternal_Text.setEnabled(false);
+            // don't need to enable the clear atom button, no grid should be selected
+            //NICS_Grid_dialog_clearAtomButton.setEnabled(true);
+
+            // flag that we are working from atomic coordinates
+            GlobalCoordinateGrid = false;
+
+            synchronized(GhastlyLock){
+                // exclude global coordinate grid proposed atoms
+                Ghastly.ExcludeProposed();
+                // flag to unselect selected atoms (which shouldn't be selected anyways
+                    Ghastly.UnselectAtoms = true;
+                    // allow atom selection
+                    Ghastly.LockSelection = false;
+                    // remove the plane automatically calculated by the
+                    Ghastly.ClearPlanePoints();
+
+                    // set plane indicatoion to red
+                    NICS_Grid_dialog_textField.setBackground(Color.RED);
+
+                }
+
+                // do a first pass calculation based on the user information already present
+                if(NICS_Grid_ByPoints_RadioButton.isSelected()){
+                    NICS_Grid_NumberPoints_Calculate();
+                }else{
+                    NICS_Grid_Delta_Calculate();
+                }
+
+            }
+    }//GEN-LAST:event_NICS_Grid_By_Atom_Specified_Plane_RadioActionPerformed
+
+    private void NICS_Grid_dialog_clearAtomButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Grid_dialog_clearAtomButtonActionPerformed
+        // TODO add your handling code here:
+        synchronized(GhastlyLock){
+            Ghastly.DisplayProposed = false;
+            Ghastly.LockSelection = false;
+            Ghastly.UnselectAtoms = true;
+            Ghastly.ExcludeProposed();
+            NICS_Grid_dialog_clearAtomButton.setEnabled(false);
+            NICS_Grid_dialog_saveReturnButton.setEnabled(false);
+            NICS_Grid_dialog_saveButton.setEnabled(false);
+        }
+    }//GEN-LAST:event_NICS_Grid_dialog_clearAtomButtonActionPerformed
+
+    private void NICS_Grid_Text_Action_Performed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Grid_Text_Action_Performed
+        // pick operation based on number of points or delta, can't operate with both simultaneously
+        // and one will be adjusted with respect ot the other
+        if(NICS_Grid_ByPoints_RadioButton.isSelected()){
+            NICS_Grid_NumberPoints_Calculate();
+        }else{
+            NICS_Grid_Delta_Calculate();
+        }
+    }//GEN-LAST:event_NICS_Grid_Text_Action_Performed
+
+    private void NICS_Grid_Text_Focus_Lost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_NICS_Grid_Text_Focus_Lost
+        // pick operation based on number of points or delta, can't operate with both simultaneously
+        // and one will be adjusted with respect ot the other
+        if(NICS_Grid_ByPoints_RadioButton.isSelected()){
+            NICS_Grid_NumberPoints_Calculate();
+        }else{
+            NICS_Grid_Delta_Calculate();
+        }
+    }//GEN-LAST:event_NICS_Grid_Text_Focus_Lost
+
+    private void NICS_Grid_ByDelta_RadioButtonNICS_Scan_IntervelByDelta_Radio_Action(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Grid_ByDelta_RadioButtonNICS_Scan_IntervelByDelta_Radio_Action
+        // TODO add your handling code here:
+        if(NICS_Grid_ByDelta_RadioButton.isSelected()){
+            NICS_Grid_XDelta_textField.setEnabled(true);
+            NICS_Grid_YDelta_textField.setEnabled(true);
+            NICS_Grid_ZDelta_textField.setEnabled(true);
+            NICS_Grid_XNumberPoints_textField.setEnabled(false);
+            NICS_Grid_YNumberPoints_textField.setEnabled(false);
+            NICS_Grid_ZNumberPoints_textField.setEnabled(false);
+        }
+    }//GEN-LAST:event_NICS_Grid_ByDelta_RadioButtonNICS_Scan_IntervelByDelta_Radio_Action
+
+    private void NICS_Grid_ByPoints_RadioButtonNICS_Scan_IntervalByPoint_Radio_Action(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Grid_ByPoints_RadioButtonNICS_Scan_IntervalByPoint_Radio_Action
+        // TODO add your handling code here:
+        if(NICS_Grid_ByPoints_RadioButton.isSelected()){
+            NICS_Grid_XDelta_textField.setEnabled(false);
+            NICS_Grid_YDelta_textField.setEnabled(false);
+            NICS_Grid_ZDelta_textField.setEnabled(false);
+            NICS_Grid_XNumberPoints_textField.setEnabled(true);
+            NICS_Grid_YNumberPoints_textField.setEnabled(true);
+            NICS_Grid_ZNumberPoints_textField.setEnabled(true);
+        }
+    }//GEN-LAST:event_NICS_Grid_ByPoints_RadioButtonNICS_Scan_IntervalByPoint_Radio_Action
+
+    private void NICS_Scan_Calculate_Release(){
+        synchronized(GhastlyLock){            
+            Ghastly.DisplayProposed = false; 
+            Ghastly.LockSelection = false;
+            Ghastly.UnselectAtoms = true;            
+            Ghastly.ExcludeProposed();       
+            NICS_Scan_dialog_clearParameterButton.setEnabled(false);
+            NICS_Scan_dialog_clearAtomButton.setEnabled(false);
+            NICS_Scan_dialog_saveReturnButton.setEnabled(false);
+            NICS_Scan_dialog_saveButton.setEnabled(false);  
+        }
+    }
+        private void NICS_Grid_Calculate_Release(){
+        synchronized(GhastlyLock){
+            Ghastly.DisplayProposed = false; 
+            Ghastly.LockSelection = false;
+            Ghastly.UnselectAtoms = true;
+            Ghastly.ExcludeProposed();       
+            NICS_Grid_dialog_clearParameterButton.setEnabled(false);
+            NICS_Grid_dialog_clearAtomButton.setEnabled(false);
+            NICS_Grid_dialog_saveReturnButton.setEnabled(false);
+            NICS_Grid_dialog_saveButton.setEnabled(false);  
+        }
+    }
+    
+        
+        
+        
+        
+        
+        
+        
+    private void NICS_Scan_NumberPoints_Calculate(){
+        String line = null;
+        float DeltaValue = 0;
+        float MinValue = 0;
+        float MaxValue = 0;
+        float TotalDelta = 0;
+        float NumberPointsInput = 0;
+        int NumberPoints = 0;
+        
+        // sanity check everything else before numberpoints calculation
+        NICS_Scan_Calculate();    
+        
+        
+        // catch number of points error early, if it's nonsense set to undefined
+        // and set delta to zero, calculate other values and return
+        line = NICS_Scan_NumberPoints_textField.getText();
+        try{NumberPointsInput = Float.parseFloat(line);}
+        catch(NumberFormatException e){
+            System.out.println("Number Points Error");            
+            NICS_Scan_NumberPoints_textField.setText("");
+            NICS_Scan_Delta_textField.setText("0.0");
+            NICS_Scan_Calculate();
+            return;
+        };
+              
+        // read in the max and min values now
+        line = NICS_Scan_MinRange_textField.getText();        
+        try{MinValue = Float.parseFloat(line);}
+        catch(NumberFormatException e){
+            // no way you get here, crash the program
+            System.out.println("Error in NICS Scan input fields interface on reading in minimum value");
+            System.out.flush();
+            assert(false);
+        };
+        
+        line = NICS_Scan_MaxRange_textField.getText();
+        try{MaxValue = Float.parseFloat(line);}
+        catch(NumberFormatException e){
+            // no way you get here, crash the program
+            System.out.println("Error in NICS Scan input fields interface on reading in maximum value");
+            System.out.flush();
+            assert(false);
+        };
+        TotalDelta = MaxValue - MinValue;
+        // if a negative number was entered, assume that positive was meant and flip the sign 
+        if(NumberPointsInput < 0){
+            NumberPointsInput = Math.abs(NumberPointsInput);
+        }
+        // convert floating point to integer assuming value after decimal point are a typo
+        NumberPoints = (int)Math.floor(NumberPointsInput);
+        // if the value is zero, set Number Point to undefined and delta to zero and move to calculation/return
+        // also needs to be more than one for a "scan"
+        if((NumberPoints == 0) || (NumberPoints == 1)){
+            NICS_Scan_NumberPoints_textField.setText("");
+            NICS_Scan_Delta_textField.setText("0.0");
+            NICS_Scan_Calculate();
+            return;
+        }        
+        // number of points is properly formatted
+        // calculate delta and input all values into the 
+        // the number of points is inclusive so subtract one for the division
+        // cannot have a single point in this calculation, this is handled above
+        
+        
+        
+        DeltaValue = TotalDelta / ((float)(NumberPoints) - 1.0f);                
+        NICS_Scan_NumberPoints_textField.setText(Integer.toString(NumberPoints));
+        NICS_Scan_Delta_textField.setText(Float.toString(DeltaValue));
+        NICS_Scan_Calculate();
+        return;
+    }
+    
+
+   
+    
+    
+    
+    
+    private void NICS_Grid_NumberPoints_Calculate(){
+        String line = null;
+        
+        float XDeltaValue = 0;
+        float XMinValue = 0;
+        float XMaxValue = 0;
+        float XTotalDelta = 0;
+        float XNumberPointsInput = 0;
+        int XNumberPoints = 0;
+        
+        
+        float YDeltaValue = 0;
+        float YMinValue = 0;
+        float YMaxValue = 0;
+        float YTotalDelta = 0;
+        float YNumberPointsInput = 0;
+        int YNumberPoints = 0;
+        
+        float ZDeltaValue = 0;
+        float ZMinValue = 0;
+        float ZMaxValue = 0;
+        float ZTotalDelta = 0;
+        float ZNumberPointsInput = 0;
+        int ZNumberPoints = 0;
+        
+        // X values
+        
+        // sanity check everything else before number points calculation
+        NICS_Grid_Calculate();    
+ 
+        // catch number of points error early, if it's nonsense set to undefined
+        // and set delta to zero, calculate other values and return
+        line = NICS_Grid_XNumberPoints_textField.getText();
+        try{XNumberPointsInput = Float.parseFloat(line);}
+        catch(NumberFormatException e){
+            System.out.println("Number Points Error");            
+            NICS_Grid_XNumberPoints_textField.setText("");
+            NICS_Grid_XDelta_textField.setText("0.0");
+            NICS_Grid_Calculate();
+            return;
+        };
+        // read in the max and min values now
+        line = NICS_Grid_XMinRange_textField.getText();        
+        try{XMinValue = Float.parseFloat(line);}
+        catch(NumberFormatException e){
+            // no way you get here, crash the program
+            System.out.println("Error in NICS Grid input fields interface on reading in minimum value");
+            System.out.flush();
+            assert(false);
+        };
+        
+        line = NICS_Grid_XMaxRange_textField.getText();
+        try{XMaxValue = Float.parseFloat(line);}
+        catch(NumberFormatException e){
+            // no way you get here, crash the program
+            System.out.println("Error in NICS Grid input fields interface on reading in maximum value");
+            System.out.flush();
+            assert(false);
+        };
+        
+        // Y values
+        
+        // catch number of points error early, if it's nonsense set to undefined
+        // and set delta to zero, calculate other values and return
+        line = NICS_Grid_YNumberPoints_textField.getText();
+        try{YNumberPointsInput = Float.parseFloat(line);}
+        catch(NumberFormatException e){
+            System.out.println("Number Points Error");            
+            NICS_Grid_YNumberPoints_textField.setText("");
+            NICS_Grid_YDelta_textField.setText("0.0");
+            NICS_Grid_Calculate();
+            return;
+        };
+        // read in the max and min values now
+        line = NICS_Grid_YMinRange_textField.getText();        
+        try{YMinValue = Float.parseFloat(line);}
+        catch(NumberFormatException e){
+            // no way you get here, crash the program
+            System.out.println("Error in NICS Grid input fields interface on reading in minimum value");
+            System.out.flush();
+            assert(false);
+        };
+        
+        line = NICS_Grid_YMaxRange_textField.getText();
+        try{YMaxValue = Float.parseFloat(line);}
+        catch(NumberFormatException e){
+            // no way you get here, crash the program
+            System.out.println("Error in NICS Grid input fields interface on reading in maximum value");
+            System.out.flush();
+            assert(false);
+        };
+        
+        // Z values
+        
+        
+        // catch number of points error early, if it's nonsense set to undefined
+        // and set delta to zero, calculate other values and return
+        line = NICS_Grid_ZNumberPoints_textField.getText();
+        try{ZNumberPointsInput = Float.parseFloat(line);}
+        catch(NumberFormatException e){
+            System.out.println("Number Points Error");            
+            NICS_Grid_ZNumberPoints_textField.setText("");
+            NICS_Grid_ZDelta_textField.setText("0.0");
+            NICS_Grid_Calculate();
+            return;
+        };
+        // read in the max and min values now
+        line = NICS_Grid_ZMinRange_textField.getText();        
+        try{ZMinValue = Float.parseFloat(line);}
+        catch(NumberFormatException e){
+            // no way you get here, crash the program
+            System.out.println("Error in NICS Grid input fields interface on reading in minimum value");
+            System.out.flush();
+            assert(false);
+        };
+        
+        line = NICS_Grid_ZMaxRange_textField.getText();
+        try{ZMaxValue = Float.parseFloat(line);}
+        catch(NumberFormatException e){
+            // no way you get here, crash the program
+            System.out.println("Error in NICS Grid input fields interface on reading in maximum value");
+            System.out.flush();
+            assert(false);
+        };
+        
+        
+        
+        XTotalDelta = XMaxValue - XMinValue;
+        YTotalDelta = YMaxValue - YMinValue;
+        ZTotalDelta = ZMaxValue - ZMinValue;
+        // if a negative number was entered, assume that positive was meant and flip the sign 
+        if(XNumberPointsInput < 0){
+            XNumberPointsInput = Math.abs(XNumberPointsInput);            
+        }
+        if(YNumberPointsInput < 0){
+            YNumberPointsInput = Math.abs(YNumberPointsInput);            
+        }
+        if(ZNumberPointsInput < 0){
+            ZNumberPointsInput = Math.abs(ZNumberPointsInput);           
+        }
+        // convert floating point to integer assuming value after decimal point are a typo
+        XNumberPoints = (int)Math.floor(XNumberPointsInput);
+        YNumberPoints = (int)Math.floor(YNumberPointsInput);
+        ZNumberPoints = (int)Math.floor(ZNumberPointsInput);
+        
+        
+        
+        
+        
+        
+        
+        // if the value is zero, set Number Point to undefined and delta to zero and move to calculation/return
+        
+        if(XNumberPoints == 0){
+            NICS_Grid_XNumberPoints_textField.setText("");
+            NICS_Grid_XDelta_textField.setText("0.0");
+            // avoid a divide by zero for the delta calculation
+        }else if(XNumberPoints == 1){
+            XDeltaValue = 0.0f;
+            NICS_Grid_XNumberPoints_textField.setText(Integer.toString(XNumberPoints));
+            NICS_Grid_XDelta_textField.setText(Float.toString(XDeltaValue));   
+        }else{        
+        // number of points is properly formatted
+        // calculate delta and input all values into the 
+        // the number of points is inclusive so subtract one for the division
+        // cannot have a single point in this calculation, this is handled above
+            XDeltaValue = XTotalDelta / ((float)(XNumberPoints) - 1.0f);                
+            NICS_Grid_XNumberPoints_textField.setText(Integer.toString(XNumberPoints));
+            NICS_Grid_XDelta_textField.setText(Float.toString(XDeltaValue));            
+        }
+        
+        // y values
+        
+        if(YNumberPoints == 0){
+            NICS_Grid_YNumberPoints_textField.setText("");
+            NICS_Grid_YDelta_textField.setText("0.0");           
+        }else if(YNumberPoints == 1){
+            YDeltaValue = 0.0f;
+            NICS_Grid_YNumberPoints_textField.setText(Integer.toString(YNumberPoints));
+            NICS_Grid_YDelta_textField.setText(Float.toString(YDeltaValue));   
+        }else{        
+        // number of points is properly formatted
+        // calculate delta and input all values into the 
+        // the number of points is inclusive so subtract one for the division
+        // cannot have a single point in this calculation, this is handled above
+            YDeltaValue = YTotalDelta / ((float)(YNumberPoints) - 1.0f);                
+            NICS_Grid_YNumberPoints_textField.setText(Integer.toString(YNumberPoints));
+            NICS_Grid_YDelta_textField.setText(Float.toString(YDeltaValue));            
+        }
+        
+        // z values
+        
+        if(ZNumberPoints == 0){
+            NICS_Grid_ZNumberPoints_textField.setText("");
+            NICS_Grid_ZDelta_textField.setText("0.0");           
+        }else if(ZNumberPoints == 1){
+            ZDeltaValue = 0.0f;
+            NICS_Grid_ZNumberPoints_textField.setText(Integer.toString(ZNumberPoints));
+            NICS_Grid_ZDelta_textField.setText(Float.toString(ZDeltaValue));   
+        }else{        
+        // number of points is properly formatted
+        // calculate delta and input all values into the 
+        // the number of points is inclusive so subtract one for the division
+        // cannot have a single point in this calculation, this is handled above
+            ZDeltaValue = ZTotalDelta / ((float)(ZNumberPoints) - 1.0f);                
+            NICS_Grid_ZNumberPoints_textField.setText(Integer.toString(ZNumberPoints));
+            NICS_Grid_ZDelta_textField.setText(Float.toString(ZDeltaValue));            
+        }
+        
+        
+        NICS_Grid_Calculate();
+         
+    }        
+     
+     
+     
+     
+     
+    
+    
+    
+     
+    
+    private void NICS_Scan_Delta_Calculate(){
+         //modify number of points to match the delta, first check delta for sanity
+        String line = null;
+        float DeltaValue = 0;
+        float MinValue = 0;
+        float MaxValue = 0;
+        float TotalDelta = 0;
+        int NumberPoints = 0;
+        float NumberPointFP = 0;
+        
+        // sanity check everything else before delta calculation
+        NICS_Scan_Calculate();    
+        
+        line = NICS_Scan_Delta_textField.getText();
+        try{DeltaValue = Float.parseFloat(line);}
+        catch(NumberFormatException e){
+            System.out.println("DeltaValue Error");
+            DeltaValue = 0.0f;
+            NICS_Scan_Delta_textField.setText("0.0");
+        };
+        
+        line = NICS_Scan_MinRange_textField.getText();        
+        try{MinValue = Float.parseFloat(line);}
+        catch(NumberFormatException e){
+            // no way you get here, crash the program
+            System.out.println("Error in NICS Scan input fields interface on reading in minimum value");
+            System.out.flush();
+            assert(false);
+        };
+        
+        line = NICS_Scan_MaxRange_textField.getText();
+        try{MaxValue = Float.parseFloat(line);}
+        catch(NumberFormatException e){
+            // no way you get here, crash the program
+            System.out.println("Error in NICS Scan input fields interface on reading in maximum value");
+            System.out.flush();
+            assert(false);
+        };
+        
+        TotalDelta = MaxValue - MinValue;
+            
+        
+        // assume that if the delta is < 0, user accidentally added a minus sign, swap it
+        if(DeltaValue < 0){
+            DeltaValue = Math.abs(DeltaValue);
+            NICS_Scan_Delta_textField.setText(Float.toString(DeltaValue));
+        }    
+        // if the delta value is set to zero, set the number of points to undefined and move on
+        // othewise the number of points is infinite
+        if(TotalDelta == 0){
+            NICS_Scan_Delta_textField.setText("0.0");
+            NICS_Scan_NumberPoints_textField.setText("");
+        }else if(DeltaValue == 0.0f){
+            NICS_Scan_NumberPoints_textField.setText("");            
+        // set delta to zero and number of points to undefined if delta is larger than total delta
+        }else if(TotalDelta < DeltaValue){
+            NICS_Scan_Delta_textField.setText("0.0");
+            NICS_Scan_NumberPoints_textField.setText("");           
+        // delta is a well defined value, run calculation    
+        }else{
+            // not 0 so calculate the number of point properly
+            //the end points are inclusive, so floor(Total / delta) + 1 = number of points 
+            //assume every other points error handling was already checked by the generic check below
+            // this has to be the case
+            NumberPointFP = TotalDelta / DeltaValue;            
+            NumberPoints = (int)Math.floor((double)NumberPointFP) + 1;                        
+            System.out.println("Delta Test, Number Points:" + NumberPoints + " in fp: " + NumberPointFP + " Delta Value: " + DeltaValue);
+            NICS_Scan_NumberPoints_textField.setText(Integer.toString(NumberPoints));           
+        }
+        NICS_Scan_Calculate();                    
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    // do delta calculations for X, Y, and Z at the same time. It's low overhead and saves code space
+    private void NICS_Grid_Delta_Calculate(){
+         //modify number of points to match the delta, first check delta for sanity
+        String line = null;
+        float ZDeltaValue = 0;
+        float ZMinValue = 0;
+        float ZMaxValue = 0;
+        float ZTotalDelta = 0;
+        int ZNumberPoints = 0;
+        float ZNumberPointFP = 0;
+        
+        float YDeltaValue = 0;
+        float YMinValue = 0;
+        float YMaxValue = 0;
+        float YTotalDelta = 0;
+        int YNumberPoints = 0;
+        float YNumberPointFP = 0;
+        
+        float XDeltaValue = 0;
+        float XMinValue = 0;
+        float XMaxValue = 0;
+        float XTotalDelta = 0;
+        int XNumberPoints = 0;
+        float XNumberPointFP = 0;
+        
+        // sanity check everything else before delta calculation
+        NICS_Grid_Calculate();  
+        
+        // check X
+        
+        line = NICS_Grid_XDelta_textField.getText();
+        try{XDeltaValue = Float.parseFloat(line);}
+        catch(NumberFormatException e){
+            System.out.println("DeltaValue Error");
+            XDeltaValue = 0.0f;
+            NICS_Grid_XDelta_textField.setText("0.0");
+        };       
+        line = NICS_Grid_XMinRange_textField.getText();        
+        try{XMinValue = Float.parseFloat(line);}
+        catch(NumberFormatException e){
+            // no way you get here, crash the program
+            System.out.println("Error in NICS Scan input fields interface on reading in minimum value");
+            System.out.flush();
+            assert(false);
+        };        
+        line = NICS_Grid_XMaxRange_textField.getText();
+        try{XMaxValue = Float.parseFloat(line);}
+        catch(NumberFormatException e){
+            // no way you get here, crash the program
+            System.out.println("Error in NICS Scan input fields interface on reading in maximum value");
+            System.out.flush();
+            assert(false);
+        };
+        
+        // check Y
+        
+        line = NICS_Grid_YDelta_textField.getText();
+        try{YDeltaValue = Float.parseFloat(line);}
+        catch(NumberFormatException e){
+            System.out.println("DeltaValue Error");
+            YDeltaValue = 0.0f;
+            NICS_Grid_YDelta_textField.setText("0.0");
+        };       
+        line = NICS_Grid_YMinRange_textField.getText();        
+        try{YMinValue = Float.parseFloat(line);}
+        catch(NumberFormatException e){
+            // no way you get here, crash the program
+            System.out.println("Error in NICS Scan input fields interface on reading in minimum value");
+            System.out.flush();
+            assert(false);
+        };        
+        line = NICS_Grid_YMaxRange_textField.getText();
+        try{YMaxValue = Float.parseFloat(line);}
+        catch(NumberFormatException e){
+            // no way you get here, crash the program
+            System.out.println("Error in NICS Scan input fields interface on reading in maximum value");
+            System.out.flush();
+            assert(false);
+        };
+        
+        // check Z
+        
+        line = NICS_Grid_ZDelta_textField.getText();
+        try{ZDeltaValue = Float.parseFloat(line);}
+        catch(NumberFormatException e){
+            System.out.println("DeltaValue Error");
+            ZDeltaValue = 0.0f;
+            NICS_Grid_ZDelta_textField.setText("0.0");
+        };        
+        line = NICS_Grid_ZMinRange_textField.getText();        
+        try{ZMinValue = Float.parseFloat(line);}
+        catch(NumberFormatException e){
+            // no way you get here, crash the program
+            System.out.println("Error in NICS Scan input fields interface on reading in minimum value");
+            System.out.flush();
+            assert(false);
+        };        
+        line = NICS_Grid_ZMaxRange_textField.getText();
+        try{ZMaxValue = Float.parseFloat(line);}
+        catch(NumberFormatException e){
+            // no way you get here, crash the program
+            System.out.println("Error in NICS Scan input fields interface on reading in maximum value");
+            System.out.flush();
+            assert(false);
+        };
+        
+        // set total delta
+        
+        
+        XTotalDelta = XMaxValue - XMinValue;
+        YTotalDelta = YMaxValue - YMinValue;
+        ZTotalDelta = ZMaxValue - ZMinValue;
+        
+        
+
+        // X calculate
+        if(XDeltaValue < 0){
+            XDeltaValue = Math.abs(XDeltaValue);
+            NICS_Grid_XDelta_textField.setText(Float.toString(XDeltaValue));
+        }   
+        // if the delta value is set to zero, set the number of points to one and move on
+        // othewise the number of points is infinite
+        if(XTotalDelta == 0){
+            NICS_Grid_XDelta_textField.setText("0.0");
+            NICS_Grid_XNumberPoints_textField.setText("1");            
+        }else if(XDeltaValue == 0.0f){
+            NICS_Grid_XNumberPoints_textField.setText("1");                                                                      
+        // set delta to zero and number of points to undefined if delta is larger than total delta
+        }else if(XTotalDelta < XDeltaValue){
+            NICS_Grid_XDelta_textField.setText("0.0");
+            NICS_Grid_XNumberPoints_textField.setText("");
+        // delta is a well defined value, run calculation    
+        }else{
+            // not 0 so calculate the number of points properly
+            //the end points are inclusive, so floor(Total / delta) + 1 = number of points 
+            //assume every other points error handling was already checked by the generic check below
+            // this has to be the case
+            XNumberPointFP = XTotalDelta / XDeltaValue;            
+            XNumberPoints = (int)Math.floor((double)XNumberPointFP) + 1;                        
+            //System.out.println("Delta Test, Number Points:" + XNumberPoints + " in fp: " + XNumberPointFP + " Delta Value: " + DeltaValue);
+            NICS_Grid_XNumberPoints_textField.setText(Integer.toString(XNumberPoints));         
+        }
+        
+        
+        // Y calculate
+        if(YDeltaValue < 0){
+            YDeltaValue = Math.abs(YDeltaValue);
+            NICS_Grid_YDelta_textField.setText(Float.toString(YDeltaValue));
+        }  
+        // if the delta value is set to zero, set the number of points to one and move on
+        // othewise the number of points is infinite
+        if(YTotalDelta == 0){
+            NICS_Grid_YDelta_textField.setText("0.0");
+            NICS_Grid_YNumberPoints_textField.setText("1");            
+        }else if(YDeltaValue == 0.0f){
+            NICS_Grid_YNumberPoints_textField.setText("1");                                                         
+        // set delta to zero and number of points to undefined if delta is larger than total delta
+        }else if(YTotalDelta < YDeltaValue){
+            NICS_Grid_YDelta_textField.setText("0.0");
+            NICS_Grid_YNumberPoints_textField.setText("");
+        // delta is a well defined value, run calculation    
+        }else{
+            // not 0 so calculate the number of point properly
+            //the end points are inclusive, so floor(Total / delta) + 1 = number of points 
+            //assume every other points error handling was already checked by the generic check below
+            // this has to be the case
+            YNumberPointFP = YTotalDelta / YDeltaValue;            
+            YNumberPoints = (int)Math.floor((double)YNumberPointFP) + 1;                        
+            //System.out.println("Delta Test, Number Points:" + YNumberPoints + " in fp: " + YNumberPointFP + " Delta Value: " + DeltaValue);
+            NICS_Grid_YNumberPoints_textField.setText(Integer.toString(YNumberPoints));           
+        }
+        
+        // Z calculate
+        // if the delta value is set to zero, set the number of points to one and move on
+        // othewise the number of points is infinite
+        if(ZDeltaValue < 0){
+            ZDeltaValue = Math.abs(ZDeltaValue);
+            NICS_Grid_ZDelta_textField.setText(Float.toString(ZDeltaValue));
+        }  
+        if(ZTotalDelta == 0){
+            NICS_Grid_ZDelta_textField.setText("0.0");
+            NICS_Grid_ZNumberPoints_textField.setText("1");            
+        }else if(ZDeltaValue == 0.0f){
+            NICS_Grid_ZNumberPoints_textField.setText("1");                                                         
+        // set delta to zero and number of points to undefined if delta is larger than total delta
+        }else if(ZTotalDelta < ZDeltaValue){
+            NICS_Grid_ZDelta_textField.setText("0.0");
+            NICS_Grid_ZNumberPoints_textField.setText("");
+        // delta is a well defined value, run calculation    
+        }else{
+            // not 0 so calculate the number of point properly
+            //the end points are inclusive, so floor(Total / delta) + 1 = number of points 
+            //assume every other points error handling was already checked by the generic check below
+            // this has to be the case
+            ZNumberPointFP = ZTotalDelta / ZDeltaValue;            
+            ZNumberPoints = (int)Math.floor((double)ZNumberPointFP) + 1;                        
+            //System.out.println("Delta Test, Number Points:" + ZNumberPoints + " in fp: " + ZNumberPointFP + " Delta Value: " + DeltaValue);
+            NICS_Grid_ZNumberPoints_textField.setText(Integer.toString(ZNumberPoints));
+        }
+        
+        // now do grid calculation
+        
+        NICS_Grid_Calculate();
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    private void NICS_Grid_Calculate(){
+        float ZMinValue = 0;
+        float ZMaxValue = 0;
+        float ZDeltaValue = 0;
+        float YMinValue = 0;
+        float YMaxValue = 0;
+        float YDeltaValue = 0;
+        float XMinValue = 0;
+        float XMaxValue = 0;
+        float XDeltaValue = 0;
+        float ThetaValue = 0;
+        float PhiValue = 0;
+        float X_Origin;
+        float Y_Origin;
+        float Z_Origin;
+        String line = null;
+        synchronized(GhastlyLock){
+            
+            // check if we are working from a global plane first
+            // and check and adjust values as needed as well as calculate the plane
+            if(GlobalCoordinateGrid){
+                // check the X, Y, and Z coordinates to make sure they
+                // are real numbers, no other restrictions on them
+                line = NICS_Grid_XExternal_Text.getText();
+                try{X_Origin = Float.parseFloat(line);}
+                catch(NumberFormatException e){
+                    System.out.println("Number Points Error");            
+                    NICS_Grid_XExternal_Text.setText("");                    
+                    return;
+                };
+                line = NICS_Grid_YExternal_Text.getText();
+                try{Y_Origin = Float.parseFloat(line);}
+                catch(NumberFormatException e){
+                    System.out.println("Number Points Error");            
+                    NICS_Grid_YExternal_Text.setText("");                    
+                    return;
+                };
+                line = NICS_Grid_ZExternal_Text.getText();
+                try{Z_Origin = Float.parseFloat(line);}
+                catch(NumberFormatException e){
+                    System.out.println("Number Points Error");            
+                    NICS_Grid_ZExternal_Text.setText("");                    
+                    return;
+                };
+                synchronized(GhastlyLock){
+                    
+                    Ghastly.GlobalCoordinatePlane(X_Origin, Y_Origin, Z_Origin);
+                }           
+            }
+          
+            // x values
+            
+            line = NICS_Grid_XMinRange_textField.getText();
+            try{XMinValue = Float.parseFloat(line);}
+            catch(NumberFormatException e){  
+                System.out.println("MinValue Error");
+                XMinValue = 0.0f;
+                NICS_Grid_XMinRange_textField.setText("0.0");
+            };            
+            line = NICS_Grid_XMaxRange_textField.getText();                        
+            try{XMaxValue = Float.parseFloat(line);}
+            catch(NumberFormatException e){
+                System.out.println("MaxValue Error");
+                XMaxValue = 0.0f;
+                NICS_Grid_XMaxRange_textField.setText("0.0");
+            }                                                     
+            line = NICS_Grid_XDelta_textField.getText();
+            try{XDeltaValue = Float.parseFloat(line);}
+            catch(NumberFormatException e){
+                // no way you get here, crash the program, this is handled in the delta value handler
+                System.out.println("Error in NICS Scan input fields interface on reading in Delta value");
+                System.out.flush();
+                assert(false);
+            };
+            
+            // y values
+            
+            line = NICS_Grid_YMinRange_textField.getText();
+            try{YMinValue = Float.parseFloat(line);}
+            catch(NumberFormatException e){  
+                System.out.println("MinValue Error");
+                YMinValue = 0.0f;
+                NICS_Grid_YMinRange_textField.setText("0.0");
+            };            
+            line = NICS_Grid_YMaxRange_textField.getText();                        
+            try{YMaxValue = Float.parseFloat(line);}
+            catch(NumberFormatException e){
+                System.out.println("MaxValue Error");
+                YMaxValue = 0.0f;
+                NICS_Grid_YMaxRange_textField.setText("0.0");
+            }                       
+            line = NICS_Grid_YDelta_textField.getText();
+            try{YDeltaValue = Float.parseFloat(line);}
+            catch(NumberFormatException e){
+                // no way you get here, crash the program, this is handled in the delta value handler
+                System.out.println("Error in NICS Scan input fields interface on reading in Delta value");
+                System.out.flush();
+                assert(false);
+            };
+            
+            // x values
+                                                
+            line = NICS_Grid_ZMinRange_textField.getText();
+            try{ZMinValue = Float.parseFloat(line);}
+            catch(NumberFormatException e){  
+                System.out.println("MinValue Error");
+                ZMinValue = 0.0f;
+                NICS_Grid_ZMinRange_textField.setText("0.0");
+            };            
+            line = NICS_Grid_ZMaxRange_textField.getText();                        
+            try{ZMaxValue = Float.parseFloat(line);}
+            catch(NumberFormatException e){
+                System.out.println("MaxValue Error");
+                ZMaxValue = 0.0f;
+                NICS_Grid_ZMaxRange_textField.setText("0.0");
+            }                       
+            line = NICS_Grid_ZDelta_textField.getText();
+            try{ZDeltaValue = Float.parseFloat(line);}
+            catch(NumberFormatException e){
+                // no way you get here, crash the program, this is handled in the delta value handler
+                System.out.println("Error in NICS Scan input fields interface on reading in Delta value");
+                System.out.flush();
+                assert(false);
+            };
+
+            // polar rotation values
+            
+            line = NICS_Grid_Theta_textField.getText();
+            try{ThetaValue = Float.parseFloat(line);}
+            catch(NumberFormatException e){
+                System.out.println("ThetaValue Error");
+                ThetaValue = 0.0f;
+                NICS_Grid_Theta_textField.setText("0.0");
+            };
+            
+            line = NICS_Grid_Phi_textField.getText();
+            try{PhiValue = Float.parseFloat(line);}
+            catch(NumberFormatException e){
+                System.out.println("PhiValue Error");
+                PhiValue = 0.0f;
+                NICS_Grid_Phi_textField.setText("0.0");
+            };
+            
+            // check and correct polar rotation values to angles < 360 
+            
+            if(ThetaValue >= 360.0){
+                ThetaValue = ThetaValue - 360.0f * ((ThetaValue / 360.0f) - (ThetaValue%360.0f));
+                NICS_Scan_Theta_textField.setText(Float.toString(ThetaValue));
+            };
+            if(ThetaValue <= -360.0){
+                ThetaValue = ThetaValue + 360.0f * ((-ThetaValue / 360.0f) + (ThetaValue%360.0f));
+                NICS_Scan_Theta_textField.setText(Float.toString(ThetaValue));
+            };
+
+            if(PhiValue >= 360.0){
+                PhiValue = PhiValue - 360.0f * ((PhiValue / 360.0f) - (PhiValue%360.0f));
+                NICS_Scan_Phi_textField.setText(Float.toString(PhiValue));
+            };
+            if(PhiValue <= -360.0){
+                PhiValue = PhiValue + 360.0f * ((-PhiValue / 360.0f) + (PhiValue%360.0f));
+                NICS_Scan_Phi_textField.setText(Float.toString(PhiValue));
+            };
+            
+            
+            // all good generate the grid if the values are right first
+            //check for the cases where there is one plane
+                    
+            //System.out.println("YMin: " + YMinValue + "YMax: " + YMaxValue + "YDelta: " + YDeltaValue + " YMax > YMin " + (YMaxValue > YMinValue));
+            
+            
+            if(((XDeltaValue == 0) &&
+                ((YDeltaValue > 0) && ((YMaxValue - YMinValue) >= YDeltaValue) && (YMaxValue > YMinValue))&&
+                ((ZDeltaValue > 0) && ((ZMaxValue - ZMinValue) >= ZDeltaValue) && (ZMaxValue > ZMinValue))) ||
+                    
+               (((XDeltaValue > 0) && ((XMaxValue - XMinValue) >= XDeltaValue) && (XMaxValue > XMinValue)) &&
+                (YDeltaValue == 0) &&
+                ((ZDeltaValue > 0) && ((ZMaxValue - ZMinValue) >= ZDeltaValue) && (ZMaxValue > ZMinValue))) ||
+                    
+               (((XDeltaValue > 0) && ((XMaxValue - XMinValue) >= XDeltaValue) && (XMaxValue > XMinValue))  &&
+                ((YDeltaValue > 0) && ((YMaxValue - YMinValue) >= YDeltaValue) && (YMaxValue > YMinValue))&&
+                (ZDeltaValue == 0)) &&
+                Ghastly.PlaneCalculated()){
+                NICS_Grid Temp = new NICS_Grid(); 
+                Temp.Define(0, Ghastly.GetPlane(), 
+                            XMinValue, XMaxValue, XDeltaValue,
+                            YMinValue, YMaxValue, YDeltaValue,
+                            ZMinValue, ZMaxValue, ZDeltaValue,
+                            ThetaValue, PhiValue);
+                Ghastly.NewProposed(Temp);
+                Ghastly.DisplayProposed = true;
+                NICS_Grid_dialog_clearParameterButton.setEnabled(true);
+                if(!GlobalCoordinateGrid)NICS_Grid_dialog_clearAtomButton.setEnabled(true);
+                NICS_Grid_dialog_saveReturnButton.setEnabled(true);
+                NICS_Grid_dialog_saveButton.setEnabled(true);
+            // cases where there are no planes              
+            }else if((XMaxValue > XMinValue)&&((XMaxValue - XMinValue) >= XDeltaValue) 
+                && XDeltaValue != 0
+                && (YMaxValue > YMinValue)&&((YMaxValue - YMinValue) >= YDeltaValue) 
+                && YDeltaValue != 0
+                && (ZMaxValue > ZMinValue)&&((ZMaxValue - ZMinValue) >= ZDeltaValue) 
+                && ZDeltaValue != 0                        
+                &&(Ghastly.PlaneCalculated()) ){                
+                
+                NICS_Grid Temp = new NICS_Grid(); 
+                Temp.Define(0, Ghastly.GetPlane(), 
+                            XMinValue, XMaxValue, XDeltaValue,
+                            YMinValue, YMaxValue, YDeltaValue,
+                            ZMinValue, ZMaxValue, ZDeltaValue,
+                            ThetaValue, PhiValue);
+                Ghastly.NewProposed(Temp);
+                Ghastly.DisplayProposed = true;
+                NICS_Grid_dialog_clearParameterButton.setEnabled(true);
+                if(!GlobalCoordinateGrid)NICS_Grid_dialog_clearAtomButton.setEnabled(true);
+                NICS_Grid_dialog_saveReturnButton.setEnabled(true);
+                NICS_Grid_dialog_saveButton.setEnabled(true);
+            // nothing to calculate, set up wrong
+            }else{                            
+                Ghastly.DisplayProposed = false; 
+                //Ghastly.LockSelection = false;
+                // don't need to unselect here
+                Ghastly.UnselectAtoms = false;
+                Ghastly.ExcludeProposed();       
+                NICS_Grid_dialog_clearParameterButton.setEnabled(false);
+                //NICS_Grid_dialog_clearAtomButton.setEnabled(false);
+                NICS_Grid_dialog_saveReturnButton.setEnabled(false);
+                NICS_Grid_dialog_saveButton.setEnabled(false);                  
+            }
+            
+        }
+        
+        
+        
+        
+    }
+    
+    
+    
+    
+    
+    
+    
+    private void NICS_Scan_Calculate(){
+        // TODO add your handling code here:
+        float MinValue = 0;
+        float MaxValue = 0;
+        float DeltaValue = 0;
+        float ThetaValue = 0;
+        float PhiValue = 0;
+        String line = null;
+        
+        
+        synchronized(GhastlyLock){
+            
+            line = NICS_Scan_MinRange_textField.getText();
+            try{MinValue = Float.parseFloat(line);}
+            catch(NumberFormatException e){  
+                System.out.println("MinValue Error");
+                MinValue = 0.0f;
+                NICS_Scan_MinRange_textField.setText("0.0");
+            };
+            
+           line = NICS_Scan_MaxRange_textField.getText();                        
+            try{MaxValue = Float.parseFloat(line);}
+            catch(NumberFormatException e){
+                System.out.println("MaxValue Error");
+                MaxValue = 0.0f;
+                NICS_Scan_MaxRange_textField.setText("0.0");
+            }
+                       
+            line = NICS_Scan_Delta_textField.getText();
+            try{DeltaValue = Float.parseFloat(line);}
+            catch(NumberFormatException e){
+                // no way you get here, crash the program, this is handled in the delta value handler
+                System.out.println("Error in NICS Scan input fields interface on reading in Delts value");
+                System.out.flush();
+                assert(false);
+            };
+          
+            line = NICS_Scan_Theta_textField.getText();
+            try{ThetaValue = Float.parseFloat(line);}
+            catch(NumberFormatException e){
+                System.out.println("ThetaValue Error");
+                ThetaValue = 0.0f;
+                NICS_Scan_Theta_textField.setText("0.0");
+            };
+            
+            line = NICS_Scan_Phi_textField.getText();
+            try{PhiValue = Float.parseFloat(line);}
+            catch(NumberFormatException e){
+                System.out.println("PhiValue Error");
+                PhiValue = 0.0f;
+                NICS_Scan_Phi_textField.setText("0.0");
+            };
+            
+            if(ThetaValue >= 360.0){
+                ThetaValue = ThetaValue - 360.0f * ((ThetaValue / 360.0f) - (ThetaValue%360.0f));
+                NICS_Scan_Theta_textField.setText(Float.toString(ThetaValue));
+            };
+            if(ThetaValue <= -360.0){
+                ThetaValue = ThetaValue + 360.0f * ((-ThetaValue / 360.0f) + (ThetaValue%360.0f));
+                NICS_Scan_Theta_textField.setText(Float.toString(ThetaValue));
+            };
+
+            if(PhiValue >= 360.0){
+                PhiValue = PhiValue - 360.0f * ((PhiValue / 360.0f) - (PhiValue%360.0f));
+                NICS_Scan_Phi_textField.setText(Float.toString(PhiValue));
+            };
+            if(PhiValue <= -360.0){
+                PhiValue = PhiValue + 360.0f * ((-PhiValue / 360.0f) + (PhiValue%360.0f));
+                NICS_Scan_Phi_textField.setText(Float.toString(PhiValue));
+            };
+
+
+            if((MaxValue > MinValue)&&((MaxValue - MinValue) >= DeltaValue)&&(Ghastly.PlaneCalculated()) && DeltaValue != 0){
+                NICS_Scan Temp = new NICS_Scan();           
+                Temp.Define(0, Ghastly.GetPlane(), MinValue, MaxValue, DeltaValue, ThetaValue, PhiValue);
+                
+                Ghastly.NewProposed(Temp);
+                Ghastly.DisplayProposed = true;
+                NICS_Scan_dialog_clearParameterButton.setEnabled(true);
+                NICS_Scan_dialog_clearAtomButton.setEnabled(true);
+                NICS_Scan_dialog_saveReturnButton.setEnabled(true);
+                NICS_Scan_dialog_saveButton.setEnabled(true);
+            }else{                            
+                Ghastly.DisplayProposed = false; 
+                // don't need to unselect here
+                Ghastly.UnselectAtoms = false;
+                Ghastly.ExcludeProposed();       
+                NICS_Scan_dialog_clearParameterButton.setEnabled(false);                
+                NICS_Scan_dialog_saveReturnButton.setEnabled(false);
+                NICS_Scan_dialog_saveButton.setEnabled(false);                  
+            }
+        }
+    }
+    
+    
+    
     /**
      * @param args the command line arguments
      */
@@ -953,11 +3557,12 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton AddNewGhostAtomType;
+    private javax.swing.JMenuItem ClearGhostAtom;
     private javax.swing.JMenuItem CloseMenu;
     private javax.swing.JComboBox<String> ComboBoxGhostType;
     private javax.swing.JMenuItem ExitMenu;
+    private javax.swing.JFileChooser FileChooser;
     private javax.swing.JMenu FileMenu;
-    private javax.swing.JFileChooser FileOpen;
     private javax.swing.JFrame GhostAtomForm;
     private javax.swing.JMenu GhostAtomMenu;
     private javax.swing.JTable GhostAtomTable;
@@ -977,16 +3582,98 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
     private javax.swing.JButton NICS1_dialog_saveReturnButton;
     private javax.swing.JTextField NICS1_dialog_textField;
     private javax.swing.JFrame NICSO_dialog;
+    private javax.swing.ButtonGroup NICS_Grid_AtomSelection_buttonGroup;
+    private javax.swing.JRadioButton NICS_Grid_ByDelta_RadioButton;
+    private javax.swing.JRadioButton NICS_Grid_ByPoints_RadioButton;
+    private javax.swing.JRadioButton NICS_Grid_By_Atom_Specified_Plane_Radio;
+    private javax.swing.JRadioButton NICS_Grid_By_Global_Coordinate_Plane_Radio;
+    private javax.swing.JTextField NICS_Grid_Delta_label;
+    private javax.swing.JTextField NICS_Grid_Delta_label1;
+    private javax.swing.JTextField NICS_Grid_Delta_label2;
+    private javax.swing.JTextField NICS_Grid_MaxRange_label;
+    private javax.swing.JTextField NICS_Grid_MaxRange_label1;
+    private javax.swing.JTextField NICS_Grid_MaxRange_label2;
+    private javax.swing.JTextField NICS_Grid_MinRange_label;
+    private javax.swing.JTextField NICS_Grid_MinRange_label1;
+    private javax.swing.JTextField NICS_Grid_MinRange_label2;
+    private javax.swing.JTextField NICS_Grid_Phi_label;
+    private javax.swing.JTextField NICS_Grid_Phi_textField;
+    private javax.swing.JTextField NICS_Grid_Points_label;
+    private javax.swing.JTextField NICS_Grid_Points_label1;
+    private javax.swing.JTextField NICS_Grid_Points_label2;
+    private javax.swing.JTextField NICS_Grid_Theta_label;
+    private javax.swing.JTextField NICS_Grid_Theta_textField;
+    private javax.swing.JTextField NICS_Grid_XDelta_textField;
+    private javax.swing.JTextField NICS_Grid_XExternal_Text;
+    private javax.swing.JTextField NICS_Grid_XMaxRange_textField;
+    private javax.swing.JTextField NICS_Grid_XMinRange_textField;
+    private javax.swing.JTextField NICS_Grid_XNumberPoints_textField;
+    private javax.swing.JTextField NICS_Grid_YDelta_textField;
+    private javax.swing.JTextField NICS_Grid_YExternal_Text;
+    private javax.swing.JTextField NICS_Grid_YMaxRange_textField;
+    private javax.swing.JTextField NICS_Grid_YMinRange_textField;
+    private javax.swing.JTextField NICS_Grid_YNumberPoints_textField;
+    private javax.swing.JTextField NICS_Grid_ZDelta_textField;
+    private javax.swing.JTextField NICS_Grid_ZExternal_Text;
+    private javax.swing.JTextField NICS_Grid_ZMaxRange_textField;
+    private javax.swing.JTextField NICS_Grid_ZMinRange_textField;
+    private javax.swing.JTextField NICS_Grid_ZNumberPoints_textField;
+    private javax.swing.ButtonGroup NICS_Grid_buttonGroup;
+    private javax.swing.JButton NICS_Grid_cancelButton;
+    private javax.swing.JFrame NICS_Grid_dialog;
+    private javax.swing.JButton NICS_Grid_dialog_clearAtomButton;
+    private javax.swing.JButton NICS_Grid_dialog_clearParameterButton;
+    private javax.swing.JButton NICS_Grid_dialog_saveButton;
+    private javax.swing.JButton NICS_Grid_dialog_saveReturnButton;
+    private javax.swing.JTextField NICS_Grid_dialog_textField;
+    private javax.swing.JRadioButton NICS_Scan_ByDelta_jRadioButton;
+    private javax.swing.JRadioButton NICS_Scan_ByPoints_jRadioButton;
+    private javax.swing.JTextField NICS_Scan_Delta_label;
+    private javax.swing.JTextField NICS_Scan_Delta_textField;
+    private javax.swing.JTextField NICS_Scan_MaxRange_label;
+    private javax.swing.JTextField NICS_Scan_MaxRange_textField;
+    private javax.swing.JTextField NICS_Scan_MinRange_label;
+    private javax.swing.JTextField NICS_Scan_MinRange_textField;
+    private javax.swing.JTextField NICS_Scan_NumberPoints_textField;
+    private javax.swing.JTextField NICS_Scan_Phi_label;
+    private javax.swing.JTextField NICS_Scan_Phi_textField;
+    private javax.swing.JTextField NICS_Scan_Theta_label;
+    private javax.swing.JTextField NICS_Scan_Theta_textField;
+    private javax.swing.ButtonGroup NICS_Scan_buttonGroup;
+    private javax.swing.JButton NICS_Scan_cancelButton;
+    private javax.swing.JFrame NICS_Scan_dialog;
+    private javax.swing.JButton NICS_Scan_dialog_clearAtomButton;
+    private javax.swing.JButton NICS_Scan_dialog_clearParameterButton;
+    private javax.swing.JButton NICS_Scan_dialog_saveButton;
+    private javax.swing.JButton NICS_Scan_dialog_saveReturnButton;
+    private javax.swing.JTextField NICS_Scan_dialog_textField;
+    private javax.swing.JMenuItem NewGhostAtom;
+    private javax.swing.JMenuItem SaveGhostAtom;
+    private javax.swing.JPanel XParameters;
+    private javax.swing.JPanel YParameters;
+    private javax.swing.JPanel ZParameters;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JMenuItem jMenuItem2;
-    private javax.swing.JMenuItem jMenuItem4;
-    private javax.swing.JMenuItem jMenuItem6;
-    private javax.swing.JMenuItem jMenuItem7;
+    private javax.swing.JOptionPane jOptionPane1;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
+    private javax.swing.JPanel jPanel5;
+    private javax.swing.JPanel jPanel6;
+    private javax.swing.JPanel jPanel7;
+    private javax.swing.JPanel jPanel8;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
+    private javax.swing.JSeparator jSeparator3;
+    private javax.swing.JSeparator jSeparator4;
     private javax.swing.JTextArea jTextAreaCompletedCalculation;
+    private javax.swing.JTextField jTextField1;
+    private javax.swing.JTextField jTextField2;
+    private javax.swing.JTextField jTextField3;
+    private javax.swing.JTextField jTextField4;
     // End of variables declaration//GEN-END:variables
 }

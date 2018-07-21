@@ -7,6 +7,7 @@ package GhostAtom;
 import MeanPlane.*;
 import java.util.ArrayList;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 /**
  *
@@ -18,11 +19,14 @@ public class NICS_1 extends GhostAtomType{
     
     // set the parameters
     public void Define(int Identity, Plane CurrentPlane, int sign){
-        SetType = new String("NICS(1)");
+        SetType = 1;
         Identifier = Identity;
         Atoms = new ArrayList();       
+        Vector3f TempAtom;
         if(sign == 1){
-            Atoms.add(new GhostAtom(CurrentPlane.CalculateTransformedCoordinates(new Vector3f(0.0f,0.0f,1.0f), true)));
+            TempAtom = CurrentPlane.CalculateTransformedCoordinates(new Vector3f(0.0f,0.0f,1.0f), true);
+            // -1.0 makes render ending use the default radius
+            Atoms.add(new GhostAtom(new Vector4f(TempAtom.x, TempAtom.y, TempAtom.z, -1.0f)));
             Atoms.get(0).Identifier = Identity;
             Atoms.get(0).AtomIndex = 1;
             NormalToPlane = CurrentPlane.GetPlaneNormal();
@@ -30,7 +34,8 @@ public class NICS_1 extends GhostAtomType{
             return;
         }     
         if(sign == -1){
-            Atoms.add(new GhostAtom(CurrentPlane.CalculateTransformedCoordinates(new Vector3f(0.0f,0.0f,-1.0f), true)));
+            TempAtom = CurrentPlane.CalculateTransformedCoordinates(new Vector3f(0.0f,0.0f,-1.0f), true);
+            Atoms.add(new GhostAtom(new Vector4f(TempAtom.x, TempAtom.y, TempAtom.z, -1.0f)));
             Atoms.get(0).Identifier = Identity;
             Atoms.get(0).AtomIndex = 1;
             NormalToPlane = CurrentPlane.GetPlaneNormal();
@@ -39,8 +44,12 @@ public class NICS_1 extends GhostAtomType{
         }      
         
         if(sign == 0){
-            Atoms.add(new GhostAtom(CurrentPlane.CalculateTransformedCoordinates(new Vector3f(0.0f,0.0f,1.0f), true)));
-            Atoms.add(new GhostAtom(CurrentPlane.CalculateTransformedCoordinates(new Vector3f(0.0f,0.0f,-1.0f), true)));
+            TempAtom = CurrentPlane.CalculateTransformedCoordinates(new Vector3f(0.0f,0.0f,1.0f), true);
+            // -1.0 makes render ending use the default radius
+            Atoms.add(new GhostAtom(new Vector4f(TempAtom.x, TempAtom.y, TempAtom.z, -1.0f)));            
+            TempAtom = CurrentPlane.CalculateTransformedCoordinates(new Vector3f(0.0f,0.0f,-1.0f), true);
+            // -1.0 makes render ending use the default radius
+            Atoms.add(new GhostAtom(new Vector4f(TempAtom.x, TempAtom.y, TempAtom.z, -1.0f)));
             Atoms.get(0).Identifier = Identity;
             Atoms.get(0).AtomIndex = 1;
             Atoms.get(1).Identifier = Identity;

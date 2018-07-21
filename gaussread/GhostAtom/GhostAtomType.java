@@ -1,31 +1,34 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package GhostAtom;
-import java.util.ArrayList;
-import org.joml.Vector3f;
-import org.joml.Vector4f;
 /**
  *
  * @author David Joshua Dibble
  */
 
+package GhostAtom;
+import java.util.ArrayList;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
+
 // this will store the different types of ghost atom types
-// including NICS[zz] NICS XY planes, NICS scan etc etc to be implemented as 
+// including NICS[zz] NICS XY planes, NICS scan, NICS Grid etc etc to be implemented as 
 // they come up.
 // this will be storded under 
-public class GhostAtomType {
-    String SetType;
+public class GhostAtomType implements Cloneable{
+    int SetType; // 0 = NICS(0) 1 = NICS(1) 2 = NICS(Scan) 3 = NICS(GRID)
     int Identifier;
+    
+    
     ArrayList<GhostAtom> Atoms;
     
     // usefull for giving out information about the plane the atoms are on
     Vector3f NormalToPlane;
     Vector4f PlaneEquation;
     
-    
+    // function to allow cloning of the data
+    public Object clone() throws
+                   CloneNotSupportedException
+    {
+        return super.clone();
+    }
     
     // UI to keep track of if the user has highlighted this particular set for
     //further examination
@@ -33,11 +36,12 @@ public class GhostAtomType {
     int HighlightLevel = 0;
     
     public ArrayList<GhostAtom> GetAtomList(){
-    
-    return Atoms;
+        return Atoms;
     }
     
-    
+    public int GhostSetType(){
+        return SetType;
+    } 
     
     public boolean AtomMatches(float x, float y, float z){
         
@@ -94,5 +98,6 @@ public class GhostAtomType {
         
     }
     
+   
     
 }

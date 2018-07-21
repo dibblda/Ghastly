@@ -10,7 +10,7 @@ public class GaussFile{
 
 // File Parameters and buffers
 
-RandomAccessFile gaussInputFile = null;
+RandomAccessFile InputFile = null;
 long randomAccessBeginning = 0;
 long randomAccessCheckpoint = 0;
 
@@ -72,9 +72,12 @@ int [] AtomicValenceMax = {0,1,0,1,2,4,4,4,3,1,0,
 boolean InputOrientationRead = false;
 double [][] InputAtomicCoordinates = null;
 double [][] interatomicDistanceArray = null;
+// for normalized (centered) display of molecule. Store the displacement from the original for later coordinate calculations
+double [] normalizationVector = null;
 
 
-// atomic radii table indexed by atomic number.  many are unfilled 
+
+// atomic radii table indexed by atomic number.  many are unfilled. table size 97 
 double [] AtomicRadii = {-100,0.35,-100,0.85,0.56,0.39,0.73,0.66,0.69,0.68,-100,
                          1.10,0.81,0.64,1.11,1.04,0.96,0.95,-100,1.43,1.08,
                          0.84,0.77,0.74,0.72,0.84,0.70,0.79,0.79,0.82,0.83,
@@ -83,7 +86,8 @@ double [] AtomicRadii = {-100,0.35,-100,0.85,0.56,0.39,0.73,0.66,0.69,0.68,-100,
                          -100,-100,1.26,-100,-100,1.41,-100,-100,-100,-100,
                          -100,-100,-100,-100,-100,-100,-100,-100,-100,-100,
                          -100,-100,-100,-100,-100,-100,-100,0.89,1.42,1.26,
-                         1.55,1.26,-100,-100,-100,-100,-100,-100,-100,-100};
+                         1.55,1.26,-100,-100,-100,-100,-100,-100,-100,-100,
+                         -100,-100,-100,-100,-100,-100};
 
 // up to AN 96 bond radii based on statistical analysis of CSD as presented by wikipedia
 // this isn't currently in use in the program but may be in the future
@@ -99,7 +103,7 @@ double [] CovalentRadii = {0.00,0.32,0.28,1.29,0.96,0.84,0.76,0.71,0.66,0.57,0.5
                            1.46,1.47,1.48,1.40,1.50,1.50,2.60,2.21,2.15,2.07,
                            2.00,1.97,1.90,1.87,1.81,1.69};
 
- // atomic symbols listed by atomic number for lookup
+ // atomic symbols listed by atomic number for lookup table size 97
     static public String [] AtomicSymbol = {"Bq","H","He","Li","Be","B","C","N","O","F","Ne",
                                               "Na","Mg","Al","Si","P","S","Cl","Ar","K","Ca",
                                               "Sc","Ti","V","Cr","Mn","Fe","Co","Ni","Cu","Zn",
@@ -113,24 +117,24 @@ double [] CovalentRadii = {0.00,0.32,0.28,1.29,0.96,0.84,0.76,0.71,0.66,0.57,0.5
 
 //Creator
 public GaussFile (File input_file, String filetype) throws IOException {
-	int file_lines = 0;
-       
-        // chaeck if the file type is a gaussian com file, then start reading in
+	
+        //System.out.println("File name: " + filetype + "\n");
+        // check if the file type is a gaussian com file, then start reading in
         if(input_file.getName().endsWith(".com")){
-            System.out.println("Gaussian com File\n");
+            
             try{
                     //open file, and get beggining pointer
-                    gaussInputFile = new RandomAccessFile(input_file, "r");
+                    InputFile = new RandomAccessFile(input_file, "r");
 
-                    randomAccessBeginning = gaussInputFile.getFilePointer();
+                    randomAccessBeginning = InputFile.getFilePointer();
 
                     // reset file to beginning 
-                    gaussInputFile.seek(randomAccessBeginning);
+                    InputFile.seek(randomAccessBeginning);
                     // read the file coordinates
                      RecordComFileCoordinates();
                
                     // calculate bonding based on the XYX coordinates
-                    GaussCoordinateBondDetermination();
+                    CoordinateBondDetermination();
                    
             }
 
@@ -138,16 +142,177 @@ public GaussFile (File input_file, String filetype) throws IOException {
                         System.out.println("Whoopsie, where's the file? " + e);
             }
         }
-        // if the file is a gaussian log file
-        // this section requires a substantial amount of work to fix it up
-        // the old log file format is deprecated
-        if(input_file.getName().endsWith(".log")){
-            System.out.println("log File not implemented \n");             
-        
-            // not implemented in this code version
-            
-          
+        // check if the file type is a xyz file, then start reading in
+        if(input_file.getName().endsWith(".xyz")){
+           
+            try{
+                    //open file, and get beggining pointer
+                    InputFile = new RandomAccessFile(input_file, "r");
+
+                    randomAccessBeginning = InputFile.getFilePointer();
+
+                    // reset file to beginning 
+                    InputFile.seek(randomAccessBeginning);
+                    // read the file coordinates
+                     RecordXYZFileCoordinates();
+               
+                    // calculate bonding based on the XYX coordinates
+                    CoordinateBondDetermination();
+                   
+            }
+
+            catch(FileNotFoundException e){
+                        System.out.println("Whoopsie, where's the file? " + e);
+            }
         }
+        
+        if(input_file.getName().endsWith(".mol")){
+           
+            try{
+                    //open file, and get beggining pointer
+                    InputFile = new RandomAccessFile(input_file, "r");
+
+                    randomAccessBeginning = InputFile.getFilePointer();
+
+                    // reset file to beginning 
+                    InputFile.seek(randomAccessBeginning);
+                    // read the file coordinates
+                     RecordMOLFileCoordinates();
+               
+                    // calculate bonding based on the XYX coordinates
+                    CoordinateBondDetermination();
+                   
+            }
+
+            catch(FileNotFoundException e){
+                        System.out.println("Whoopsie, where's the file? " + e);
+            }
+        }
+        
+        if(input_file.getName().endsWith(".mol2")){
+           
+            try{
+                    //open file, and get beggining pointer
+                    InputFile = new RandomAccessFile(input_file, "r");
+
+                    randomAccessBeginning = InputFile.getFilePointer();
+
+                    // reset file to beginning 
+                    InputFile.seek(randomAccessBeginning);
+                    // read the file coordinates
+                     RecordMOL2FileCoordinates();
+               
+                    // calculate bonding based on the XYX coordinates
+                    CoordinateBondDetermination();
+                   
+            }
+
+            catch(FileNotFoundException e){
+                        System.out.println("Whoopsie, where's the file? " + e);
+            }
+        }
+         if(input_file.getName().endsWith(".pdb")){
+           
+            try{
+                    //open file, and get beggining pointer
+                    InputFile = new RandomAccessFile(input_file, "r");
+
+                    randomAccessBeginning = InputFile.getFilePointer();
+
+                    // reset file to beginning 
+                    InputFile.seek(randomAccessBeginning);
+                    // read the file coordinates
+                     RecordPDBFileCoordinates();
+               
+                    // calculate bonding based on the XYX coordinates
+                    CoordinateBondDetermination();
+                   
+            }
+
+            catch(FileNotFoundException e){
+                        System.out.println("Whoopsie, where's the file? " + e);
+            }
+        }
+        
+       
+}
+
+
+private void RecordPDBFileCoordinates() throws IOException {
+    String line = "This line is blank";
+    
+    int A_itor, B_itor, itor;
+    boolean breakloop = false;
+    
+    // fast forward to the atom specification section 
+    while(!(line.substring(0,6).trim().contentEquals("ATOM")||line.substring(0,6).trim().contentEquals("HETATM"))){
+        line = InputFile.readLine();        
+    };
+    //you've hit the first atom specification
+    numberAtoms++;
+    //count the remaining
+    line = InputFile.readLine(); 
+    if(line.length() < 6)breakloop = true;
+    while((line.substring(0,6).trim().contentEquals("ATOM")||line.substring(0,6).trim().contentEquals("HETATM"))&&!breakloop){
+              
+        numberAtoms++;
+        line = InputFile.readLine();  
+        if(line.length() < 6)break;
+        if(line == null)break;
+    };
+    
+
+    // allocate memory for storing the atom information 
+
+     //allocate memory to store bond connectivity and label
+    BondMatrix = new int [numberAtoms + 1][numberAtoms + 1];
+    for(A_itor = 1; A_itor < numberAtoms + 1; A_itor++){
+        for(B_itor = 1; B_itor < numberAtoms + 1; B_itor++){
+                BondMatrix[A_itor][B_itor] = 0;
+        }
+    }
+    // allocate memory for input coordinate matrix
+
+    InputAtomicCoordinates = new double [numberAtoms + 1][4];
+
+    // allocate memory to store the atom labels
+    AtomLabel = new String[numberAtoms + 1];
+    // allocate space  to store the nume of bonds to each atom in the matrix
+    AtomValence = new int [numberAtoms + 1];
+    
+    
+    // return to file beginning and then forward to atom specification section
+    // read in the first atom
+    InputFile.seek(randomAccessBeginning);
+    line = InputFile.readLine();
+    while(!(line.substring(0,6).trim().contentEquals("ATOM")||line.substring(0,6).trim().contentEquals("HETATM"))){
+        line = InputFile.readLine();                  
+    };    
+    
+    AtomLabel[1] =  new String(line.substring(76,78).trim());
+    //enter atomic number and coordinates            
+    InputAtomicCoordinates[1][0] = AtomicNumberLookup(line.substring(76,78).trim());
+    InputAtomicCoordinates[1][1] = Double.parseDouble(line.substring(30,38).trim());
+    InputAtomicCoordinates[1][2] = Double.parseDouble(line.substring(38,47).trim());
+    InputAtomicCoordinates[1][3] = Double.parseDouble(line.substring(46,55).trim());
+    
+    
+    //now loop though and read in the subsequent atoms
+    for(itor = 2; itor <= numberAtoms; itor++){      
+        //line containing an atom specification should have (atom #) (atom) X Y Z      
+        line = InputFile.readLine();                
+        AtomLabel[itor] =  new String(line.substring(76,78).trim());
+        //enter atomic number and coordinates            
+        InputAtomicCoordinates[itor][0] = AtomicNumberLookup(line.substring(76,78).trim());
+        InputAtomicCoordinates[itor][1] = Double.parseDouble(line.substring(30,38).trim());
+        InputAtomicCoordinates[itor][2] = Double.parseDouble(line.substring(38,47).trim());
+        InputAtomicCoordinates[itor][3] = Double.parseDouble(line.substring(46,55).trim());            
+    };
+
+    
+    // flip a boolean letting rest of code know we are all good
+    InputOrientationRead = true;
+    
 }
 
 
@@ -155,9 +320,280 @@ public GaussFile (File input_file, String filetype) throws IOException {
 
 
 
+private void RecordMOL2FileCoordinates() throws IOException {
+    String line = null;
+    int A_itor, B_itor, itor;
+    
+        
+    // fast forward to the molecule specification section 
+    while(!InputFile.readLine().contentEquals("@<TRIPOS>MOLECULE"));
+    // read the number of atoms in the molecule in the molecule specification section
+    InputFile.readLine();
+    line = InputFile.readLine();
+    line.replace("\\t","\\s");
+    // break up into the individual components
+    String[] tokens = line.trim().split("\\s+");
+    // read the number of atoms
+    numberAtoms = Integer.parseInt(tokens[0]);
+
+   
+    
+    // allocate memory for storing the atom information 
+
+     //allocate memory to store bond connectivity and label
+    BondMatrix = new int [numberAtoms + 1][numberAtoms + 1];
+    for(A_itor = 1; A_itor < numberAtoms + 1; A_itor++){
+        for(B_itor = 1; B_itor < numberAtoms + 1; B_itor++){
+                BondMatrix[A_itor][B_itor] = 0;
+        }
+    }
+    // allocate memory for input coordinate matrix
+
+    InputAtomicCoordinates = new double [numberAtoms + 1][4];
+
+    // allocate memory to store the atom labels
+    AtomLabel = new String[numberAtoms + 1];
+    // allocate space  to store the nume of bonds to each atom in the matrix
+    AtomValence = new int [numberAtoms + 1];
+    
+    
+    // return to file beginning and then forward to atom specification section
+    InputFile.seek(randomAccessBeginning);
+    while(!InputFile.readLine().contentEquals("@<TRIPOS>ATOM"));
+    
+    // read in the atoms
+        for(itor = 1; itor <= numberAtoms; itor++){      
+            //line containing an atom specification should have (atom #) (atom) X Y Z      
+            line = InputFile.readLine();
+             
+                
+            // swap out tabs with spaces if they exist
+            line.replace("\\t","\\s");
+            // break up into the individual components
+            tokens = line.trim().split("\\s+");
+ 
+            AtomLabel[itor] =  new String(tokens[1]);
+            //enter atomic number and coordinates            
+            InputAtomicCoordinates[itor][0] = AtomicNumberLookup(tokens[1]);
+            InputAtomicCoordinates[itor][1] = Double.parseDouble(tokens[2]);
+            InputAtomicCoordinates[itor][2] = Double.parseDouble(tokens[3]);
+            InputAtomicCoordinates[itor][3] = Double.parseDouble(tokens[4]);                                                                                              
+           
+        }
+  
+        // flip a boolean letting rest of code know we are all good
+        InputOrientationRead = true;
+        //
+        // Although bonding is available in a mol2 file we are ignoring it. my code handles the bonding guesses well enough.
+        //
+    
+    
+    
+}
+
+
+private void RecordMOLFileCoordinates() throws IOException {
+    String line = null;
+    int A_itor, B_itor, itor;
+        
+        // first three lines are irrelevent
+        InputFile.readLine();
+        InputFile.readLine();
+        InputFile.readLine();
+        //InputFile.readLine();
+        // now you should be at the header portion, the first number is the number of atoms
+        line = InputFile.readLine();
+        // swap out tabs with spaces if they exist
+        line.replace("\\t","\\s");
+        // break up into the individual components
+        String[] tokens = line.trim().split("\\s+");
+        // read the number of atoms
+        numberAtoms = Integer.parseInt(tokens[0]);
+      
+        
+        
+        // allocate memory for storing the atom information 
+                 
+         //allocate memory to store bond connectivity and label
+        BondMatrix = new int [numberAtoms + 1][numberAtoms + 1];
+        for(A_itor = 1; A_itor < numberAtoms + 1; A_itor++){
+                for(B_itor = 1; B_itor < numberAtoms + 1; B_itor++){
+                        BondMatrix[A_itor][B_itor] = 0;
+                }
+        }
+        // allocate memory for input coordinate matrix
+        
+        InputAtomicCoordinates = new double [numberAtoms + 1][4];
+        
+        // allocate memory to store the atom labels
+        AtomLabel = new String[numberAtoms + 1];
+        // allocate space  to store the nume of bonds to each atom in the matrix
+        AtomValence = new int [numberAtoms + 1];
+    
+        
+        // now loop though from first atom to the last, entering in the atom label, number, and coordinates 
+
+        for(itor = 1; itor <= numberAtoms; itor++){      
+            //line containing an atom specification should have X Y Z (atom)             
+            line = InputFile.readLine();
+             
+                
+            // swap out tabs with spaces if they exist
+            line.replace("\\t","\\s");
+            // break up into the individual components
+            tokens = line.trim().split("\\s+");
+ 
+            AtomLabel[itor] =  new String(tokens[3]);
+            //enter atomic number and coordinates            
+            InputAtomicCoordinates[itor][0] = AtomicNumberLookup(tokens[3]);
+            InputAtomicCoordinates[itor][1] = Double.parseDouble(tokens[0]);
+            InputAtomicCoordinates[itor][2] = Double.parseDouble(tokens[1]);
+            InputAtomicCoordinates[itor][3] = Double.parseDouble(tokens[2]);                                                                                              
+           
+        }
+  
+        // flip a boolean letting rest of code know we are all good
+        InputOrientationRead = true;
+        //
+        // Although bonding is available in a mol file we are ignoring it. my code handles the bonding guesses well enough.
+        //
+}
+
+
+
+// read in xyz file format from the file pointer
+private void RecordXYZFileCoordinates() throws IOException {
+    String line = null;
+    boolean AtomCountFinished = false;
+    double atomic_number;
+    int A_itor, B_itor, itor;
+    
+
+
+
+         
+        // assume first two lines are probably number of atoms and then a comment, throw them out
+        InputFile.readLine();
+        InputFile.readLine();
+        // now you should be just before the first line
+        randomAccessCheckpoint = InputFile.getFilePointer();
+        
+        // count the number of atoms in the file past this
+         while(!AtomCountFinished){
+            line = InputFile.readLine();
+            if(!line.isEmpty()){
+                numberAtoms += 1;                
+                
+            }else{
+                AtomCountFinished = true;
+            }
+            //System.out.println("Made it here" + numberAtoms);
+         }
+         
+         
+         
+        // allocate memory for storing the atom information 
+                 
+         //allocate memory to store bond connectivity and label
+        BondMatrix = new int [numberAtoms + 1][numberAtoms + 1];
+        for(A_itor = 1; A_itor < numberAtoms + 1; A_itor++){
+                for(B_itor = 1; B_itor < numberAtoms + 1; B_itor++){
+                        BondMatrix[A_itor][B_itor] = 0;
+                }
+        }
+        // allocate memory for input coordinate matrix
+        
+        InputAtomicCoordinates = new double [numberAtoms + 1][4];
+        
+        // allocate memory to store the atom labels
+        AtomLabel = new String[numberAtoms + 1];
+        // allocate space  to store the nume of bonds to each atom in the matrix
+        AtomValence = new int [numberAtoms + 1];
+
+        
+        
+        
+        
+
+        // now loop though from first atom to the last, entering in the atom label, number, and coordinates 
+        // go back to first line
+       
+        InputFile.seek(randomAccessCheckpoint);
+        
+      
+        
+        
+        //reenter the first line string
+    
+        for(itor = 1; itor <= numberAtoms; itor++){      
+            //line containing an atom specification should have (atom) X Y Z so four columns             
+            line = InputFile.readLine();
+             
+                
+            // swap out tabs with spaces if they exist
+            line.replace("\\t","\\s");
+            // break up into the individual components
+            String[] tokens = line.trim().split("\\s+");
+            // there should only be four per line
+            if(tokens.length == 4){
+                 
+                // if it's an tomic symbol read it otherwise it is an atomic number?
+                if(IsAtomicSymbol(tokens[0])){
+                    
+                    AtomLabel[itor] =  new String(tokens[0]);
+                    //enter atomic number and coordinates            
+                    InputAtomicCoordinates[itor][0] = AtomicNumberLookup(AtomLabel[itor]);
+                    InputAtomicCoordinates[itor][1] = Double.parseDouble(tokens[1]);
+                    InputAtomicCoordinates[itor][2] = Double.parseDouble(tokens[2]);
+                    InputAtomicCoordinates[itor][3] = Double.parseDouble(tokens[3]);                                                                                              
+                }else{
+                    atomic_number = Integer.getInteger(tokens[0]);
+                    if(atomic_number > 96) throw new IOException("File contains atom with atomic number > 96, probably an error");
+                    InputAtomicCoordinates[itor][0] = atomic_number;
+                    InputAtomicCoordinates[itor][1] = Double.parseDouble(tokens[1]);
+                    InputAtomicCoordinates[itor][2] = Double.parseDouble(tokens[2]);
+                    InputAtomicCoordinates[itor][3] = Double.parseDouble(tokens[3]); 
+                }
+        
+            
+            }else{
+                throw new IOException("File is improperly formatted. It does not contain a complete atom coordinate description");
+            }
+            
+        }
+        
+        
+        
+        
+        
+        
+         
+          
+        
+        
+        // flip a boolean letting rest of code know we are all good
+        InputOrientationRead = true;
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+ 
+}
+
+
+
 /*
-coordinate input scan fro a com file is below.
-first, second teh file and determine the number of atoms, then allocate memory based on th is (also get the molecular charge)
+coordinate input scan from a com file is below.
+first, second the file and determine the number of atoms, then allocate memory based on th is (also get the molecular charge)
 second, rescan, recording the atoms and coordinates this time
 */
 
@@ -174,13 +610,13 @@ private void RecordComFileCoordinates(){
         //advance to the atom coordinate matrix
         //reading lined until it is ready to be read in (Three past teh job specification lione
         // the charge and multuiplicity starts then on to the atom coordinate line
-        line = gaussInputFile.readLine();
+        line = InputFile.readLine();
         //get past the headers and route section
-        while(line.startsWith("$")||line.startsWith("%")||line.startsWith("#"))line = gaussInputFile.readLine();
+        while(line.startsWith("$")||line.startsWith("%")||line.startsWith("#"))line = InputFile.readLine();
         //read three more lines to get to the charge / multiplicity
-        gaussInputFile.readLine();
-        gaussInputFile.readLine();
-        line = gaussInputFile.readLine();
+        InputFile.readLine();
+        InputFile.readLine();
+        line = InputFile.readLine();
         //store the charge and multiplicity               
         String[] tokens = line.split("\\s+");
         moleculeCharge = Float.parseFloat(tokens[0]);
@@ -190,9 +626,9 @@ private void RecordComFileCoordinates(){
         
         
         //first line of the atom and coordinate section
-        line = gaussInputFile.readLine();
+        line = InputFile.readLine();
         //mark its location
-        randomAccessCheckpoint = gaussInputFile.getFilePointer();
+        randomAccessCheckpoint = InputFile.getFilePointer();
         //duplicate the data
         firstline = line;
         //up atom count if not blank
@@ -203,7 +639,7 @@ private void RecordComFileCoordinates(){
         }
         //now loop the the rest until a blank line is encountered
         while(!AtomCountFinished){
-            line = gaussInputFile.readLine();
+            line = InputFile.readLine();
             if(!line.isEmpty()){
                 numberAtoms += 1;
             }else{
@@ -234,7 +670,7 @@ private void RecordComFileCoordinates(){
 
         // now loop though from first atom to the last, entering in the atom label, number, and coordinates 
         // go back to first line
-        gaussInputFile.seek(randomAccessCheckpoint);
+        InputFile.seek(randomAccessCheckpoint);
         //reenter the first line string
         line = firstline; 
         for(itor = 1; itor <= numberAtoms; itor++){                      
@@ -247,7 +683,7 @@ private void RecordComFileCoordinates(){
             InputAtomicCoordinates[itor][2] = Double.parseDouble(tokens[3]);
             InputAtomicCoordinates[itor][3] = Double.parseDouble(tokens[4]);
             //get next line
-            line = gaussInputFile.readLine();
+            line = InputFile.readLine();
         }
         
         // flip a boolean letting rest of code know we are all good
@@ -263,7 +699,7 @@ private void RecordComFileCoordinates(){
 }
 
 
-
+// get the atomic number of the symbol
 private double AtomicNumberLookup(String Label){
     double atomic_number = 0;
     int itor = 0;
@@ -276,7 +712,19 @@ private double AtomicNumberLookup(String Label){
     return atomic_number;       
 }
 
-private void GaussCoordinateBondDetermination(){
+//determine if the string is an atomic number
+private boolean IsAtomicSymbol(String Label){
+    int itor;
+    for(itor = 0; itor < AtomicSymbol.length; itor++){
+        if(AtomicSymbol[itor].equals(Label) == true){            
+            return true;
+        }
+    }
+    return false;
+}
+
+
+private void CoordinateBondDetermination(){
 	double offsetValue = 0;
 	double xSquare = 0, ySquare = 0, zSquare = 0, sumSquare = 0;
 	double interatomicDistance = 0;
@@ -304,7 +752,7 @@ private void GaussCoordinateBondDetermination(){
 			sumSquare = xSquare + ySquare + zSquare;
 			interatomicDistance = Math.sqrt(sumSquare);
 
-			// parameters for range of acceptable donbing values
+			// parameters for range of acceptable bonding values
 			if(interatomicDistance <= 1.5)
 				offsetMultiplier = 0.15;
 			if((interatomicDistance > 1.5) && (interatomicDistance <= 1.9))

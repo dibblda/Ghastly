@@ -1,63 +1,68 @@
 package OpenGLEngine;
 
-import java.util.Arrays;
-
-        import org.lwjgl.LWJGLException;
+import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
 import org.lwjgl.util.glu.Sphere;
 import org.lwjgl.util.glu.Cylinder;
-
 // required for lighting
 import java.nio.FloatBuffer;
 import org.lwjgl.BufferUtils;
 // required for mouse input
 import org.lwjgl.input.Mouse;
 // required for picking buffer
-
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector2f;
 import org.joml.camera.ArcBallCamera;
-
 import static org.lwjgl.opengl.GL11.GL_MODELVIEW;
 import static org.lwjgl.opengl.GL11.GL_PROJECTION;
 import static org.lwjgl.opengl.GL11.glMatrixMode;
 import org.lwjgl.util.vector.Vector4f;
-
 import GhostAtom.*;
 //import MeanPlane.*;
 import java.util.ArrayList;
+// divided up rendering functions and variable into additional static classes for
+
+import OpenGLEngine.RenderSettings;
+import OpenGLEngine.RenderGrid;
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 public class MoleculeDisplay {
 
     
 // parameters for obtaining the data from the read inb file for display
+// variable for putting ghost atoms into a display list for quick rendering 
 //------------------------------------------------------------------------------    
 private boolean moleculeGeometryLoaded = false;
 private double [][] internalAtomArray = null;
 private int [][] internalBondArray = null;
 private float [][][] internalBondGeometry = null;
 GhostAtomSet Ghastly = null;
+Object GhastlyLock;
+// for opengl display list
+Integer ListIndex = 0;
+
 //------------------------------------------------------------------------------
 
-
-
-
- 
 // display and lighting parameters
 //------------------------------------------------------------------------------
 private DisplayMode displayMode;
 private boolean fullscreen = false;
-private float shininess = 50.0f;
-private float ambientLightData[] = { 0.2f, 0.2f, 0.2f, 1.0f };
-private float diffuseLightData[] = { 0.8f, 0.8f, 0.8f, 1.0f };
-private float specularLightData[] = { 0.30f, 0.30f, 0.30f, 1.0f };
-private float positionLightData[] = { 30.0f, 30.0f, 20.0f, 1.0f }; 
-private float matSpecularData[] = { 1.0f, 1.0f, 1.0f, 1.0f }; 
 private FloatBuffer ambientLight;
 private FloatBuffer diffuseLight; 
 private FloatBuffer specularLight; 
@@ -65,32 +70,19 @@ private FloatBuffer positionLight;
 private FloatBuffer matSpecular;
 //------------------------------------------------------------------------------
 
-
-
-
-
 //window parameters and camera FOV
 //------------------------------------------------------------------------------
 // variable for the opengl window width and height, field of view
 float windowWidth, windowHeight;
-// field of view (in radians) (~45 degrees)
-float fieldOfView = 0.785f;
+
 //------------------------------------------------------------------------------
-
-
-
-
-
 
 // for picking algorithm based on ray tracing and 
 // atom selection / plane variables
 //------------------------------------------------------------------------------
 Vector3f RayOrigin = new Vector3f();
 Vector3f RayDirection = new Vector3f();
-//maximum value for the parametric equation defining a line to get 
-//the end and beginning points for a picker ray
-// make large to ensure that it always crosses atom space (1000 angstroms here)
-float ParametricTValue = 1000.0f;
+
 // variables for UI
 
 // quick note, the input atomic coordinates start at 1 (0 is null) and have 
@@ -98,21 +90,8 @@ float ParametricTValue = 1000.0f;
 private int [] atomSelectedArray = null;
 // storage of coordinates for the extra highlighted atom
 Vector3f HighlightedAtom = null;
-//int NumberAtomsSelected = 0;
-//private int [] atomOrderSelectedArray = null;
-//private int [] atomHighlightedArrary = null;
-// for generating a plane from selected atoms
-//Plane SelectionPlane = new Plane();
+
 //------------------------------------------------------------------------------
-
-
-
-
-// variable to identify ghost atoms, here is an array list for fliexibility
-//------------------------------------------------------------------------------
- //private ArrayList<GhostAtom> GhostAtomList = new ArrayList();
-//------------------------------------------------------------------------------
-
 
 // for arc ball camera, rotation of the model + zoom
 //------------------------------------------------------------------------------
@@ -121,13 +100,8 @@ Vector3f HighlightedAtom = null;
  FloatBuffer fb = BufferUtils.createFloatBuffer(16);
  //FloatBuffer Pickerfb = BufferUtils.createFloatBuffer(16);
  ArcBallCamera cam = new ArcBallCamera();
- float zoom = 20;
 //------------------------------------------------------------------------------
  
-
- 
- 
-
 // Variables for moving the model around in a plane parallel to the screen
 //------------------------------------------------------------------------------
  boolean DragAtomSelected = false; 
@@ -144,35 +118,10 @@ Vector3f MousePlaneCoordinates = new Vector3f(0, 0, 0);
 Vector3f DragRayVector = new Vector3f(0, 0, 0);
 //------------------------------------------------------------------------------
 
-
-
-
 // variables for the size of atoms, scaling, and colors
 //------------------------------------------------------------------------------
-private int colorMapArraySize = 97;
-// covalent radii used to draw spheres for each AN
-private double [] CovalentRadii = {0.00,0.32,0.28,1.29,0.96,0.84,0.76,0.71,0.66,0.57,0.58,
-                                   1.67,1.42,1.21,1.11,1.07,1.05,1.02,1.06,2.03,1.76,
-                                   1.71,1.61,1.54,1.40,1.40,1.32,1.26,1.24,1.32,1.22,
-                                   1.22,1.20,1.19,1.20,1.20,1.16,2.21,1.95,1.91,1.76,
-                                   1.65,1.55,1.48,1.47,1.43,1.40,1.46,1.45,1.43,1.39,
-                                   1.40,1.38,1.39,1.41,2.44,2.15,2.08,2.05,2.04,2.02,
-                                   1.99,1.99,1.99,1.97,1.95,1.93,1.93,1.90,1.90,1.88,
-                                   1.88,1.75,1.71,1.63,1.52,1.44,1.42,1.37,1.37,1.33,
-                                   1.46,1.47,1.48,1.40,1.50,1.50,2.60,2.21,2.15,2.07,
-                                   2.00,1.97,1.90,1.87,1.81,1.69};
-
-
-private int SINGLE_BOND = 10;
-private float atomScaling = 0.5f; 
-private float atomSelectScaling = 0.7f;
-private float bondScaling = 0.3f;
-
 // default color map for each atom
-private float [][] atomColorMap = new float[colorMapArraySize][3];
-// color map for bonds
-private float [] singleBondColorMap = {0.6f, 0.6f, 0.6f};
-//------------------------------------------------------------------------------
+private float [][] atomColorMap = new float[RenderSettings.colorMapArraySize][3];
 
 
 
@@ -180,7 +129,10 @@ private float [] singleBondColorMap = {0.6f, 0.6f, 0.6f};
 
 
 
-public void PassInterfaceParameters(double [][] atomArray, int [][] bondArray, float [][][] bondGeometry, GhostAtomSet GhastlyPassed){
+
+
+
+public void PassInterfaceParameters(double [][] atomArray, int [][] bondArray, float [][][] bondGeometry, GhostAtomSet GhastlyPassed, Object GhastlyLockPassed){
 	assert(atomArray != null);
 	assert(bondArray != null);
 	assert(bondGeometry != null);
@@ -188,14 +140,14 @@ public void PassInterfaceParameters(double [][] atomArray, int [][] bondArray, f
 	internalAtomArray = atomArray;
 	internalBondArray = bondArray;
 	internalBondGeometry = bondGeometry;
-
+        GhastlyLock = GhastlyLockPassed;
 	atomSelectedArray = new int [internalAtomArray.length];
        
 	for(int itor = 0; itor < internalAtomArray.length; itor++){
 		atomSelectedArray[itor] = 0;               
 	}
 	
-        //System.out.println("Made it here2 Geometry");
+        
 	moleculeGeometryLoaded = true;
         
         Ghastly = GhastlyPassed;
@@ -260,157 +212,158 @@ public void start() {
         boolean RightClickEvent = false;
         
 	while (!Display.isCloseRequested()) {
- 	
-             //check for a resize event and do it
-            if (Display.wasResized())doResize(Display.getWidth(), Display.getHeight());
+            // wanted to only draw if the window is active this appears to not work'    
+            //if(Display.isActive()){
             
-            
-             // render OpenGL here
-            GL11.glLoadIdentity();
-		
-            // OK, now read mouse input and decide if a rotaion is going to happen or a atom picking
-            // picking an atom should be a mouse click less then 200 msec
-            
-            
-             // only select if mouse button was clicked
-             //mark the time from the very first mouse down event
-            if(Mouse.isButtonDown(0) && clickEvent == false){
-                //get the initial time clicked
-                //only get the time if we haven't been through this loop before during the same click so the time isn't continually updating  
-                //during a mouse button down hold
-                holdTimeStart = System.nanoTime();
-                //set initial mouse coordinates on click
-                mouseXlast = Mouse.getX();
-                mouseYlast = Mouse.getY();
-                clickEvent=true;                                                         
-            };  
-            
-            
-            // mouse button released, check if less then 200 msec then execute, clear button clock state if >= 200 msec
-            if(!Mouse.isButtonDown(0)){
-                
-                holdTimeEnd = System.nanoTime();
-                //check if less than 200 msec, otherwise reset 
-                if((((holdTimeEnd - holdTimeStart) / 1e6) < 200.0) && clickEvent==true){ 
-                    //check is selection is currently allowed
-                    // this variable is set within the swing components
-                    if(!Ghastly.LockSelection){
-                        SelectionInterface(Mouse.getX(), Mouse.getY(), false);                                       
-                        clickEvent=false;
-                    }
-                //release time >= 200 msec, go to the drag interface or just reset the click    
-                }else if(((holdTimeEnd - holdTimeStart) / 1e6) >= 200.0){
-                    clickEvent=false;
-                  
-                }
-            }
-             
-            //look for a down mouse button >= 200 msec, must ba a drag
-            if(Mouse.isButtonDown(0)){
-                //check it it's been longer the 200 msec then calculate the move during this time slice
-                dragTime = System.nanoTime();
-                if(((dragTime - holdTimeStart) / 1e6) >= 200.0){
-                    
-                    
-                    // get coordinates, calculate delta and modify camera alpha and beta
-                    mouseX = Mouse.getX();
-                    mouseY = Mouse.getY();
-                    cam.setAlpha(cam.getAlpha() + Math.toRadians((mouseX - mouseXlast) * 0.3f));
-                    cam.setBeta(cam.getBeta() + Math.toRadians((mouseYlast - mouseY) * 0.3f));
-                    mouseXlast = mouseX;
-                    mouseYlast = mouseY;
-                                                            
-                }
-            }
-            
-            int dWheel = Mouse.getDWheel();
-            if(dWheel < 0){
-                zoom *= 1.1f;                 
-            }else if(dWheel > 0){
-                zoom /= 1.1f;                
-            }
-            // implement zoom 
-            cam.zoom(zoom);
-            
-            // see if the molecule is being dragged around in the XY plane
-            // right mouse button?
-            
-            if(Mouse.isButtonDown(1)){
-                if(!RightClickEvent){
-                System.out.println("NewDrag");
-                System.out.println("");
-                }
-                RightClickEvent = true;
-                SelectionInterface(Mouse.getX(), Mouse.getY(), true);
-                
-            }else if(!Mouse.isButtonDown(1)){
-                if(RightClickEvent == true){
-                    
-                    RightClickEvent = false;
-                    planeDefined = false;
-                     
-                    
-                  
-                    
-                }
-            }
-            
-            //calculate time delta and update
-            /* Compute delta time */
-            long thisTime = System.nanoTime();
-            float diff = (float) ((thisTime - lastTime) / 1E9);
-            lastTime = thisTime;
-            /* And let the camera make its update */
-            cam.update(diff);
-                             
-           
-           
-            GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);          
+                 //check for a resize event and do it
+                if (Display.wasResized())doResize(Display.getWidth(), Display.getHeight());
 
-            GL11.glEnable(GL11.GL_COLOR_MATERIAL);
-            
-            
-            // new code to render the molecule
-            mat.setPerspective(fieldOfView, windowWidth / windowHeight, 0.1f, 100.0f).get(fb);
-            glMatrixMode(GL_PROJECTION);          
-            GL11.glLoadMatrix(fb);
-             /*
-             * Obtain the camera's view matrix and render molecule.
-             */
-            cam.viewMatrix(mat.identity()).get(fb);
-            glMatrixMode(GL_MODELVIEW);
-            GL11.glLoadMatrix(fb);                                    
-            // move to the center
-            /* possibly not needed?
-            mat.translate(cam.centerMover.target).get(fb);
-            GL11.glLoadMatrix(fb);
-            */
-            //end of new code                                                                                                   
-            
-            
-            RenderMolecule();		          
-            Display.update();
-            
-            // unselect all atoms if requested by swing interface
-            if(Ghastly.UnselectAtoms){
-                UnselectAtoms();
-                Ghastly.UnselectAtoms = false;
-            }
-             
+
+                 // render OpenGL here
+                GL11.glLoadIdentity();
+
+                // OK, now read mouse input and decide if a rotaion is going to happen or a atom picking
+                // picking an atom should be a mouse click less then 200 msec
+
+
+                 // only select if mouse button was clicked
+                 //mark the time from the very first mouse down event
+                if(Mouse.isButtonDown(0) && clickEvent == false){
+                    //get the initial time clicked
+                    //only get the time if we haven't been through this loop before during the same click so the time isn't continually updating  
+                    //during a mouse button down hold
+                    holdTimeStart = System.nanoTime();
+                    //set initial mouse coordinates on click
+                    mouseXlast = Mouse.getX();
+                    mouseYlast = Mouse.getY();
+                    clickEvent=true;                                                         
+                };  
+
+
+                // mouse button released, check if less then 200 msec then execute, clear button clock state if >= 200 msec
+                if(!Mouse.isButtonDown(0)){
+
+
+
+                    holdTimeEnd = System.nanoTime();
+                    //check if less than 200 msec, otherwise reset 
+                    if((((holdTimeEnd - holdTimeStart) / 1e6) < 200.0) && clickEvent==true){ 
+                        //check is selection is currently allowed
+                        // this variable is set within the swing components
+
+                            // only select if unlocked 
+                            if(Ghastly.LockSelection == false){
+                                SelectionInterface(Mouse.getX(), Mouse.getY(), false);
+                            }
+                            clickEvent=false;
+
+                    //release time >= 200 msec, go to the drag interface or just reset the click    
+                    }else if(((holdTimeEnd - holdTimeStart) / 1e6) >= 200.0){
+                        clickEvent=false;
+
+                    }
+                }
+
+                //look for a down mouse button >= 200 msec, must be a drag
+                if(Mouse.isButtonDown(0)){
+                    //check it it's been longer the 200 msec then calculate the move during this time slice
+                    dragTime = System.nanoTime();
+                    if(((dragTime - holdTimeStart) / 1e6) >= 200.0){
+
+
+                        // get coordinates, calculate delta and modify camera alpha and beta
+                        mouseX = Mouse.getX();
+                        mouseY = Mouse.getY();
+                        cam.setAlpha(cam.getAlpha() + Math.toRadians((mouseX - mouseXlast) * 0.3f));
+                        cam.setBeta(cam.getBeta() + Math.toRadians((mouseYlast - mouseY) * 0.3f));
+                        mouseXlast = mouseX;
+                        mouseYlast = mouseY;
+
+                    }
+                }
+
+                int dWheel = Mouse.getDWheel();
+                if(dWheel < 0){
+                    RenderSettings.zoom *= 1.1f;                 
+                }else if(dWheel > 0){
+                    RenderSettings.zoom /= 1.1f;                
+                }
+                // implement zoom 
+                cam.zoom(RenderSettings.zoom);
+
+                // see if the molecule is being dragged around in the XY plane
+                // right mouse button?
+
+                if(Mouse.isButtonDown(1)){
+
+                    RightClickEvent = true;
+                    SelectionInterface(Mouse.getX(), Mouse.getY(), true);
+
+                }else if(!Mouse.isButtonDown(1)){
+                    if(RightClickEvent == true){
+
+                        RightClickEvent = false;
+                        planeDefined = false;
+
+
+
+
+                    }
+                }
+
+                //calculate time delta and update
+                /* Compute delta time */
+                long thisTime = System.nanoTime();
+                float diff = (float) ((thisTime - lastTime) / 1E9);
+                lastTime = thisTime;
+                /* And let the camera make its update */
+                cam.update(diff);
+
+
+
+                GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);          
+
+                GL11.glEnable(GL11.GL_COLOR_MATERIAL);
+
+
+                // new code to render the molecule
+                mat.setPerspective(RenderSettings.fieldOfView, windowWidth / windowHeight, RenderSettings.ZNear, RenderSettings.ZFar).get(fb);
+                glMatrixMode(GL_PROJECTION);          
+                GL11.glLoadMatrix(fb);
+                 /*
+                 * Obtain the camera's view matrix and render molecule.
+                 */
+                cam.viewMatrix(mat.identity()).get(fb);
+                glMatrixMode(GL_MODELVIEW);
+                GL11.glLoadMatrix(fb);                                    
+               
+                RenderMolecule();
+                
+                Display.update();
+
+                // unselect all atoms if requested by swing interface
+                synchronized(GhastlyLock){
+                    if(Ghastly.UnselectAtoms){
+                        UnselectAtoms();
+                        Ghastly.UnselectAtoms = false;
+                    }
+                }
+            //}
 	}
  
 	Display.destroy();
 }
  
 
+
 private void RenderMolecule(){
                               
-        GL11.glTranslatef(DragRayVector.x, DragRayVector.y, DragRayVector.z);   					  	                  
-	RenderAtoms();
-        RenderGhostAtoms();
-	RenderBonds();
-	RenderSelectedCursor();
-        RenderPCAPlane();
+        GL11.glTranslatef(DragRayVector.x, DragRayVector.y, DragRayVector.z);
+         // rendering order matters for transparency       
+	RenderAtoms();        
+	RenderBonds();       
+        RenderSelectedCursor();
+        RenderGhostAtomsByNICSType();
         GL11.glTranslatef(-DragRayVector.x, -DragRayVector.y, -DragRayVector.z);
 	return;
 }
@@ -422,7 +375,7 @@ float aspectRatio = (float)newWidth / (float)newHeight;
   GL11.glMatrixMode(GL11.GL_PROJECTION);
   GL11.glLoadIdentity();
   GL11.glViewport(0, 0, newWidth, newHeight);
-  GLU.gluPerspective(40.0f, (float)aspectRatio, 0.1f, 100.0f); 
+  GLU.gluPerspective(45.0f, (float)aspectRatio, RenderSettings.ZNear, RenderSettings.ZFar); 
   GL11.glMatrixMode(GL11.GL_MODELVIEW);
   //reset global variables used for picking
   windowWidth = newWidth;
@@ -460,7 +413,7 @@ private void UnselectAtoms(){
 
 
 
-// used ray tracing to deteermin the location of the mouse 
+// used ray tracing to determine the location of the mouse 
 // depending if left or right mouse, dragging or picking will occur
 private void SelectionInterface(int mouse_x, int mouse_y, boolean dragInterface){
    
@@ -477,7 +430,7 @@ private void SelectionInterface(int mouse_x, int mouse_y, boolean dragInterface)
     
    
     // get the projection matrix
-    temp.setPerspective(fieldOfView, windowWidth / windowHeight, 0.1f, 100.0f);
+    temp.setPerspective(RenderSettings.fieldOfView, windowWidth / windowHeight, 0.1f, 100.0f);
     // take the projection matrix and multiply it by the modelview matrix 
     cam.viewMatrix(temp).translate(DragRayVector).unprojectRay(PickerCoordinates, viewport, RayOrigin, RayDirection);            
     RayDirection.normalize();
@@ -485,7 +438,7 @@ private void SelectionInterface(int mouse_x, int mouse_y, boolean dragInterface)
     if(dragInterface){
         //reset and recalculate
         temp.identity();
-        temp.setPerspective(fieldOfView, windowWidth / windowHeight, 0.1f, 100.0f);
+        temp.setPerspective(RenderSettings.fieldOfView, windowWidth / windowHeight, 0.1f, 100.0f);
         
         cam.viewMatrix(temp).unprojectRay(PickerCoordinates, viewport, MouseRayOrigin, MouseRayDirection);   
         MouseRayDirection.normalize();
@@ -496,10 +449,13 @@ private void SelectionInterface(int mouse_x, int mouse_y, boolean dragInterface)
     PickerCoordinates.y = windowHeight / 2.0f;
     //reset and recalculate
     temp.identity();
-    temp.setPerspective(fieldOfView, windowWidth / windowHeight, 0.1f, 100.0f);
+    temp.setPerspective(RenderSettings.fieldOfView, windowWidth / windowHeight, 0.1f, 100.0f);
     cam.viewMatrix(temp).unprojectRay(PickerCoordinates, viewport, RayOriginZero, RayDirectionZero);            
     RayDirectionZero.normalize();
     // now do atom collisions and drag calculations (if asked for)
+    
+   
+    
     TestAtomCollision(dragInterface);
     
     return;
@@ -517,19 +473,19 @@ private void TestAtomCollision(boolean dragInterface){
     // get closest point between sphere center and line defined by RayOrigin and RayDirection
     //see if the distance is less than the radius of the sphere
     
-    //itorate over all atoms, find the hits
+    //itorate over all atoms, find the hits    
     for(int itor = 1; itor < atomSelectedArray.length; itor++){
        
         if(RayAtomCollides((float)internalAtomArray[itor][1], 
                            (float)internalAtomArray[itor][2],
                            (float)internalAtomArray[itor][3],
-                           (float)CovalentRadii[(int)internalAtomArray[itor][0]])){
-            numberHits++;              
+                           (float)RenderSettings.CovalentRadii[(int)internalAtomArray[itor][0]])){
+            numberHits++;
             //test if the atom is any closer than the last atom entered, if so replace it
             TestR = SphereOriginDistance((float)internalAtomArray[itor][1], 
                                          (float)internalAtomArray[itor][2], 
                                          (float)internalAtomArray[itor][3]);
-            //System.out.println(TestR);
+            
             //if closer, swap it out, else move on
             if(TestR <= LastR){
                 currentAtom = itor;
@@ -539,7 +495,8 @@ private void TestAtomCollision(boolean dragInterface){
         };                                             
        
      }
-  //Found the closest atom to the origin (and def. found one), just highlight (or unhighlight) for now, in the future this will be a big part of the GUI
+   
+  //Found the closest atom to the origin (and def. found one) add to plane if requested
   // only do this if for selection and not drag interface  
     if(!dragInterface){
         if(numberHits >= 1){
@@ -556,35 +513,39 @@ private void TestAtomCollision(boolean dragInterface){
                 // store coordinates
                 HighlightedAtom = new Vector3f((float)internalAtomArray[currentAtom][1], (float)internalAtomArray[currentAtom][2], (float)internalAtomArray[currentAtom][3]);
                 
-                // atom the atom to the selection plane
+                // add the atom to the selection plane
                 // need to list whole name, clashes in the libraries
                 org.joml.Vector4f NewPoint = new org.joml.Vector4f((float)internalAtomArray[currentAtom][1], (float)internalAtomArray[currentAtom][2], (float)internalAtomArray[currentAtom][3], (float)currentAtom);
-                Ghastly.AddPointToPlane(NewPoint);;                                                
-            
+                Ghastly.AddPointToPlane(NewPoint);                                                
+                // set the new atom coordinates as the "X-axis" for plane calculations
+                Ghastly.SetPlaneXAxisPoint(new Vector3f((float)internalAtomArray[currentAtom][1], 
+                                           (float)internalAtomArray[currentAtom][2], 
+                                           (float)internalAtomArray[currentAtom][3]));
             }else if(atomSelectedArray[currentAtom] == 2){
                 // unselect the atom and remove from the current selection plane
                 atomSelectedArray[currentAtom] = 0;
                 // unselected, remove from the list
                 Ghastly.RemovePointFromPlane(currentAtom);
-                
+                // as this was the most highlighted atom it must have been the set plane axis
+                // atom so assume that we are removing it from the list and falling back one.
+                // fall back to last "X-axis" point
+                Ghastly.RemoveCurrentXAxisPoint();
                 
             }else if(atomSelectedArray[currentAtom] == 1) {
-                // unseelct the currently extra-highlighted atom and choose this new one
-                // no change to the plane selection
+                // unselect the currently extra-highlighted atom and choose this new one
+                // no change to the plane selection but change the "X-Axis" to this one
                 for(int itor_refresh = 1; itor_refresh < atomSelectedArray.length; itor_refresh++){
                     if(atomSelectedArray[itor_refresh] == 2)atomSelectedArray[itor_refresh] = 1;
                 }
                 atomSelectedArray[currentAtom] = 2;                
                 // store coordinates
                 HighlightedAtom = new Vector3f((float)internalAtomArray[currentAtom][1], (float)internalAtomArray[currentAtom][2], (float)internalAtomArray[currentAtom][3]);
+                // reset the "X-Axis" point to this one
+                Ghastly.SetPlaneXAxisPoint(HighlightedAtom);
+
             }
         }
-        
-        
-        
-        
-        
-        
+          
     }else{
         // for dragging around the molecule on screen
         // first hit defines the drag plane, subsequent 
@@ -606,8 +567,7 @@ private void TestAtomCollision(boolean dragInterface){
                         
             
             // get the plane parallel to the screen that runs through the selected atom
-            DefineScreenPlane();
-            //SelectionVectorScreenIntersection();
+            DefineScreenPlane();            
             planeDefined = true;
             
         }else if((numberHits >= 1)&&(planeDefined == true)){
@@ -629,12 +589,12 @@ private boolean RayAtomCollides(float AtomX, float AtomY, float AtomZ, float rad
     Vector3f LineEnd = new Vector3f();
 
 
-    LineStart.x = RayDirection.x * ParametricTValue + RayOrigin.x;
-    LineStart.y = RayDirection.y * ParametricTValue + RayOrigin.y;
-    LineStart.z = RayDirection.z * ParametricTValue + RayOrigin.z;
-    LineEnd.x = RayDirection.x * (-ParametricTValue) + RayOrigin.x;
-    LineEnd.y = RayDirection.y * (-ParametricTValue) + RayOrigin.y;
-    LineEnd.z = RayDirection.z * (-ParametricTValue) + RayOrigin.z;
+    LineStart.x = RayDirection.x * RenderSettings.ParametricTValue + RayOrigin.x;
+    LineStart.y = RayDirection.y * RenderSettings.ParametricTValue + RayOrigin.y;
+    LineStart.z = RayDirection.z * RenderSettings.ParametricTValue + RayOrigin.z;
+    LineEnd.x = RayDirection.x * (-RenderSettings.ParametricTValue) + RayOrigin.x;
+    LineEnd.y = RayDirection.y * (-RenderSettings.ParametricTValue) + RayOrigin.y;
+    LineEnd.z = RayDirection.z * (-RenderSettings.ParametricTValue) + RayOrigin.z;
                                          
         
    
@@ -689,177 +649,6 @@ void SelectionVectorScreenIntersection(){
 
 
 
-void renderSelectionLine() {
-    float start_x = 0, start_y = 0, start_z = 0;
-    float end_x = 0, end_y = 0, end_z = 0;
-   
-    
-    float start_x0 = 0, start_y0 = 0, start_z0 = 0;
-    float end_x0 = 0, end_y0 = 0, end_z0 = 0;
-    
-    
-    start_x = RayDirection.x * ParametricTValue + RayOrigin.x;
-    start_y = RayDirection.y * ParametricTValue + RayOrigin.y;
-    start_z = RayDirection.z * ParametricTValue + RayOrigin.z;
-
-    end_x = RayDirection.x * (-ParametricTValue) + RayOrigin.x;
-    end_y = RayDirection.y * (-ParametricTValue) + RayOrigin.y;
-    end_z = RayDirection.z * (-ParametricTValue) + RayOrigin.z;
-   
-    start_x0 = RayDirectionZero.x * ParametricTValue + RayOriginZero.x;
-    start_y0 = RayDirectionZero.y * ParametricTValue + RayOriginZero.y;
-    start_z0 = RayDirectionZero.z * ParametricTValue + RayOriginZero.z;
-
-    end_x0 = RayDirectionZero.x * (-ParametricTValue) + RayOriginZero.x;
-    end_y0 = RayDirectionZero.y * (-ParametricTValue) + RayOriginZero.y;
-    end_z0 = RayDirectionZero.z * (-ParametricTValue) + RayOriginZero.z;
-   
-    
-   
-    
-    
-    
-    // draw lines
-    GL11.glBegin(GL11.GL_LINES);
-   // selection line    
-    GL11.glColor3f(1.0f, 0.0f, 0.0f); 
-    GL11.glVertex3f(start_x, start_y, start_z);
-    GL11.glVertex3f(end_x, end_y, end_z);
-    //camera center line
-    GL11.glColor3f(0.0f, 1.0f, 0.0f); 
-    GL11.glVertex3f(start_x0, start_y0, start_z0);
-    GL11.glVertex3f(end_x0, end_y0, end_z0);
-   
-    GL11.glEnd();
-
-//System.out.println(" x "+RayOriginZero.x+" y "+RayOriginZero.y+" z "+RayOriginZero.z);
-
-}
-
-private void RenderMouseInPlace(){
-    
-    GL11.glTranslatef(MousePlaneCoordinates.x, MousePlaneCoordinates.y,  MousePlaneCoordinates.z);
-
-    GL11.glColor4f(1.0f, 0.0f, 0.0f, 0.5f);
-    
-    Sphere s = new Sphere();
-
-    s.draw(1.0f, 20, 20);
-
-    GL11.glTranslatef(-MousePlaneCoordinates.x, -MousePlaneCoordinates.y,  -MousePlaneCoordinates.z);           
-                               
-}
-
-
-
-private void RenderNormalPlane(){
-    
-    // http://mathworld.wolfram.com/Plane.html
-    
-    
-    float X_1, X_2, X_3, X_4;
-    float Y_1, Y_2, Y_3, Y_4;
-    float Z_1, Z_2, Z_3, Z_4;
-    float A_P, B_P, C_P, D_P;
-    X_1 = -100.0f;
-    X_2 = -100.0f;
-    X_3 = 100.0f;
-    X_4 = 100.0f;
-    
-    Y_1 = -100.0f;
-    Y_2 = 100.0f;
-    Y_3 = 100.0f;
-    Y_4 = -100.0f;
-    
-    // variable defining the plane
-    // the plance is parralell to the screen, normal vector direction discovered by deprojection from center of screen
-    // the plane is specified to be the incident with the center of the selected atom
-    
-    A_P = RayDirectionZero.x;
-    B_P = RayDirectionZero.y;
-    C_P = RayDirectionZero.z;
-    D_P = -RayDirectionZero.x*(AtomSelectionVector.x + DragRayVector.x) - RayDirectionZero.y*(AtomSelectionVector.y + DragRayVector.y) - RayDirectionZero.z*(AtomSelectionVector.z + DragRayVector.z);
-    
-    Z_1 = (-D_P - B_P * Y_1 - A_P * X_1) / C_P;
-    Z_2 = (-D_P - B_P * Y_2 - A_P * X_2) / C_P;
-    Z_3 = (-D_P - B_P * Y_3 - A_P * X_3) / C_P;
-    Z_4 = (-D_P - B_P * Y_4 - A_P * X_4) / C_P;
-    
-    
-    GL11.glBegin(GL11.GL_QUADS);
-    GL11.glEnable(GL11.GL_BLEND);
-    GL11.glColor4f(0.0f, 1.0f, 0.0f, 0.5f);
-    GL11.glVertex3f(X_1, Y_1, Z_1);
-    GL11.glVertex3f(X_2, Y_2, Z_2);
-    GL11.glVertex3f(X_3, Y_3, Z_3);
-    GL11.glVertex3f(X_4, Y_4, Z_4);
-    GL11.glDisable(GL11.GL_BLEND);
-    
-    
-    GL11.glEnd();
-   
-}
-
-
-private void RenderPCAPlane(){
-    
-    if(!Ghastly.PlaneCalculated()){
-        //System.out.println("no plane");
-        return;
-    } 
-    
-    org.joml.Vector4f SelPlaneEq = Ghastly.GetPlaneEquation();
-    // http://mathworld.wolfram.com/Plane.html
-    
-    //System.out.println("A: "+ SelPlaneEq.x +" B: "+SelPlaneEq.y+" C: "+SelPlaneEq.z+" D: "+SelPlaneEq.w);
-    
-    
-    float X_1, X_2, X_3, X_4;
-    float Y_1, Y_2, Y_3, Y_4;
-    float Z_1, Z_2, Z_3, Z_4;
-    float A_P, B_P, C_P, D_P;
-    X_1 = -100.0f;
-    X_2 = -100.0f;
-    X_3 = 100.0f;
-    X_4 = 100.0f;
-    
-    Y_1 = -100.0f;
-    Y_2 = 100.0f;
-    Y_3 = 100.0f;
-    Y_4 = -100.0f;
-    
-    // variable defining the plane
-    // the plance is parralell to the screen, normal vector direction discovered by deprojection from center of screen
-    // the plane is specified to be the incident with the center of the selected atom
-    
-    A_P = SelPlaneEq.x;
-    B_P = SelPlaneEq.y;
-    C_P = SelPlaneEq.z;
-    D_P = SelPlaneEq.w;
-    
-    Z_1 = (-D_P - B_P * Y_1 - A_P * X_1) / C_P;
-    Z_2 = (-D_P - B_P * Y_2 - A_P * X_2) / C_P;
-    Z_3 = (-D_P - B_P * Y_3 - A_P * X_3) / C_P;
-    Z_4 = (-D_P - B_P * Y_4 - A_P * X_4) / C_P;
-    
-    
-    GL11.glBegin(GL11.GL_QUADS);
-    GL11.glEnable(GL11.GL_BLEND);
-    GL11.glColor4f(0.0f, 1.0f, 0.0f, 0.5f);
-    GL11.glVertex3f(X_1, Y_1, Z_1);
-    GL11.glVertex3f(X_2, Y_2, Z_2);
-    GL11.glVertex3f(X_3, Y_3, Z_3);
-    GL11.glVertex3f(X_4, Y_4, Z_4);
-    GL11.glDisable(GL11.GL_BLEND);
-    
-    
-    GL11.glEnd();
-    
-    
-    
-    
-}
-
 private void RenderSelectedCursor(){
 	
 
@@ -870,15 +659,26 @@ private void RenderSelectedCursor(){
             // differenct colors depending on if a highlighted atom or a selected atom
             GL11.glTranslatef((float)internalAtomArray[itor][1], (float)internalAtomArray[itor][2],  (float)internalAtomArray[itor][3]);
             if(atomSelectedArray[itor] == 1){
-                GL11.glColor4f(1.0f, 1.0f, 0.0f, 0.5f);
+                // modded this because of transparency issues but changing display order solved the problem, not needed but kept for flexibility
+                if(Ghastly.RenderHighlightCursorSolid){
+                    GL11.glColor4f(RenderSettings.HighlightedAtomInGridColor.x, RenderSettings.HighlightedAtomInGridColor.y, RenderSettings.HighlightedAtomInGridColor.z, RenderSettings.HighlightedAtomInGridColor.w);
+                }else{
+                    GL11.glColor4f(RenderSettings.HighlightedAtomColor.x, RenderSettings.HighlightedAtomColor.y, RenderSettings.HighlightedAtomColor.z, RenderSettings.HighlightedAtomColor.w);
+                }
                 GL11.glLoadName(itor);
                 Sphere s = new Sphere();
-                s.draw((float)(atomSelectScaling * CovalentRadii[(int)internalAtomArray[itor][0]]), 20, 20);
+                s.draw((float)(RenderSettings.atomSelectScaling * RenderSettings.CovalentRadii[(int)internalAtomArray[itor][0]]), 20, 20);
             }else if(atomSelectedArray[itor] == 2  ){
-                GL11.glColor4f(1.0f, 0.0f, 0.0f, 0.5f);
+                // modded this because of transparency issues but changing display order solved the problem, not needed but kept for flexibility
+                if(Ghastly.RenderSelectionCursorSolid){
+                    GL11.glColor4f(RenderSettings.SelectedAtomInGridColor.x, RenderSettings.SelectedAtomInGridColor.y, RenderSettings.SelectedAtomInGridColor.z, RenderSettings.SelectedAtomInGridColor.w);
+                }else{
+                    GL11.glColor4f(RenderSettings.SelectedAtomColor.x, RenderSettings.SelectedAtomColor.y, RenderSettings.SelectedAtomColor.z, RenderSettings.SelectedAtomColor.w);
+                }
+                
                 GL11.glLoadName(itor);
                 Sphere s = new Sphere();
-                s.draw((float)(atomSelectScaling * CovalentRadii[(int)internalAtomArray[itor][0]]), 20, 20);
+                s.draw((float)(RenderSettings.atomSelectScaling * RenderSettings.CovalentRadii[(int)internalAtomArray[itor][0]]), 20, 20);
             }
             GL11.glTranslatef(-1.0f * (float)internalAtomArray[itor][1],  -1.0f * (float)internalAtomArray[itor][2],  -1.0f * (float)internalAtomArray[itor][3]);
 
@@ -888,94 +688,202 @@ private void RenderSelectedCursor(){
 }
 
 
-private void RenderGhostAtoms(){
-    GhostAtom temp;
+
+
+// render each type of ghost atom potentially by a different method
+// rendering large number of grid atoms with everything else, at least 1000 is taking up too much 
+// rendering time. Came up with a different solution to render them.
+private void RenderGhostAtomsByNICSType(){
+    ArrayList<GhostAtomType> GhostTypeSetList;
+    ArrayList<GhostAtom> GhostAtomListToRender;
+    GhostAtomType ProposedGhostTypeSet;
     
-    // in display proposed mode
-    if(Ghastly.DisplayProposed){
-        if(Ghastly.GetProposedAtoms().isEmpty())return;
-        for(int itor = 0; itor < Ghastly.GetProposedAtoms().size(); itor++){
-            temp = Ghastly.GetProposedAtoms().get(itor);
-            GL11.glTranslatef(temp.x, temp.y, temp.z);
-
-
-            // need to higlight atoms if they are
-            if(Ghastly.GetProposedAtoms().get(itor).HighlightLevel == 0){
-                GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-                GL11.glLoadName(itor + 10000);
-                Sphere s = new Sphere();
-                s.draw(0.2f, 20, 20);
-            }else if(Ghastly.GetProposedAtoms().get(itor).HighlightLevel == 1){
-                GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-                GL11.glLoadName(itor + 11000);
-                Sphere sin = new Sphere();
-                sin.draw(0.2f, 20, 20);
-                GL11.glColor4f(1.0f, 1.0f, 0.0f, 0.5f);
-                GL11.glLoadName(itor + 10000);
-                Sphere sout = new Sphere();
-                sout.draw(0.5f, 20, 20);
-            }else{
-                GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-                GL11.glLoadName(itor + 11000);
-                Sphere sin = new Sphere();
-                sin.draw(0.2f, 20, 20);
-                GL11.glColor4f(1.0f, 0.0f, 0.0f, 0.5f);
-                GL11.glLoadName(itor + 10000);
-                Sphere sout = new Sphere();
-                sout.draw(0.5f, 20, 20);
-            }
-
-
-            GL11.glTranslatef(-temp.x, -temp.y, -temp.z);
+    // first see if displaying a proposed set
+    if(Ghastly.DisplayProposed){        
+        ProposedGhostTypeSet = Ghastly.GetProposedGhostAtomType();
+        if(ProposedGhostTypeSet == null) return;
+        // should be OK, render it depending on the type
+        if(ProposedGhostTypeSet.GhostSetType() < 2){
+            RenderSimpleProposedGhostAtoms(Ghastly.GetProposedAtoms());
+        }else if(ProposedGhostTypeSet.GhostSetType() == 2){
+            RenderScanProposedGhostAtoms(Ghastly.GetProposedAtoms());
+        }else if(ProposedGhostTypeSet.GhostSetType() == 3){
+            RenderGrid.RenderGridProposedGhostAtoms((NICS_Grid)ProposedGhostTypeSet, GhastlyLock);
         }
+        return;
+        // not a proposed set, step through each ghost atom type and pick
+        // render type that is appropriate
+        // when originally rendering grids the total number of atoms can be *huge* ( > 1000 easily)
+        // so the whole program slows when rendering everything the same way together
+        // modify this so different types of rendering can be handled individually depending on the NICS type
         
-    // in normal mode, display all    
-    }else{
-        
-        if(Ghastly.GetAtoms().isEmpty())return;                            
-        for(int itor = 0; itor < Ghastly.GetAtoms().size(); itor++){
-            temp = Ghastly.GetAtoms().get(itor);
-            GL11.glTranslatef(temp.x, temp.y, temp.z);
-
-
-            // need to higlight atoms if they are
-            if(Ghastly.GetAtoms().get(itor).HighlightLevel == 0){
-                GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-                GL11.glLoadName(itor + 10000);
-                Sphere s = new Sphere();
-                s.draw(0.2f, 20, 20);
-            }else if(Ghastly.GetAtoms().get(itor).HighlightLevel == 1){
-                GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-                GL11.glLoadName(itor + 11000);
-                Sphere sin = new Sphere();
-                sin.draw(0.2f, 20, 20);
-                GL11.glColor4f(1.0f, 1.0f, 0.0f, 0.5f);
-                GL11.glLoadName(itor + 10000);
-                Sphere sout = new Sphere();
-                sout.draw(0.5f, 20, 20);
-            }else{
-                GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-                GL11.glLoadName(itor + 11000);
-                Sphere sin = new Sphere();
-                sin.draw(0.2f, 20, 20);
-                GL11.glColor4f(1.0f, 0.0f, 0.0f, 0.5f);
-                GL11.glLoadName(itor + 10000);
-                Sphere sout = new Sphere();
-                sout.draw(0.5f, 20, 20);
+    }else{       
+        GhostTypeSetList = Ghastly.GetCurrentGhostAtomTypes();
+        if(GhostTypeSetList == null) return;
+        if(GhostTypeSetList.isEmpty()) return;
+        for(int itor = 0; itor < GhostTypeSetList.size(); itor++){            
+            GhostAtomListToRender = GhostTypeSetList.get(itor).GetAtomList();
+            if(GhostTypeSetList.get(itor).GhostSetType() < 2){
+                RenderSimpleGhostAtoms(GhostAtomListToRender);
+            }else if(GhostTypeSetList.get(itor).GhostSetType() == 2){
+                RenderScanGhostAtoms(GhostAtomListToRender);
+            }else if(GhostTypeSetList.get(itor).GhostSetType() == 3){
+                RenderGrid.RenderGridGhostAtoms((NICS_Grid)GhostTypeSetList.get(itor), GhastlyLock);
             }
-
-
-            GL11.glTranslatef(-temp.x, -temp.y, -temp.z);
         }
-    
     }
-    
     
 }
 
+private void RenderSimpleProposedGhostAtoms(ArrayList<GhostAtom> GhostAtomListToRender){
+GhostAtom SingleGhostAtom;
+    synchronized(GhastlyLock){
+        // in display proposed mode                                                      
+            // only display proposed
+        if(Ghastly.DisplayProposed){
+            
+            if(GhostAtomListToRender == null) return;
+            if(GhostAtomListToRender.isEmpty())return;       
+            for(int itor = 0; itor < GhostAtomListToRender.size(); itor++){
+                SingleGhostAtom = GhostAtomListToRender.get(itor);
+                GL11.glTranslatef(SingleGhostAtom.x, SingleGhostAtom.y, SingleGhostAtom.z);
 
 
+                // need to higlight atoms if they are
+                if(SingleGhostAtom.HighlightLevel == 0){
+                    GL11.glColor4f(RenderSettings.ProposedGhostAtomColor.x, RenderSettings.ProposedGhostAtomColor.y, RenderSettings.ProposedGhostAtomColor.z, RenderSettings.ProposedGhostAtomColor.w);
+                    GL11.glLoadName(itor + 10000);
 
+                    Sphere s = new Sphere();
+                    //size adjustable
+                    if(SingleGhostAtom.radius <= 0){
+                        s.draw(0.2f, 20, 20);
+                    }else{
+                        s.draw(SingleGhostAtom.radius, 20, 20);
+                    }
+                }else if(SingleGhostAtom.HighlightLevel == 1){
+                    GL11.glColor4f(RenderSettings.ProposedGhostAtomColor.x, RenderSettings.ProposedGhostAtomColor.y, RenderSettings.ProposedGhostAtomColor.z, RenderSettings.ProposedGhostAtomColor.w);
+                    GL11.glLoadName(itor + 11000);
+                    Sphere sin = new Sphere();
+                    //size adjustable
+                    if(SingleGhostAtom.radius <= 0){
+                        sin.draw(0.2f, 20, 20);
+                    }else{
+                        sin.draw(SingleGhostAtom.radius, 20, 20);
+                    } 
+                    GL11.glColor4f(RenderSettings.HighlightedAtomColor.x, RenderSettings.HighlightedAtomColor.y, RenderSettings.HighlightedAtomColor.z, RenderSettings.HighlightedAtomColor.w);
+                    GL11.glLoadName(itor + 10000);
+                    Sphere sout = new Sphere();
+                    //size adjustable
+                    if(SingleGhostAtom.radius <= 0){
+                        sout.draw(0.5f, 20, 20);
+                    }else{
+                        sout.draw(SingleGhostAtom.radius * 2.5f, 20, 20);
+                    }
+                }else{
+                    GL11.glColor4f(RenderSettings.ProposedGhostAtomColor.x, RenderSettings.ProposedGhostAtomColor.y, RenderSettings.ProposedGhostAtomColor.z, RenderSettings.ProposedGhostAtomColor.w);
+                    GL11.glLoadName(itor + 11000);
+                    Sphere sin = new Sphere();
+                    //size adjustable
+                    if(SingleGhostAtom.radius <= 0){
+                        sin.draw(0.2f, 20, 20);
+                    }else{
+                        sin.draw(SingleGhostAtom.radius, 20, 20);
+                    } 
+                    GL11.glColor4f(RenderSettings.SelectedAtomColor.x, RenderSettings.SelectedAtomColor.y, RenderSettings.SelectedAtomColor.z, RenderSettings.SelectedAtomColor.w);
+                    GL11.glLoadName(itor + 10000);
+                    Sphere sout = new Sphere();
+                    //size adjustable
+                    if(SingleGhostAtom.radius <= 0){
+                        sout.draw(0.5f, 20, 20);
+                    }else{
+                        sout.draw(SingleGhostAtom.radius * 2.5f, 20, 20);
+                    }
+                }
+
+
+                GL11.glTranslatef(-SingleGhostAtom.x, -SingleGhostAtom.y, -SingleGhostAtom.z);
+            }
+        }
+    }
+}
+// stub functions for now
+private void RenderScanProposedGhostAtoms(ArrayList<GhostAtom> GhostAtomListToRender){
+    RenderSimpleProposedGhostAtoms(GhostAtomListToRender);
+}
+
+
+private void RenderSimpleGhostAtoms(ArrayList<GhostAtom> GhostAtomListToRender){
+    GhostAtom SingleGhostAtom;
+    synchronized(GhastlyLock){
+        // in display proposed mode                                                      
+        // only display proposed
+        if(GhostAtomListToRender == null) return;
+        if(GhostAtomListToRender.isEmpty())return;  
+
+        for(int itor = 0; itor < GhostAtomListToRender.size(); itor++){
+            SingleGhostAtom = GhostAtomListToRender.get(itor);
+            GL11.glTranslatef(SingleGhostAtom.x, SingleGhostAtom.y, SingleGhostAtom.z);
+
+
+            // need to higlight atoms if they are
+            if(SingleGhostAtom.HighlightLevel == 0){
+                GL11.glColor4f(RenderSettings.GhostAtomColor.x, RenderSettings.GhostAtomColor.y, RenderSettings.GhostAtomColor.z, RenderSettings.GhostAtomColor.w);
+                GL11.glLoadName(itor + 10000);
+                Sphere s = new Sphere();
+                //size adjustable
+                if(SingleGhostAtom.radius <= 0){
+                    s.draw(0.2f, 20, 20);
+                }else{
+                    s.draw(SingleGhostAtom.radius, 20, 20);
+                }
+            }else if(SingleGhostAtom.HighlightLevel == 1){
+                GL11.glColor4f(RenderSettings.GhostAtomColor.x, RenderSettings.GhostAtomColor.y, RenderSettings.GhostAtomColor.z, RenderSettings.GhostAtomColor.w);
+                GL11.glLoadName(itor + 11000);
+                Sphere sin = new Sphere();
+                //size adjustable
+                if(SingleGhostAtom.radius <= 0){
+                    sin.draw(0.2f, 20, 20);
+                }else{
+                    sin.draw(SingleGhostAtom.radius, 20, 20);
+                }                                    
+                GL11.glColor4f(RenderSettings.HighlightedAtomColor.x, RenderSettings.HighlightedAtomColor.y, RenderSettings.HighlightedAtomColor.z, RenderSettings.HighlightedAtomColor.w);
+                GL11.glLoadName(itor + 10000);
+                Sphere sout = new Sphere();
+                //size adjustable
+                if(SingleGhostAtom.radius <= 0){
+                    sout.draw(0.5f, 20, 20);
+                }else{
+                    sout.draw(SingleGhostAtom.radius * 2.5f, 20, 20);
+                }
+            }else{
+                GL11.glColor4f(RenderSettings.GhostAtomColor.x, RenderSettings.GhostAtomColor.y, RenderSettings.GhostAtomColor.z, RenderSettings.GhostAtomColor.w);
+                GL11.glLoadName(itor + 11000);
+                Sphere sin = new Sphere();
+                //size adjustable
+                if(SingleGhostAtom.radius <= 0){
+                    sin.draw(0.2f, 20, 20);
+                }else{
+                    sin.draw(SingleGhostAtom.radius, 20, 20);
+                }
+                GL11.glColor4f(RenderSettings.SelectedAtomColor.x, RenderSettings.SelectedAtomColor.y, RenderSettings.SelectedAtomColor.z, RenderSettings.SelectedAtomColor.w);
+                GL11.glLoadName(itor + 10000);
+                Sphere sout = new Sphere();
+                //size adjustable
+                if(SingleGhostAtom.radius <= 0){
+                    sout.draw(0.5f, 20, 20);
+                }else{
+                    sout.draw(SingleGhostAtom.radius * 2.5f, 20, 20);
+                }
+            }
+            GL11.glTranslatef(-SingleGhostAtom.x, -SingleGhostAtom.y, -SingleGhostAtom.z);
+        }
+    }
+}
+// stub functions for now
+private void RenderScanGhostAtoms(ArrayList<GhostAtom> GhostAtomListToRender){
+    RenderSimpleGhostAtoms(GhostAtomListToRender);
+}
 
 
 
@@ -1004,7 +912,7 @@ private void RenderAtoms(){
 	
 		Sphere s = new Sphere();
 
-   		s.draw((float)(atomScaling * CovalentRadii[atomicNumber]), 16, 16);
+   		s.draw((float)(RenderSettings.atomScaling * RenderSettings.CovalentRadii[atomicNumber]), 16, 16);
 
    		// go back to where you started for next atom addition
 		GL11.glTranslatef(-1.0f * (float)internalAtomArray[itor][1], 
@@ -1037,7 +945,7 @@ private void RenderSingleBonds(){
 	for(A_itor = 1; A_itor < internalBondArray[0].length; A_itor++){
 		for(B_itor = A_itor; B_itor < internalBondArray[0].length; B_itor++){
 			// test to see if a single bond was formed	
-			if(internalBondArray[A_itor][B_itor] == SINGLE_BOND){
+			if(internalBondArray[A_itor][B_itor] == RenderSettings.SINGLE_BOND){
 			
 				
 
@@ -1064,17 +972,17 @@ private void RenderSingleBonds(){
 			   				(float)internalBondGeometry[A_itor][B_itor][7]);
                                         //GL11.glColor3f((float)0.0,(float)1.0,(float)0.0);
 			   	}
-				GL11.glColor3f(singleBondColorMap[0],
-                                                singleBondColorMap[1],
-						singleBondColorMap[2]);
+				GL11.glColor3f(RenderSettings.singleBondColorMap[0],
+                                                RenderSettings.singleBondColorMap[1],
+						RenderSettings.singleBondColorMap[2]);
 				// load a default name one more than he number of atoms in molecule for all bonds
 				GL11.glLoadName(internalAtomArray.length);
 				Cylinder C = new Cylinder();
 		   		
 		   		// cylinder is scaled based on radius of hydrogen listed
                                 //draw cylinder, startes at origin and length R
-				C.draw((float)(bondScaling * CovalentRadii[1]), 
-					(float)(bondScaling * CovalentRadii[1]), 
+				C.draw((float)(RenderSettings.bondScaling * RenderSettings.CovalentRadii[1]), 
+					(float)(RenderSettings.bondScaling * RenderSettings.CovalentRadii[1]), 
 					internalBondGeometry[A_itor][B_itor][3], 16, 16);
 		   		
 
@@ -1156,7 +1064,7 @@ void ColorMapArraySet(){
 
 	// set standard colors for some atoms and something else for the rest
 
-	for(itor = 0; itor < colorMapArraySize; itor++){
+	for(itor = 0; itor < RenderSettings.colorMapArraySize; itor++){
 		if((itor == 1) || (itor == 5) || (itor == 6) || 
 		   (itor == 7) || (itor == 8) || (itor == 9) ||
 		   (itor == 14) || (itor == 15) || (itor == 16) ||
@@ -1235,27 +1143,27 @@ void ColorMapArraySet(){
  private void initLightArrays() {
 
     ambientLight = BufferUtils.createFloatBuffer(4);
-    ambientLight.put(ambientLightData[0]).put(ambientLightData[1]).put(ambientLightData[2]).put(ambientLightData[3]).flip();
+    ambientLight.put(RenderSettings.ambientLightData[0]).put(RenderSettings.ambientLightData[1]).put(RenderSettings.ambientLightData[2]).put(RenderSettings.ambientLightData[3]).flip();
 
     
 
     diffuseLight = BufferUtils.createFloatBuffer(4);
-    diffuseLight.put(diffuseLightData[0]).put(diffuseLightData[1]).put(diffuseLightData[2]).put(diffuseLightData[3]).flip();
+    diffuseLight.put(RenderSettings.diffuseLightData[0]).put(RenderSettings.diffuseLightData[1]).put(RenderSettings.diffuseLightData[2]).put(RenderSettings.diffuseLightData[3]).flip();
 
     
 
     specularLight = BufferUtils.createFloatBuffer(4);
-    specularLight.put(specularLightData[0]).put(specularLightData[1]).put(specularLightData[2]).put(specularLightData[3]).flip();
+    specularLight.put(RenderSettings.specularLightData[0]).put(RenderSettings.specularLightData[1]).put(RenderSettings.specularLightData[2]).put(RenderSettings.specularLightData[3]).flip();
 
     
 
     positionLight = BufferUtils.createFloatBuffer(4);
-    positionLight.put(positionLightData[0]).put(positionLightData[1]).put(positionLightData[2]).put(positionLightData[3]).flip();
+    positionLight.put(RenderSettings.positionLightData[0]).put(RenderSettings.positionLightData[1]).put(RenderSettings.positionLightData[2]).put(RenderSettings.positionLightData[3]).flip();
 
 
 
     matSpecular = BufferUtils.createFloatBuffer(4);
-    matSpecular.put(matSpecularData[0]).put(matSpecularData[1]).put(matSpecularData[2]).put(matSpecularData[3]).flip();
+    matSpecular.put(RenderSettings.matSpecularData[0]).put(RenderSettings.matSpecularData[1]).put(RenderSettings.matSpecularData[2]).put(RenderSettings.matSpecularData[3]).flip();
 
     return;
 }
@@ -1305,11 +1213,11 @@ private void initOpenGl(){
 
     GL11.glEnable(GL11.GL_TEXTURE_2D); // Enable Texture Mapping
     GL11.glShadeModel(GL11.GL_SMOOTH); // Enable Smooth Shading
-    GL11.glClearColor(0.0f, 0.0f, 0.0f, 0.0f); //  Background COLOR
+    GL11.glClearColor(RenderSettings.BackgroundColor.x, RenderSettings.BackgroundColor.y, RenderSettings.BackgroundColor.z, RenderSettings.BackgroundColor.w); //  Background COLOR
     GL11.glClearDepth(1.0); // Depth Buffer Setup
     GL11.glEnable(GL11.GL_DEPTH_TEST); // Enables Depth Testing
     GL11.glDepthFunc(GL11.GL_LEQUAL); // The Type Of Depth Testing To Do
-
+    //GL11.glDepthRange(0, 10000);
     GL11.glMatrixMode(GL11.GL_PROJECTION); // Select The Projection Matrix
     GL11.glLoadIdentity(); // Reset The Projection Matrix
 
@@ -1317,17 +1225,17 @@ private void initOpenGl(){
 
     windowWidth = displayMode.getWidth();
     windowHeight = displayMode.getHeight();
-    GLU.gluPerspective(45.0f,windowWidth / windowHeight, 0.1f, 100.0f);
+    //GLU.gluPerspective(45.0f,windowWidth / windowHeight, ZNear, ZFar);
     GL11.glMatrixMode(GL11.GL_MODELVIEW); // Select The Modelview Matrix
 
     // Really Nice Perspective Calculations
     GL11.glHint(GL11.GL_PERSPECTIVE_CORRECTION_HINT, GL11.GL_NICEST);
 
-
+    
 
     // adjust lighting
     GL11.glMaterial(GL11.GL_FRONT, GL11.GL_SPECULAR, matSpecular);
-    GL11.glMaterialf(GL11.GL_FRONT, GL11.GL_SHININESS, shininess);       
+    GL11.glMaterialf(GL11.GL_FRONT, GL11.GL_SHININESS, RenderSettings.shininess);       
     GL11.glLight(GL11.GL_LIGHT0, GL11.GL_AMBIENT, ambientLight);
     GL11.glLight(GL11.GL_LIGHT0, GL11.GL_DIFFUSE, diffuseLight);
     GL11.glLight(GL11.GL_LIGHT0, GL11.GL_SPECULAR, specularLight);
@@ -1340,9 +1248,17 @@ private void initOpenGl(){
 
 
     // enable transparency blending
-    GL11.glEnable (GL11.GL_BLEND); 
-    GL11.glBlendFunc (GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-
+    GL11.glEnable(GL11.GL_BLEND); 
+    // test of "order independant transparency"
+    //GL11.glBlendFunc(GL11.GL_ZERO, GL11.GL_SRC_COLOR);  
+    //GL11.glBlendFunc(GL11.GL_ONE, GL11.GL_ONE);
+  
+    
+    
+    
+    // original function call
+    GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+    
 }
 
 
@@ -1350,5 +1266,345 @@ private void initOpenGl(){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//----------------deprecated code, saved but unused for now---------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+
+
+/*
+
+
+private void RenderGhostAtoms(){
+    ArrayList<GhostAtom> GhostAtomListToRender;
+    GhostAtom SingleGhostAtom;
+    synchronized(GhastlyLock){
+        // in display proposed mode                                                      
+            // only display proposed
+        if(Ghastly.DisplayProposed){
+            GhostAtomListToRender = Ghastly.GetProposedAtoms();
+            if(GhostAtomListToRender == null) return;
+            if(GhostAtomListToRender.isEmpty())return;       
+            for(int itor = 0; itor < GhostAtomListToRender.size(); itor++){
+                SingleGhostAtom = GhostAtomListToRender.get(itor);
+                GL11.glTranslatef(SingleGhostAtom.x, SingleGhostAtom.y, SingleGhostAtom.z);
+
+
+                // need to higlight atoms if they are
+                if(SingleGhostAtom.HighlightLevel == 0){
+                    GL11.glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
+                    GL11.glLoadName(itor + 10000);
+
+                    Sphere s = new Sphere();
+                    //size adjustable
+                    if(SingleGhostAtom.radius <= 0){
+                        s.draw(0.2f, 20, 20);
+                    }else{
+                        s.draw(SingleGhostAtom.radius, 20, 20);
+                    }
+                }else if(SingleGhostAtom.HighlightLevel == 1){
+                    GL11.glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
+                    GL11.glLoadName(itor + 11000);
+                    Sphere sin = new Sphere();
+                    //size adjustable
+                    if(SingleGhostAtom.radius <= 0){
+                        sin.draw(0.2f, 20, 20);
+                    }else{
+                        sin.draw(SingleGhostAtom.radius, 20, 20);
+                    } 
+                    GL11.glColor4f(1.0f, 1.0f, 0.0f, 0.5f);
+                    GL11.glLoadName(itor + 10000);
+                    Sphere sout = new Sphere();
+                    //size adjustable
+                    if(SingleGhostAtom.radius <= 0){
+                        sout.draw(0.5f, 20, 20);
+                    }else{
+                        sout.draw(SingleGhostAtom.radius * 2.5f, 20, 20);
+                    }
+                }else{
+                    GL11.glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
+                    GL11.glLoadName(itor + 11000);
+                    Sphere sin = new Sphere();
+                    //size adjustable
+                    if(SingleGhostAtom.radius <= 0){
+                        sin.draw(0.2f, 20, 20);
+                    }else{
+                        sin.draw(SingleGhostAtom.radius, 20, 20);
+                    } 
+                    GL11.glColor4f(1.0f, 0.0f, 0.0f, 0.5f);
+                    GL11.glLoadName(itor + 10000);
+                    Sphere sout = new Sphere();
+                    //size adjustable
+                    if(SingleGhostAtom.radius <= 0){
+                        sout.draw(0.5f, 20, 20);
+                    }else{
+                        sout.draw(SingleGhostAtom.radius * 2.5f, 20, 20);
+                    }
+                }
+
+
+                GL11.glTranslatef(-SingleGhostAtom.x, -SingleGhostAtom.y, -SingleGhostAtom.z);
+            }
+
+        // in normal mode, display all    
+        }else{
+
+            if(Ghastly.GetAtoms().isEmpty())return;   
+
+            GhostAtomListToRender = Ghastly.GetAtoms();
+            if(GhostAtomListToRender == null) return;
+            if(GhostAtomListToRender.isEmpty())return;  
+
+            for(int itor = 0; itor < GhostAtomListToRender.size(); itor++){
+                SingleGhostAtom = GhostAtomListToRender.get(itor);
+                GL11.glTranslatef(SingleGhostAtom.x, SingleGhostAtom.y, SingleGhostAtom.z);
+
+
+                // need to higlight atoms if they are
+                if(SingleGhostAtom.HighlightLevel == 0){
+                    GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+                    GL11.glLoadName(itor + 10000);
+                    Sphere s = new Sphere();
+                    //size adjustable
+                    if(SingleGhostAtom.radius <= 0){
+                        s.draw(0.2f, 20, 20);
+                    }else{
+                        s.draw(SingleGhostAtom.radius, 20, 20);
+                    }
+                }else if(SingleGhostAtom.HighlightLevel == 1){
+                    GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+                    GL11.glLoadName(itor + 11000);
+                    Sphere sin = new Sphere();
+                    //size adjustable
+                    if(SingleGhostAtom.radius <= 0){
+                        sin.draw(0.2f, 20, 20);
+                    }else{
+                        sin.draw(SingleGhostAtom.radius, 20, 20);
+                    }                                    
+                    GL11.glColor4f(1.0f, 1.0f, 0.0f, 0.5f);
+                    GL11.glLoadName(itor + 10000);
+                    Sphere sout = new Sphere();
+                    //size adjustable
+                    if(SingleGhostAtom.radius <= 0){
+                        sout.draw(0.5f, 20, 20);
+                    }else{
+                        sout.draw(SingleGhostAtom.radius * 2.5f, 20, 20);
+                    }
+                }else{
+                    GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+                    GL11.glLoadName(itor + 11000);
+                    Sphere sin = new Sphere();
+                    //size adjustable
+                    if(SingleGhostAtom.radius <= 0){
+                        sin.draw(0.2f, 20, 20);
+                    }else{
+                        sin.draw(SingleGhostAtom.radius, 20, 20);
+                    }
+                    GL11.glColor4f(1.0f, 0.0f, 0.0f, 0.5f);
+                    GL11.glLoadName(itor + 10000);
+                    Sphere sout = new Sphere();
+                    //size adjustable
+                    if(SingleGhostAtom.radius <= 0){
+                        sout.draw(0.5f, 20, 20);
+                    }else{
+                        sout.draw(SingleGhostAtom.radius * 2.5f, 20, 20);
+                    }
+                }
+                GL11.glTranslatef(-SingleGhostAtom.x, -SingleGhostAtom.y, -SingleGhostAtom.z);
+            }
+        }                               
+    }
+    
+}
+
+
+
+
+
+
+private void RenderMouseInPlace(){
+    
+    GL11.glTranslatef(MousePlaneCoordinates.x, MousePlaneCoordinates.y,  MousePlaneCoordinates.z);
+
+    GL11.glColor4f(1.0f, 0.0f, 0.0f, 0.5f);
+    
+    Sphere s = new Sphere();
+
+    s.draw(1.0f, 20, 20);
+
+    GL11.glTranslatef(-MousePlaneCoordinates.x, -MousePlaneCoordinates.y,  -MousePlaneCoordinates.z);           
+                               
+}
+
+
+
+private void RenderNormalPlane(){
+    
+    // http://mathworld.wolfram.com/Plane.html
+    
+    
+    float X_1, X_2, X_3, X_4;
+    float Y_1, Y_2, Y_3, Y_4;
+    float Z_1, Z_2, Z_3, Z_4;
+    float A_P, B_P, C_P, D_P;
+    X_1 = -100.0f;
+    X_2 = -100.0f;
+    X_3 = 100.0f;
+    X_4 = 100.0f;
+    
+    Y_1 = -100.0f;
+    Y_2 = 100.0f;
+    Y_3 = 100.0f;
+    Y_4 = -100.0f;
+    
+    // variable defining the plane
+    // the plance is parralell to the screen, normal vector direction discovered by deprojection from center of screen
+    // the plane is specified to be the incident with the center of the selected atom
+    
+    A_P = RayDirectionZero.x;
+    B_P = RayDirectionZero.y;
+    C_P = RayDirectionZero.z;
+    D_P = -RayDirectionZero.x*(AtomSelectionVector.x + DragRayVector.x) - RayDirectionZero.y*(AtomSelectionVector.y + DragRayVector.y) - RayDirectionZero.z*(AtomSelectionVector.z + DragRayVector.z);
+    
+    Z_1 = (-D_P - B_P * Y_1 - A_P * X_1) / C_P;
+    Z_2 = (-D_P - B_P * Y_2 - A_P * X_2) / C_P;
+    Z_3 = (-D_P - B_P * Y_3 - A_P * X_3) / C_P;
+    Z_4 = (-D_P - B_P * Y_4 - A_P * X_4) / C_P;
+    
+    
+    GL11.glBegin(GL11.GL_QUADS);
+    GL11.glEnable(GL11.GL_BLEND);
+    GL11.glColor4f(0.0f, 1.0f, 0.0f, 0.5f);
+    GL11.glVertex3f(X_1, Y_1, Z_1);
+    GL11.glVertex3f(X_2, Y_2, Z_2);
+    GL11.glVertex3f(X_3, Y_3, Z_3);
+    GL11.glVertex3f(X_4, Y_4, Z_4);
+    GL11.glDisable(GL11.GL_BLEND);
+    
+    
+    GL11.glEnd();
+   
+}
+
+
+private void RenderPCAPlane(){
+    synchronized(GhastlyLock){ 
+        if(!Ghastly.PlaneCalculated()){
+            
+            return;
+        } 
+
+        org.joml.Vector4f SelPlaneEq = Ghastly.GetPlaneEquation();
+        // http://mathworld.wolfram.com/Plane.html
+    
+  
+
+        float X_1, X_2, X_3, X_4;
+        float Y_1, Y_2, Y_3, Y_4;
+        float Z_1, Z_2, Z_3, Z_4;
+        float A_P, B_P, C_P, D_P;
+        X_1 = -100.0f;
+        X_2 = -100.0f;
+        X_3 = 100.0f;
+        X_4 = 100.0f;
+
+        Y_1 = -100.0f;
+        Y_2 = 100.0f;
+        Y_3 = 100.0f;
+        Y_4 = -100.0f;
+
+        // variable defining the plane
+        // the plance is parralell to the screen, normal vector direction discovered by deprojection from center of screen
+        // the plane is specified to be the incident with the center of the selected atom
+
+        A_P = SelPlaneEq.x;
+        B_P = SelPlaneEq.y;
+        C_P = SelPlaneEq.z;
+        D_P = SelPlaneEq.w;
+
+        Z_1 = (-D_P - B_P * Y_1 - A_P * X_1) / C_P;
+        Z_2 = (-D_P - B_P * Y_2 - A_P * X_2) / C_P;
+        Z_3 = (-D_P - B_P * Y_3 - A_P * X_3) / C_P;
+        Z_4 = (-D_P - B_P * Y_4 - A_P * X_4) / C_P;
+
+
+        GL11.glBegin(GL11.GL_QUADS);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glColor4f(0.0f, 1.0f, 0.0f, 0.5f);
+        GL11.glVertex3f(X_1, Y_1, Z_1);
+        GL11.glVertex3f(X_2, Y_2, Z_2);
+        GL11.glVertex3f(X_3, Y_3, Z_3);
+        GL11.glVertex3f(X_4, Y_4, Z_4);
+        GL11.glDisable(GL11.GL_BLEND);
+        GL11.glEnd();
+    
+    
+    }
+    
+}
+
+void renderSelectionLine() {
+    float start_x = 0, start_y = 0, start_z = 0;
+    float end_x = 0, end_y = 0, end_z = 0;
+   
+    
+    float start_x0 = 0, start_y0 = 0, start_z0 = 0;
+    float end_x0 = 0, end_y0 = 0, end_z0 = 0;
+    
+    
+    start_x = RayDirection.x * ParametricTValue + RayOrigin.x;
+    start_y = RayDirection.y * ParametricTValue + RayOrigin.y;
+    start_z = RayDirection.z * ParametricTValue + RayOrigin.z;
+
+    end_x = RayDirection.x * (-ParametricTValue) + RayOrigin.x;
+    end_y = RayDirection.y * (-ParametricTValue) + RayOrigin.y;
+    end_z = RayDirection.z * (-ParametricTValue) + RayOrigin.z;
+   
+    start_x0 = RayDirectionZero.x * ParametricTValue + RayOriginZero.x;
+    start_y0 = RayDirectionZero.y * ParametricTValue + RayOriginZero.y;
+    start_z0 = RayDirectionZero.z * ParametricTValue + RayOriginZero.z;
+
+    end_x0 = RayDirectionZero.x * (-ParametricTValue) + RayOriginZero.x;
+    end_y0 = RayDirectionZero.y * (-ParametricTValue) + RayOriginZero.y;
+    end_z0 = RayDirectionZero.z * (-ParametricTValue) + RayOriginZero.z;
+   
+    
+   
+    
+    
+    
+    // draw lines
+    GL11.glBegin(GL11.GL_LINES);
+   // selection line    
+    GL11.glColor3f(1.0f, 0.0f, 0.0f); 
+    GL11.glVertex3f(start_x, start_y, start_z);
+    GL11.glVertex3f(end_x, end_y, end_z);
+    //camera center line
+    GL11.glColor3f(0.0f, 1.0f, 0.0f); 
+    GL11.glVertex3f(start_x0, start_y0, start_z0);
+    GL11.glVertex3f(end_x0, end_y0, end_z0);
+   
+    GL11.glEnd();
+
+
+
+}
+
+*/
 // EOF
 }
