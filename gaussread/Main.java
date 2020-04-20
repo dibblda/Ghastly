@@ -1,7 +1,7 @@
 
-import OpenGLEngine.MoleculeDisplay;
+import OpenGLEngine.MainRenderingEngine;
 import GhostAtom.GhostAtomSet;
-import OpenGLEngine.MoleculeDisplay;
+import OpenGLEngine.MainRenderingEngine;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -17,13 +17,14 @@ public class Main {
     
       // classes and data for communicating between components
     public Object GhastlyLock = new Object();
-    public static MoleculeDisplay molecule = new MoleculeDisplay();;
+    public static MainRenderingEngine molecule = new MainRenderingEngine();;
     public static GhostAtomSet Ghastly = new GhostAtomSet();    
     
     public static void main(String args[]) {
     final GhastlyGUI Watching = new GhastlyGUI(molecule, Ghastly);
        
-
+	
+        
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
@@ -34,6 +35,8 @@ public class Main {
         });
         
         Ghastly.addObserver(Watching);
+        
+
         
         // Get the molecular display running                 
         molecule.start();

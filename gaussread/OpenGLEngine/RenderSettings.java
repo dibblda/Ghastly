@@ -94,12 +94,12 @@ public class RenderSettings {
     // color map for bonds
     public final static float [] singleBondColorMap = {0.6f, 0.6f, 0.6f};
 
-    // color map for NICS grid------------------------------------------------------
-    //------------------------------------------------------------------------------
+    // color map and settings for NICS grid------------------------------------------------------
+    //-------------------------------------------------------------------------------------------
     //Proposed
     public final static Vector4f GridCubeProposedColor = new Vector4f(1.0f, 1.0f, 1.0f, 0.5f);
     // outline color for the proposed grid
-    public final static Vector4f GridOutlineProposedColor= new Vector4f(1.0f, 0.0f, 0.0f, 0.5f);
+    public final static Vector4f GridOutlineProposedColor= new Vector4f(1.0f, 0.0f, 0.0f, 1.0f);
     // surface point color for the proposed
     public final static Vector4f GridSurfacePointProposedColor= new Vector4f(0.0f, 1.0f, 0.0f, 1.0f);
 
@@ -113,7 +113,7 @@ public class RenderSettings {
     // Non-selected 
     public final static Vector4f GridCubeColor = new Vector4f(1.0f, 1.0f, 1.0f, 0.5f);
     // outline color for the non-selected grid
-    public final static Vector4f GridOutlineColor= new Vector4f(1.0f, 0.0f, 0.0f, 1.0f);
+    public final static Vector4f GridOutlineColor= new Vector4f(0.0f, 1.0f, 0.0f, 1.0f);
     // Surface point for the non-selected grid
     public final static Vector4f GridSurfacePointColor= new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
 
@@ -123,12 +123,38 @@ public class RenderSettings {
     public final static float GridPointSize = 5.0f;
 
     // to display the points as a quad    
-    public final static boolean RenderPointsAsQuad = true;
+   // public final static boolean RenderPointsAsQuad = true;
     
     // maximum points to display in any quad, larger than this and just don't display
     // too much brings the rendering engine to it's knees
-    public final static int NO_DISPLAY = 100000;
+    public final static int GRID_NO_DISPLAY = 100000;
+    // to avoid z-fighting in certain intances, the value below is added or subtracted
+    // to put one object mathematically in front of or behind another without being
+    // noticable be the user
     public final static float Z_fight_delta = 0.001f;
+    
+     // color map and settings for NICS scan------------------------------------------------------
+    //-------------------------------------------------------------------------------------------
+    
+    public final static Vector4f ProposedScanGhostAtomColor = new Vector4f(1.0f, 1.0f, 1.0f, 0.5f);
+    public final static Vector4f HighlightedScanAtomColor = new Vector4f(1.0f, 1.0f, 0.0f, 1.0f);
+    public final static Vector4f SelectedScanAtomColor = new Vector4f(1.0f, 0.0f, 0.0f, 1.0f);
+    public final static Vector4f ScanGhostAtomColor = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
+    
+   
+    // size of lines that follow the center of the NICS scan
+    public final static float ScanCenterLineWidth = 2.0f;
+    // center line color for the proposed scan points
+    public final static Vector4f ScanProposedCenterLineColor= new Vector4f(1.0f, 0.0f, 0.0f, 1.0f);
+    // center line color for the  scan points
+    public final static Vector4f ScanCenterLineColor= new Vector4f(0.0f, 1.0f, 0.0f, 1.0f);
+    // size of points decorating NICS Scan line if it is larger than SCAN_NO_DISPLAY    
+    public final static float ScanPointSize = 5.0f;
+    // size of points decorating NICS Scan line if it is larger than SCAN_NO_DISPLAY for selected or highlighted atoms   
+    public final static float LargeScanPointSize = 7.0f;
+    // larger than this number display as points rather than spheres
+    public final static int SCAN_NO_DISPLAY = 400;
+    
     
     // color map for proposed and accepted ghost atoms------------------------------
     //------------------------------------------------------------------------------
@@ -139,9 +165,9 @@ public class RenderSettings {
     public final static Vector4f HighlightedAtomColor = new Vector4f(1.0f, 1.0f, 0.0f, 0.5f);
     public final static Vector4f SelectedAtomColor = new Vector4f(1.0f, 0.0f, 0.0f, 0.5f);
     // transparency in openGL is difficult, render the highlights behind
-    // grid cubes as solid rather than semi-transparent
-    public final static Vector4f HighlightedAtomInGridColor = new Vector4f(1.0f, 1.0f, 0.0f, 0.5f);
-    public final static Vector4f SelectedAtomInGridColor = new Vector4f(1.0f, 0.0f, 0.0f, 0.5f);
+    // grid cubes as solid rather than semi-transparent 
+    public final static Vector4f SolidHighlightedAtomColor = new Vector4f(1.0f, 1.0f, 0.0f, 0.5f);
+    public final static Vector4f SolidSelectedAtomColor = new Vector4f(1.0f, 0.0f, 0.0f, 0.5f);
 
     // Screen background color------------------------------------------------------
     //------------------------------------------------------------------------------

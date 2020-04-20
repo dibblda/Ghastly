@@ -9,9 +9,8 @@
 
 
 import OpenGLEngine.MainRenderingEngine;
-import FileReading.GaussFile;
+import FileIO.FileReading;
 import GhostAtom.*;
-import MeanPlane.Plane;
 import java.awt.Color;
 import java.nio.file.*;
 import java.io.File;
@@ -20,10 +19,12 @@ import java.util.Observable;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
-
+import FileIO.*;
 
 
 
@@ -35,7 +36,7 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
      // classes and data for communicating between components
     MainRenderingEngine molecule = null;
 
-    GaussFile moleculeData = null;
+    FileReading moleculeData = null;
 
     boolean moleculeDataLoaded = false;
 
@@ -74,7 +75,6 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        java.awt.GridBagConstraints gridBagConstraints;
 
         GhostAtomForm = new javax.swing.JFrame();
         AddNewGhostAtomType = new javax.swing.JButton();
@@ -91,24 +91,51 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         ComboBoxGhostType = new javax.swing.JComboBox<>();
         FileChooser = new javax.swing.JFileChooser();
         NICSO_dialog = new javax.swing.JFrame();
-        NICS0_dialog_cancelButton = new javax.swing.JButton();
-        NICS0_dialog_calculateButton = new javax.swing.JButton();
+        jPanel17 = new javax.swing.JPanel();
+        filler54 = new javax.swing.Box.Filler(new java.awt.Dimension(400, 10), new java.awt.Dimension(400, 10), new java.awt.Dimension(400, 10));
+        jPanel16 = new javax.swing.JPanel();
+        filler50 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 30), new java.awt.Dimension(10, 30), new java.awt.Dimension(10, 30));
         NICS0_dialog_textField = new javax.swing.JTextField();
-        NICS0_dialog_saveReturnButton = new javax.swing.JButton();
+        filler51 = new javax.swing.Box.Filler(new java.awt.Dimension(50, 30), new java.awt.Dimension(50, 30), new java.awt.Dimension(50, 30));
         NICS0_dialog_clearButton = new javax.swing.JButton();
-        jSeparator1 = new javax.swing.JSeparator();
+        filler49 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 30), new java.awt.Dimension(10, 30), new java.awt.Dimension(10, 30));
+        filler53 = new javax.swing.Box.Filler(new java.awt.Dimension(400, 10), new java.awt.Dimension(400, 10), new java.awt.Dimension(400, 10));
+        jPanel15 = new javax.swing.JPanel();
+        filler48 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 23), new java.awt.Dimension(10, 23), new java.awt.Dimension(10, 23));
         NICS0_dialog_saveButton = new javax.swing.JButton();
+        filler13 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 23), new java.awt.Dimension(10, 23), new java.awt.Dimension(10, 23));
+        NICS0_dialog_saveReturnButton = new javax.swing.JButton();
+        filler12 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 23), new java.awt.Dimension(10, 23), new java.awt.Dimension(10, 23));
+        NICS0_dialog_cancelButton = new javax.swing.JButton();
+        filler1 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 23), new java.awt.Dimension(10, 23), new java.awt.Dimension(10, 23));
+        filler52 = new javax.swing.Box.Filler(new java.awt.Dimension(400, 10), new java.awt.Dimension(400, 10), new java.awt.Dimension(400, 10));
         NICS1_dialog = new javax.swing.JFrame();
-        NICS1_dialog_cancelButton = new javax.swing.JButton();
-        NICS1_dialog_calculateButton = new javax.swing.JButton();
+        jPanel20 = new javax.swing.JPanel();
+        filler65 = new javax.swing.Box.Filler(new java.awt.Dimension(400, 10), new java.awt.Dimension(400, 10), new java.awt.Dimension(400, 10));
+        jPanel19 = new javax.swing.JPanel();
+        filler62 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 30), new java.awt.Dimension(10, 30), new java.awt.Dimension(10, 30));
         NICS1_dialog_textField = new javax.swing.JTextField();
-        NICS1_dialog_saveReturnButton = new javax.swing.JButton();
-        NICS1_dialog_clearButton = new javax.swing.JButton();
-        jSeparator2 = new javax.swing.JSeparator();
-        NICS1_dialog_saveButton = new javax.swing.JButton();
+        filler61 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 30), new java.awt.Dimension(10, 30), new java.awt.Dimension(10, 30));
         NICS1_dialog_ChoosePlane = new javax.swing.JComboBox<>();
+        filler60 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 30), new java.awt.Dimension(10, 30), new java.awt.Dimension(10, 30));
+        NICS1_dialog_clearButton = new javax.swing.JButton();
+        filler59 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 30), new java.awt.Dimension(10, 30), new java.awt.Dimension(10, 30));
+        filler64 = new javax.swing.Box.Filler(new java.awt.Dimension(400, 10), new java.awt.Dimension(400, 10), new java.awt.Dimension(400, 10));
+        jPanel18 = new javax.swing.JPanel();
+        filler58 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 23), new java.awt.Dimension(10, 23), new java.awt.Dimension(10, 23));
+        NICS1_dialog_saveReturnButton = new javax.swing.JButton();
+        filler57 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 23), new java.awt.Dimension(10, 23), new java.awt.Dimension(10, 23));
+        NICS1_dialog_saveButton = new javax.swing.JButton();
+        filler56 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 23), new java.awt.Dimension(10, 23), new java.awt.Dimension(10, 23));
+        NICS1_dialog_cancelButton = new javax.swing.JButton();
+        filler55 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 23), new java.awt.Dimension(10, 23), new java.awt.Dimension(10, 23));
+        filler63 = new javax.swing.Box.Filler(new java.awt.Dimension(400, 10), new java.awt.Dimension(400, 10), new java.awt.Dimension(400, 10));
         NICS_Scan_dialog = new javax.swing.JFrame();
+        filler23 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 550), new java.awt.Dimension(10, 550), new java.awt.Dimension(10, 550));
+        jPanel11 = new javax.swing.JPanel();
+        filler46 = new javax.swing.Box.Filler(new java.awt.Dimension(500, 10), new java.awt.Dimension(500, 10), new java.awt.Dimension(500, 10));
         LengthDeltaContainer_Scan = new javax.swing.JPanel();
+        filler16 = new javax.swing.Box.Filler(new java.awt.Dimension(500, 0), new java.awt.Dimension(500, 0), new java.awt.Dimension(500, 0));
         jPanel2 = new javax.swing.JPanel();
         NICS_Scan_Delta_textField = new javax.swing.JTextField();
         jLabel6 = new javax.swing.JLabel();
@@ -121,8 +148,9 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         jPanel3 = new javax.swing.JPanel();
         NICS_Scan_ByDelta_jRadioButton = new javax.swing.JRadioButton();
         NICS_Scan_ByPoints_RadioButton = new javax.swing.JRadioButton();
+        filler45 = new javax.swing.Box.Filler(new java.awt.Dimension(500, 10), new java.awt.Dimension(500, 10), new java.awt.Dimension(500, 10));
         PlaneDefinitionContainer_Scan = new javax.swing.JPanel();
-        filler20 = new javax.swing.Box.Filler(new java.awt.Dimension(100, 0), new java.awt.Dimension(100, 0), new java.awt.Dimension(100, 32767));
+        filler15 = new javax.swing.Box.Filler(new java.awt.Dimension(500, 0), new java.awt.Dimension(500, 0), new java.awt.Dimension(500, 0));
         jPanel10 = new javax.swing.JPanel();
         NICS_Scan_dialog_textField = new javax.swing.JTextField();
         jLabel5 = new javax.swing.JLabel();
@@ -134,32 +162,48 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         NICS_Scan_ZExternal_Text = new javax.swing.JTextField();
         NICS_Scan_By_Atom_Specified_Plane_Radio = new javax.swing.JRadioButton();
         NICS_Scan_By_Global_Coordinate_Plane_Radio = new javax.swing.JRadioButton();
-        filler19 = new javax.swing.Box.Filler(new java.awt.Dimension(100, 0), new java.awt.Dimension(100, 0), new java.awt.Dimension(100, 32767));
+        filler20 = new javax.swing.Box.Filler(new java.awt.Dimension(500, 0), new java.awt.Dimension(500, 0), new java.awt.Dimension(500, 0));
+        filler44 = new javax.swing.Box.Filler(new java.awt.Dimension(500, 10), new java.awt.Dimension(500, 10), new java.awt.Dimension(500, 10));
         PolarAngleContainer_Scan = new javax.swing.JPanel();
-        filler17 = new javax.swing.Box.Filler(new java.awt.Dimension(100, 0), new java.awt.Dimension(100, 0), new java.awt.Dimension(100, 32767));
+        filler14 = new javax.swing.Box.Filler(new java.awt.Dimension(500, 0), new java.awt.Dimension(500, 0), new java.awt.Dimension(500, 0));
+        jPanel6 = new javax.swing.JPanel();
+        filler22 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 76), new java.awt.Dimension(10, 76), new java.awt.Dimension(10, 76));
         jPanel9 = new javax.swing.JPanel();
         jLabel10 = new javax.swing.JLabel();
         NICS_Scan_Phi_textField = new javax.swing.JTextField();
-        filler16 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 0), new java.awt.Dimension(10, 0), new java.awt.Dimension(10, 32767));
         jLabel14 = new javax.swing.JLabel();
-        filler14 = new javax.swing.Box.Filler(new java.awt.Dimension(100, 0), new java.awt.Dimension(100, 0), new java.awt.Dimension(100, 32767));
+        filler18 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 76), new java.awt.Dimension(10, 76), new java.awt.Dimension(10, 76));
         jPanel8 = new javax.swing.JPanel();
         jLabel11 = new javax.swing.JLabel();
         NICS_Scan_Theta_textField = new javax.swing.JTextField();
-        filler15 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 0), new java.awt.Dimension(10, 0), new java.awt.Dimension(10, 32767));
+        filler17 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 76), new java.awt.Dimension(10, 76), new java.awt.Dimension(10, 76));
         jLabel15 = new javax.swing.JLabel();
-        filler18 = new javax.swing.Box.Filler(new java.awt.Dimension(100, 0), new java.awt.Dimension(100, 0), new java.awt.Dimension(100, 32767));
+        filler21 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 76), new java.awt.Dimension(10, 76), new java.awt.Dimension(10, 76));
+        filler43 = new javax.swing.Box.Filler(new java.awt.Dimension(500, 10), new java.awt.Dimension(500, 10), new java.awt.Dimension(500, 10));
+        jPanel13 = new javax.swing.JPanel();
+        jPanel12 = new javax.swing.JPanel();
         jPanel7 = new javax.swing.JPanel();
+        filler30 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 23), new java.awt.Dimension(10, 23), new java.awt.Dimension(10, 23));
         NICS_Scan_dialog_clearParameterButton = new javax.swing.JButton();
-        NICS_Scan_dialog_saveReturnButton = new javax.swing.JButton();
+        filler29 = new javax.swing.Box.Filler(new java.awt.Dimension(5, 23), new java.awt.Dimension(5, 23), new java.awt.Dimension(5, 23));
+        NICS_Scan_Quit_Button = new javax.swing.JButton();
+        filler27 = new javax.swing.Box.Filler(new java.awt.Dimension(5, 23), new java.awt.Dimension(5, 23), new java.awt.Dimension(5, 23));
         NICS_Scan_dialog_saveButton = new javax.swing.JButton();
-        NICS_Scan_cancelButton = new javax.swing.JButton();
+        filler28 = new javax.swing.Box.Filler(new java.awt.Dimension(5, 23), new java.awt.Dimension(5, 23), new java.awt.Dimension(5, 23));
+        NICS_Scan_dialog_saveReturnButton = new javax.swing.JButton();
+        filler31 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 23), new java.awt.Dimension(10, 23), new java.awt.Dimension(10, 23));
+        filler47 = new javax.swing.Box.Filler(new java.awt.Dimension(500, 0), new java.awt.Dimension(500, 0), new java.awt.Dimension(500, 0));
+        filler42 = new javax.swing.Box.Filler(new java.awt.Dimension(500, 10), new java.awt.Dimension(500, 10), new java.awt.Dimension(500, 10));
+        filler19 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 550), new java.awt.Dimension(10, 550), new java.awt.Dimension(10, 550));
         NICS_Scan_buttonGroup = new javax.swing.ButtonGroup();
         NICS_Scan_AtomSelection_buttonGroup = new javax.swing.ButtonGroup();
         NICS_Grid_dialog = new javax.swing.JFrame();
+        filler10 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 550), new java.awt.Dimension(10, 550), new java.awt.Dimension(10, 550));
+        jPanel14 = new javax.swing.JPanel();
+        filler41 = new javax.swing.Box.Filler(new java.awt.Dimension(500, 10), new java.awt.Dimension(500, 10), new java.awt.Dimension(500, 10));
         GridCoordinateContainer = new javax.swing.JPanel();
         XYZContainer = new javax.swing.JPanel();
-        filler11 = new javax.swing.Box.Filler(new java.awt.Dimension(5, 0), new java.awt.Dimension(5, 0), new java.awt.Dimension(5, 32767));
+        filler7 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 158), new java.awt.Dimension(10, 158), new java.awt.Dimension(10, 158));
         XParameters = new javax.swing.JPanel();
         NICS_Grid_Points_label1 = new javax.swing.JTextField();
         NICS_Grid_XDelta_textField = new javax.swing.JTextField();
@@ -169,6 +213,7 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         NICS_Grid_MaxRange_label1 = new javax.swing.JTextField();
         NICS_Grid_XMaxRange_textField = new javax.swing.JTextField();
         NICS_Grid_Delta_label1 = new javax.swing.JTextField();
+        filler5 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 158), new java.awt.Dimension(10, 158), new java.awt.Dimension(10, 158));
         YParameters = new javax.swing.JPanel();
         NICS_Grid_Points_label = new javax.swing.JTextField();
         NICS_Grid_YDelta_textField = new javax.swing.JTextField();
@@ -178,6 +223,7 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         NICS_Grid_MaxRange_label = new javax.swing.JTextField();
         NICS_Grid_YMaxRange_textField = new javax.swing.JTextField();
         NICS_Grid_Delta_label = new javax.swing.JTextField();
+        filler3 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 158), new java.awt.Dimension(10, 158), new java.awt.Dimension(10, 158));
         ZParameters = new javax.swing.JPanel();
         NICS_Grid_Points_label2 = new javax.swing.JTextField();
         NICS_Grid_ZDelta_textField = new javax.swing.JTextField();
@@ -187,50 +233,70 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         NICS_Grid_MaxRange_label2 = new javax.swing.JTextField();
         NICS_Grid_ZMaxRange_textField = new javax.swing.JTextField();
         NICS_Grid_Delta_label2 = new javax.swing.JTextField();
-        filler10 = new javax.swing.Box.Filler(new java.awt.Dimension(5, 0), new java.awt.Dimension(5, 0), new java.awt.Dimension(5, 32767));
+        filler2 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 158), new java.awt.Dimension(10, 158), new java.awt.Dimension(10, 158));
         DeltaPointContainer = new javax.swing.JPanel();
         NICS_Grid_ByPoints_RadioButton = new javax.swing.JRadioButton();
         NICS_Grid_ByDelta_RadioButton = new javax.swing.JRadioButton();
-        filler1 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 10), new java.awt.Dimension(0, 10), new java.awt.Dimension(32767, 10));
-        PolarAngleContainer = new javax.swing.JPanel();
-        jPanel1 = new javax.swing.JPanel();
-        filler8 = new javax.swing.Box.Filler(new java.awt.Dimension(100, 0), new java.awt.Dimension(100, 0), new java.awt.Dimension(100, 32767));
-        PhiContainer = new javax.swing.JPanel();
-        jLabel2 = new javax.swing.JLabel();
-        filler3 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 5), new java.awt.Dimension(0, 5), new java.awt.Dimension(32767, 5));
-        NICS_Grid_Phi_textField = new javax.swing.JTextField();
-        filler9 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 20), new java.awt.Dimension(0, 20), new java.awt.Dimension(32767, 20));
-        filler13 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 0), new java.awt.Dimension(10, 0), new java.awt.Dimension(10, 32767));
-        jLabel13 = new javax.swing.JLabel();
-        filler6 = new javax.swing.Box.Filler(new java.awt.Dimension(100, 100), new java.awt.Dimension(100, 100), new java.awt.Dimension(200, 32767));
-        ThetaContainer = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
-        filler2 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 5), new java.awt.Dimension(0, 5), new java.awt.Dimension(32767, 5));
-        NICS_Grid_Theta_textField = new javax.swing.JTextField();
-        filler5 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 20), new java.awt.Dimension(0, 20), new java.awt.Dimension(32767, 20));
-        filler12 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 0), new java.awt.Dimension(10, 0), new java.awt.Dimension(10, 32767));
-        jLabel12 = new javax.swing.JLabel();
-        filler7 = new javax.swing.Box.Filler(new java.awt.Dimension(100, 0), new java.awt.Dimension(100, 0), new java.awt.Dimension(100, 32767));
+        filler9 = new javax.swing.Box.Filler(new java.awt.Dimension(500, 0), new java.awt.Dimension(500, 0), new java.awt.Dimension(500, 0));
+        filler40 = new javax.swing.Box.Filler(new java.awt.Dimension(500, 10), new java.awt.Dimension(500, 10), new java.awt.Dimension(500, 10));
         PlaneDefinitionContainer = new javax.swing.JPanel();
         jPanel4 = new javax.swing.JPanel();
         NICS_Grid_dialog_clearAtomButton = new javax.swing.JButton();
         NICS_Grid_By_Atom_Specified_Plane_Radio = new javax.swing.JRadioButton();
-        jTextField4 = new javax.swing.JTextField();
         NICS_Grid_dialog_textField = new javax.swing.JTextField();
-        jTextField3 = new javax.swing.JTextField();
-        jTextField2 = new javax.swing.JTextField();
+        jLabel16 = new javax.swing.JLabel();
+        jLabel17 = new javax.swing.JLabel();
+        jLabel18 = new javax.swing.JLabel();
         NICS_Grid_By_Global_Coordinate_Plane_Radio = new javax.swing.JRadioButton();
         NICS_Grid_YExternal_Text = new javax.swing.JTextField();
         NICS_Grid_XExternal_Text = new javax.swing.JTextField();
         NICS_Grid_ZExternal_Text = new javax.swing.JTextField();
+        filler8 = new javax.swing.Box.Filler(new java.awt.Dimension(500, 0), new java.awt.Dimension(500, 0), new java.awt.Dimension(500, 0));
+        filler39 = new javax.swing.Box.Filler(new java.awt.Dimension(500, 10), new java.awt.Dimension(500, 10), new java.awt.Dimension(500, 10));
+        PolarAngleContainer = new javax.swing.JPanel();
+        filler6 = new javax.swing.Box.Filler(new java.awt.Dimension(500, 0), new java.awt.Dimension(500, 0), new java.awt.Dimension(500, 0));
+        jPanel1 = new javax.swing.JPanel();
+        filler26 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 76), new java.awt.Dimension(10, 76), new java.awt.Dimension(10, 76));
+        PhiContainer = new javax.swing.JPanel();
+        jLabel2 = new javax.swing.JLabel();
+        NICS_Grid_Phi_textField = new javax.swing.JTextField();
+        jLabel13 = new javax.swing.JLabel();
+        filler25 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 76), new java.awt.Dimension(10, 76), new java.awt.Dimension(10, 76));
+        ThetaContainer = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        NICS_Grid_Theta_textField = new javax.swing.JTextField();
+        jLabel12 = new javax.swing.JLabel();
+        filler24 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 76), new java.awt.Dimension(10, 76), new java.awt.Dimension(10, 76));
+        filler38 = new javax.swing.Box.Filler(new java.awt.Dimension(500, 10), new java.awt.Dimension(500, 10), new java.awt.Dimension(500, 10));
         jPanel5 = new javax.swing.JPanel();
-        NICS_Grid_cancelButton = new javax.swing.JButton();
+        filler36 = new javax.swing.Box.Filler(new java.awt.Dimension(5, 23), new java.awt.Dimension(5, 23), new java.awt.Dimension(5, 23));
         NICS_Grid_dialog_clearParameterButton = new javax.swing.JButton();
-        NICS_Grid_dialog_saveReturnButton = new javax.swing.JButton();
+        filler35 = new javax.swing.Box.Filler(new java.awt.Dimension(5, 23), new java.awt.Dimension(5, 23), new java.awt.Dimension(5, 23));
+        NICS_Grid_Quit_Button = new javax.swing.JButton();
+        filler34 = new javax.swing.Box.Filler(new java.awt.Dimension(5, 23), new java.awt.Dimension(5, 23), new java.awt.Dimension(5, 23));
         NICS_Grid_dialog_saveButton = new javax.swing.JButton();
+        filler33 = new javax.swing.Box.Filler(new java.awt.Dimension(5, 23), new java.awt.Dimension(5, 23), new java.awt.Dimension(5, 23));
+        NICS_Grid_dialog_saveReturnButton = new javax.swing.JButton();
+        filler32 = new javax.swing.Box.Filler(new java.awt.Dimension(5, 23), new java.awt.Dimension(5, 23), new java.awt.Dimension(5, 23));
+        filler37 = new javax.swing.Box.Filler(new java.awt.Dimension(500, 10), new java.awt.Dimension(500, 10), new java.awt.Dimension(500, 10));
+        filler11 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 550), new java.awt.Dimension(10, 550), new java.awt.Dimension(10, 550));
         NICS_Grid_buttonGroup = new javax.swing.ButtonGroup();
         NICS_Grid_AtomSelection_buttonGroup = new javax.swing.ButtonGroup();
-        filler4 = new javax.swing.Box.Filler(new java.awt.Dimension(50, 0), new java.awt.Dimension(50, 0), new java.awt.Dimension(50, 32767));
+        FileChooserSaveOptions = new javax.swing.JPanel();
+        filler71 = new javax.swing.Box.Filler(new java.awt.Dimension(3, 120), new java.awt.Dimension(3, 120), new java.awt.Dimension(3, 120));
+        jPanel21 = new javax.swing.JPanel();
+        filler69 = new javax.swing.Box.Filler(new java.awt.Dimension(100, 10), new java.awt.Dimension(100, 10), new java.awt.Dimension(100, 10));
+        jLabel19 = new javax.swing.JLabel();
+        filler68 = new javax.swing.Box.Filler(new java.awt.Dimension(100, 5), new java.awt.Dimension(100, 5), new java.awt.Dimension(100, 5));
+        GhostAtomNameSelected = new javax.swing.JTextField();
+        filler67 = new javax.swing.Box.Filler(new java.awt.Dimension(100, 5), new java.awt.Dimension(100, 5), new java.awt.Dimension(100, 5));
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jList1 = new javax.swing.JList<>();
+        filler66 = new javax.swing.Box.Filler(new java.awt.Dimension(100, 5), new java.awt.Dimension(100, 5), new java.awt.Dimension(100, 5));
+        IncludeMolecule = new javax.swing.JCheckBox();
+        filler72 = new javax.swing.Box.Filler(new java.awt.Dimension(100, 10), new java.awt.Dimension(100, 10), new java.awt.Dimension(100, 10));
+        filler70 = new javax.swing.Box.Filler(new java.awt.Dimension(3, 120), new java.awt.Dimension(3, 120), new java.awt.Dimension(3, 120));
+        BlankPanel = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTextAreaCompletedCalculation = new javax.swing.JTextArea();
         MainMenu = new javax.swing.JMenuBar();
@@ -356,54 +422,77 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
                 .addContainerGap())
         );
 
-        NICSO_dialog.setTitle("NICS(0) ");
-        NICSO_dialog.setMinimumSize(new java.awt.Dimension(500, 250));
-        NICSO_dialog.setUndecorated(true);
-        NICSO_dialog.setSize(new java.awt.Dimension(400, 200));
-        NICSO_dialog.getContentPane().setLayout(new java.awt.GridBagLayout());
-
-        NICS0_dialog_cancelButton.setText("Quit");
-        NICS0_dialog_cancelButton.addActionListener(new java.awt.event.ActionListener() {
+        FileChooser.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                NICS0_dialog_cancelButtonActionPerformed(evt);
+                FileChooserActionPerformed(evt);
             }
         });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 4;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 5);
-        NICSO_dialog.getContentPane().add(NICS0_dialog_cancelButton, gridBagConstraints);
 
-        NICS0_dialog_calculateButton.setText("Calculate");
-        NICS0_dialog_calculateButton.setEnabled(false);
-        NICS0_dialog_calculateButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                NICS0_dialog_calculateButtonActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.ipadx = 10;
-        gridBagConstraints.ipady = 5;
-        NICSO_dialog.getContentPane().add(NICS0_dialog_calculateButton, gridBagConstraints);
+        NICSO_dialog.setTitle("NICS(0) Calculation");
+        NICSO_dialog.setMaximumSize(new java.awt.Dimension(400, 140));
+        NICSO_dialog.setMinimumSize(new java.awt.Dimension(400, 140));
+        NICSO_dialog.setPreferredSize(new java.awt.Dimension(400, 140));
+        NICSO_dialog.setResizable(false);
+        NICSO_dialog.setSize(new java.awt.Dimension(400, 140));
+        NICSO_dialog.getContentPane().setLayout(new javax.swing.BoxLayout(NICSO_dialog.getContentPane(), javax.swing.BoxLayout.LINE_AXIS));
 
+        jPanel17.setMaximumSize(new java.awt.Dimension(400, 117));
+        jPanel17.setMinimumSize(new java.awt.Dimension(400, 117));
+        jPanel17.setPreferredSize(new java.awt.Dimension(400, 117));
+        jPanel17.setLayout(new javax.swing.BoxLayout(jPanel17, javax.swing.BoxLayout.Y_AXIS));
+        jPanel17.add(filler54);
+
+        jPanel16.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Plane Definition", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION));
+        jPanel16.setLayout(new javax.swing.BoxLayout(jPanel16, javax.swing.BoxLayout.X_AXIS));
+        jPanel16.add(filler50);
+
+        NICS0_dialog_textField.setEditable(false);
+        NICS0_dialog_textField.setBackground(new java.awt.Color(255, 51, 0));
         NICS0_dialog_textField.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        NICS0_dialog_textField.setText("Define Atom Plane");
+        NICS0_dialog_textField.setText("Define Plane");
+        NICS0_dialog_textField.setMaximumSize(new java.awt.Dimension(100, 20));
+        NICS0_dialog_textField.setMinimumSize(new java.awt.Dimension(100, 20));
+        NICS0_dialog_textField.setPreferredSize(new java.awt.Dimension(100, 20));
         NICS0_dialog_textField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 NICS0_dialog_textFieldActionPerformed(evt);
             }
         });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridwidth = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(10, 0, 10, 0);
-        NICSO_dialog.getContentPane().add(NICS0_dialog_textField, gridBagConstraints);
+        jPanel16.add(NICS0_dialog_textField);
+        jPanel16.add(filler51);
+
+        NICS0_dialog_clearButton.setText("Clear");
+        NICS0_dialog_clearButton.setEnabled(false);
+        NICS0_dialog_clearButton.setMaximumSize(new java.awt.Dimension(100, 20));
+        NICS0_dialog_clearButton.setMinimumSize(new java.awt.Dimension(100, 20));
+        NICS0_dialog_clearButton.setPreferredSize(new java.awt.Dimension(100, 20));
+        NICS0_dialog_clearButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS0_dialog_clearButtonActionPerformed(evt);
+            }
+        });
+        jPanel16.add(NICS0_dialog_clearButton);
+        jPanel16.add(filler49);
+
+        jPanel17.add(jPanel16);
+        jPanel17.add(filler53);
+
+        jPanel15.setPreferredSize(new java.awt.Dimension(379, 23));
+        jPanel15.setLayout(new javax.swing.BoxLayout(jPanel15, javax.swing.BoxLayout.X_AXIS));
+        jPanel15.add(filler48);
+
+        NICS0_dialog_saveButton.setText("Save");
+        NICS0_dialog_saveButton.setEnabled(false);
+        NICS0_dialog_saveButton.setMaximumSize(new java.awt.Dimension(113, 23));
+        NICS0_dialog_saveButton.setMinimumSize(new java.awt.Dimension(113, 23));
+        NICS0_dialog_saveButton.setPreferredSize(new java.awt.Dimension(113, 23));
+        NICS0_dialog_saveButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS0_dialog_saveButtonActionPerformed(evt);
+            }
+        });
+        jPanel15.add(NICS0_dialog_saveButton);
+        jPanel15.add(filler13);
 
         NICS0_dialog_saveReturnButton.setText("Save and Return");
         NICS0_dialog_saveReturnButton.setEnabled(false);
@@ -412,93 +501,84 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
                 NICS0_dialog_saveReturnButtonActionPerformed(evt);
             }
         });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 4;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 5);
-        NICSO_dialog.getContentPane().add(NICS0_dialog_saveReturnButton, gridBagConstraints);
+        jPanel15.add(NICS0_dialog_saveReturnButton);
+        jPanel15.add(filler12);
 
-        NICS0_dialog_clearButton.setText("Clear");
-        NICS0_dialog_clearButton.setEnabled(false);
-        NICS0_dialog_clearButton.addActionListener(new java.awt.event.ActionListener() {
+        NICS0_dialog_cancelButton.setText("Quit");
+        NICS0_dialog_cancelButton.setMaximumSize(new java.awt.Dimension(113, 23));
+        NICS0_dialog_cancelButton.setMinimumSize(new java.awt.Dimension(113, 23));
+        NICS0_dialog_cancelButton.setPreferredSize(new java.awt.Dimension(113, 23));
+        NICS0_dialog_cancelButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                NICS0_dialog_clearButtonActionPerformed(evt);
+                NICS0_dialog_cancelButtonActionPerformed(evt);
             }
         });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.ipadx = 10;
-        gridBagConstraints.ipady = 5;
-        NICSO_dialog.getContentPane().add(NICS0_dialog_clearButton, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.gridwidth = 3;
-        gridBagConstraints.ipadx = 250;
-        gridBagConstraints.ipady = 1;
-        gridBagConstraints.insets = new java.awt.Insets(11, 10, 0, 10);
-        NICSO_dialog.getContentPane().add(jSeparator1, gridBagConstraints);
+        jPanel15.add(NICS0_dialog_cancelButton);
+        jPanel15.add(filler1);
 
-        NICS0_dialog_saveButton.setText("Save");
-        NICS0_dialog_saveButton.setEnabled(false);
-        NICS0_dialog_saveButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                NICS0_dialog_saveButtonActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 4;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(9, 5, 9, 5);
-        NICSO_dialog.getContentPane().add(NICS0_dialog_saveButton, gridBagConstraints);
+        jPanel17.add(jPanel15);
+        jPanel17.add(filler52);
 
-        NICS1_dialog.setTitle("NICS(0) ");
-        NICS1_dialog.setMinimumSize(new java.awt.Dimension(500, 250));
-        NICS1_dialog.setSize(new java.awt.Dimension(400, 200));
-        NICS1_dialog.getContentPane().setLayout(new java.awt.GridBagLayout());
+        NICSO_dialog.getContentPane().add(jPanel17);
 
-        NICS1_dialog_cancelButton.setText("Quit");
-        NICS1_dialog_cancelButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                NICS1_dialog_cancelButtonActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 4;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 5);
-        NICS1_dialog.getContentPane().add(NICS1_dialog_cancelButton, gridBagConstraints);
+        NICS1_dialog.setTitle("NICS(1)  Calculation");
+        NICS1_dialog.setMinimumSize(new java.awt.Dimension(400, 140));
+        NICS1_dialog.setResizable(false);
+        NICS1_dialog.setSize(new java.awt.Dimension(400, 140));
+        NICS1_dialog.getContentPane().setLayout(new javax.swing.BoxLayout(NICS1_dialog.getContentPane(), javax.swing.BoxLayout.LINE_AXIS));
 
-        NICS1_dialog_calculateButton.setText("Calculate");
-        NICS1_dialog_calculateButton.setEnabled(false);
-        NICS1_dialog_calculateButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                NICS1_dialog_calculateButtonActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.ipadx = 10;
-        gridBagConstraints.ipady = 5;
-        NICS1_dialog.getContentPane().add(NICS1_dialog_calculateButton, gridBagConstraints);
+        jPanel20.setMaximumSize(new java.awt.Dimension(400, 117));
+        jPanel20.setMinimumSize(new java.awt.Dimension(400, 117));
+        jPanel20.setPreferredSize(new java.awt.Dimension(400, 117));
+        jPanel20.setLayout(new javax.swing.BoxLayout(jPanel20, javax.swing.BoxLayout.Y_AXIS));
+        jPanel20.add(filler65);
+
+        jPanel19.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Plane Definition and Ghost Atom Location", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION));
+        jPanel19.setLayout(new javax.swing.BoxLayout(jPanel19, javax.swing.BoxLayout.LINE_AXIS));
+        jPanel19.add(filler62);
 
         NICS1_dialog_textField.setEditable(false);
+        NICS1_dialog_textField.setBackground(new java.awt.Color(255, 0, 0));
         NICS1_dialog_textField.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        NICS1_dialog_textField.setText("Define Atom Plane");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridwidth = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(10, 0, 10, 0);
-        NICS1_dialog.getContentPane().add(NICS1_dialog_textField, gridBagConstraints);
+        NICS1_dialog_textField.setText("Define Plane");
+        NICS1_dialog_textField.setMaximumSize(new java.awt.Dimension(100, 20));
+        NICS1_dialog_textField.setMinimumSize(new java.awt.Dimension(100, 20));
+        NICS1_dialog_textField.setPreferredSize(new java.awt.Dimension(100, 20));
+        jPanel19.add(NICS1_dialog_textField);
+        jPanel19.add(filler61);
+
+        NICS1_dialog_ChoosePlane.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Above Plane", "Below Plane", "Both" }));
+        NICS1_dialog_ChoosePlane.setEnabled(false);
+        NICS1_dialog_ChoosePlane.setMaximumSize(new java.awt.Dimension(100, 20));
+        NICS1_dialog_ChoosePlane.setMinimumSize(new java.awt.Dimension(100, 20));
+        NICS1_dialog_ChoosePlane.setPreferredSize(new java.awt.Dimension(100, 20));
+        NICS1_dialog_ChoosePlane.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS1_dialog_ChoosePlaneActionPerformed(evt);
+            }
+        });
+        jPanel19.add(NICS1_dialog_ChoosePlane);
+        jPanel19.add(filler60);
+
+        NICS1_dialog_clearButton.setText("Clear");
+        NICS1_dialog_clearButton.setEnabled(false);
+        NICS1_dialog_clearButton.setMaximumSize(new java.awt.Dimension(100, 20));
+        NICS1_dialog_clearButton.setMinimumSize(new java.awt.Dimension(100, 20));
+        NICS1_dialog_clearButton.setPreferredSize(new java.awt.Dimension(100, 20));
+        NICS1_dialog_clearButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS1_dialog_clearButtonActionPerformed(evt);
+            }
+        });
+        jPanel19.add(NICS1_dialog_clearButton);
+        jPanel19.add(filler59);
+
+        jPanel20.add(jPanel19);
+        jPanel20.add(filler64);
+
+        jPanel18.setPreferredSize(new java.awt.Dimension(379, 23));
+        jPanel18.setLayout(new javax.swing.BoxLayout(jPanel18, javax.swing.BoxLayout.X_AXIS));
+        jPanel18.add(filler58);
 
         NICS1_dialog_saveReturnButton.setText("Save and Return");
         NICS1_dialog_saveReturnButton.setEnabled(false);
@@ -507,69 +587,54 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
                 NICS1_dialog_saveReturnButtonActionPerformed(evt);
             }
         });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 4;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 5);
-        NICS1_dialog.getContentPane().add(NICS1_dialog_saveReturnButton, gridBagConstraints);
-
-        NICS1_dialog_clearButton.setText("Clear");
-        NICS1_dialog_clearButton.setEnabled(false);
-        NICS1_dialog_clearButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                NICS1_dialog_clearButtonActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.ipadx = 10;
-        gridBagConstraints.ipady = 5;
-        NICS1_dialog.getContentPane().add(NICS1_dialog_clearButton, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.gridwidth = 3;
-        gridBagConstraints.ipadx = 250;
-        gridBagConstraints.ipady = 1;
-        gridBagConstraints.insets = new java.awt.Insets(11, 10, 0, 10);
-        NICS1_dialog.getContentPane().add(jSeparator2, gridBagConstraints);
+        jPanel18.add(NICS1_dialog_saveReturnButton);
+        jPanel18.add(filler57);
 
         NICS1_dialog_saveButton.setText("Save");
         NICS1_dialog_saveButton.setEnabled(false);
+        NICS1_dialog_saveButton.setMaximumSize(new java.awt.Dimension(113, 23));
+        NICS1_dialog_saveButton.setMinimumSize(new java.awt.Dimension(113, 23));
+        NICS1_dialog_saveButton.setPreferredSize(new java.awt.Dimension(113, 23));
         NICS1_dialog_saveButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 NICS1_dialog_saveButtonActionPerformed(evt);
             }
         });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 4;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(9, 5, 9, 5);
-        NICS1_dialog.getContentPane().add(NICS1_dialog_saveButton, gridBagConstraints);
+        jPanel18.add(NICS1_dialog_saveButton);
+        jPanel18.add(filler56);
 
-        NICS1_dialog_ChoosePlane.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Above Plane", "Below Plane", "Both" }));
-        NICS1_dialog_ChoosePlane.setEnabled(false);
-        NICS1_dialog_ChoosePlane.addActionListener(new java.awt.event.ActionListener() {
+        NICS1_dialog_cancelButton.setText("Quit");
+        NICS1_dialog_cancelButton.setMaximumSize(new java.awt.Dimension(113, 23));
+        NICS1_dialog_cancelButton.setMinimumSize(new java.awt.Dimension(113, 23));
+        NICS1_dialog_cancelButton.setPreferredSize(new java.awt.Dimension(113, 23));
+        NICS1_dialog_cancelButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                NICS1_dialog_ChoosePlaneActionPerformed(evt);
+                NICS1_dialog_cancelButtonActionPerformed(evt);
             }
         });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 2;
-        NICS1_dialog.getContentPane().add(NICS1_dialog_ChoosePlane, gridBagConstraints);
+        jPanel18.add(NICS1_dialog_cancelButton);
+        jPanel18.add(filler55);
 
-        NICS_Scan_dialog.setMinimumSize(new java.awt.Dimension(500, 600));
-        NICS_Scan_dialog.setPreferredSize(new java.awt.Dimension(500, 600));
+        jPanel20.add(jPanel18);
+        jPanel20.add(filler63);
+
+        NICS1_dialog.getContentPane().add(jPanel20);
+
+        NICS_Scan_dialog.setTitle("NICS Scan Calculation");
+        NICS_Scan_dialog.setMinimumSize(new java.awt.Dimension(530, 550));
         NICS_Scan_dialog.setResizable(false);
-        NICS_Scan_dialog.getContentPane().setLayout(new javax.swing.BoxLayout(NICS_Scan_dialog.getContentPane(), javax.swing.BoxLayout.Y_AXIS));
+        NICS_Scan_dialog.getContentPane().setLayout(new javax.swing.BoxLayout(NICS_Scan_dialog.getContentPane(), javax.swing.BoxLayout.X_AXIS));
+        NICS_Scan_dialog.getContentPane().add(filler23);
+
+        jPanel11.setMinimumSize(new java.awt.Dimension(500, 550));
+        jPanel11.setName(""); // NOI18N
+        jPanel11.setPreferredSize(new java.awt.Dimension(500, 550));
+        jPanel11.setLayout(new javax.swing.BoxLayout(jPanel11, javax.swing.BoxLayout.Y_AXIS));
+        jPanel11.add(filler46);
 
         LengthDeltaContainer_Scan.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Scan Dimensions", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION));
         LengthDeltaContainer_Scan.setLayout(new javax.swing.BoxLayout(LengthDeltaContainer_Scan, javax.swing.BoxLayout.Y_AXIS));
+        LengthDeltaContainer_Scan.add(filler16);
 
         NICS_Scan_Delta_textField.setHorizontalAlignment(javax.swing.JTextField.CENTER);
         NICS_Scan_Delta_textField.setText("1.0");
@@ -646,29 +711,23 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGap(15, 15, 15)
-                        .addComponent(jLabel6)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel7))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(NICS_Scan_MinRange_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(NICS_Scan_MaxRange_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGap(38, 38, 38)
-                        .addComponent(jLabel8)
-                        .addGap(38, 38, 38)
-                        .addComponent(jLabel9))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGap(18, 18, 18)
-                        .addComponent(NICS_Scan_Delta_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(NICS_Scan_NumberPoints_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap())
+                .addGap(10, 10, 10)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addComponent(NICS_Scan_MinRange_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel6))
+                .addGap(10, 10, 10)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addComponent(NICS_Scan_MaxRange_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel7))
+                .addGap(10, 10, 10)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addComponent(NICS_Scan_Delta_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel8))
+                .addGap(10, 10, 10)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addComponent(NICS_Scan_NumberPoints_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel9))
+                .addGap(10, 10, 10))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -712,16 +771,16 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(10, 10, 10)
                 .addComponent(NICS_Scan_ByDelta_jRadioButton)
                 .addGap(10, 10, 10)
                 .addComponent(NICS_Scan_ByPoints_RadioButton)
-                .addContainerGap())
+                .addGap(10, 10, 10))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(7, 7, 7)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(NICS_Scan_ByDelta_jRadioButton)
                     .addComponent(NICS_Scan_ByPoints_RadioButton))
@@ -730,15 +789,16 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
 
         LengthDeltaContainer_Scan.add(jPanel3);
 
-        NICS_Scan_dialog.getContentPane().add(LengthDeltaContainer_Scan);
+        jPanel11.add(LengthDeltaContainer_Scan);
+        jPanel11.add(filler45);
 
         PlaneDefinitionContainer_Scan.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Plane Definition", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION));
-        PlaneDefinitionContainer_Scan.setMinimumSize(new java.awt.Dimension(575, 100));
+        PlaneDefinitionContainer_Scan.setMinimumSize(new java.awt.Dimension(575, 120));
         PlaneDefinitionContainer_Scan.setName(""); // NOI18N
-        PlaneDefinitionContainer_Scan.setPreferredSize(new java.awt.Dimension(575, 100));
+        PlaneDefinitionContainer_Scan.setPreferredSize(new java.awt.Dimension(575, 120));
         PlaneDefinitionContainer_Scan.setRequestFocusEnabled(false);
-        PlaneDefinitionContainer_Scan.setLayout(new javax.swing.BoxLayout(PlaneDefinitionContainer_Scan, javax.swing.BoxLayout.X_AXIS));
-        PlaneDefinitionContainer_Scan.add(filler20);
+        PlaneDefinitionContainer_Scan.setLayout(new javax.swing.BoxLayout(PlaneDefinitionContainer_Scan, javax.swing.BoxLayout.Y_AXIS));
+        PlaneDefinitionContainer_Scan.add(filler15);
 
         jPanel10.setAutoscrolls(true);
         jPanel10.setMinimumSize(new java.awt.Dimension(308, 84));
@@ -899,17 +959,23 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
                 .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(NICS_Scan_By_Global_Coordinate_Plane_Radio)
                     .addComponent(NICS_Scan_By_Atom_Specified_Plane_Radio))
-                .addContainerGap(2, Short.MAX_VALUE))
+                .addGap(10, 10, 10))
         );
 
         PlaneDefinitionContainer_Scan.add(jPanel10);
-        PlaneDefinitionContainer_Scan.add(filler19);
+        PlaneDefinitionContainer_Scan.add(filler20);
 
-        NICS_Scan_dialog.getContentPane().add(PlaneDefinitionContainer_Scan);
+        jPanel11.add(PlaneDefinitionContainer_Scan);
+        jPanel11.add(filler44);
 
         PolarAngleContainer_Scan.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Scan Polar Angle", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION));
-        PolarAngleContainer_Scan.setLayout(new javax.swing.BoxLayout(PolarAngleContainer_Scan, javax.swing.BoxLayout.LINE_AXIS));
-        PolarAngleContainer_Scan.add(filler17);
+        PolarAngleContainer_Scan.setMinimumSize(new java.awt.Dimension(500, 99));
+        PolarAngleContainer_Scan.setPreferredSize(new java.awt.Dimension(500, 99));
+        PolarAngleContainer_Scan.setLayout(new javax.swing.BoxLayout(PolarAngleContainer_Scan, javax.swing.BoxLayout.Y_AXIS));
+        PolarAngleContainer_Scan.add(filler14);
+
+        jPanel6.setLayout(new javax.swing.BoxLayout(jPanel6, javax.swing.BoxLayout.LINE_AXIS));
+        jPanel6.add(filler22);
 
         jLabel10.setText("<html><center>&Phi<br><center>(degrees)");
 
@@ -949,12 +1015,11 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
                 .addContainerGap())
         );
 
-        PolarAngleContainer_Scan.add(jPanel9);
-        PolarAngleContainer_Scan.add(filler16);
+        jPanel6.add(jPanel9);
 
         jLabel14.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Icons/Y_50.png"))); // NOI18N
-        PolarAngleContainer_Scan.add(jLabel14);
-        PolarAngleContainer_Scan.add(filler14);
+        jPanel6.add(jLabel14);
+        jPanel6.add(filler18);
 
         jLabel11.setText("<html><center>&Theta<br><center>(degrees)");
 
@@ -982,7 +1047,7 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
                 .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
                     .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(NICS_Scan_Theta_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap())
+                .addGap(9, 9, 9))
         );
         jPanel8Layout.setVerticalGroup(
             jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -991,26 +1056,71 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
                 .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(NICS_Scan_Theta_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addGap(17, 17, 17))
         );
 
-        PolarAngleContainer_Scan.add(jPanel8);
-        PolarAngleContainer_Scan.add(filler15);
+        jPanel6.add(jPanel8);
+        jPanel6.add(filler17);
 
         jLabel15.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Icons/Z_50.png"))); // NOI18N
         jLabel15.setToolTipText("");
-        PolarAngleContainer_Scan.add(jLabel15);
-        PolarAngleContainer_Scan.add(filler18);
+        jPanel6.add(jLabel15);
+        jPanel6.add(filler21);
 
-        NICS_Scan_dialog.getContentPane().add(PolarAngleContainer_Scan);
+        PolarAngleContainer_Scan.add(jPanel6);
 
-        NICS_Scan_dialog_clearParameterButton.setText("Clear Parameters");
+        jPanel11.add(PolarAngleContainer_Scan);
+        jPanel11.add(filler43);
+
+        jPanel13.setLayout(new javax.swing.BoxLayout(jPanel13, javax.swing.BoxLayout.Y_AXIS));
+
+        jPanel12.setLayout(new javax.swing.BoxLayout(jPanel12, javax.swing.BoxLayout.Y_AXIS));
+
+        jPanel7.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        jPanel7.setMaximumSize(new java.awt.Dimension(500, 30));
+        jPanel7.setMinimumSize(new java.awt.Dimension(500, 30));
+        jPanel7.setPreferredSize(new java.awt.Dimension(500, 30));
+        jPanel7.setRequestFocusEnabled(false);
+        jPanel7.setLayout(new javax.swing.BoxLayout(jPanel7, javax.swing.BoxLayout.X_AXIS));
+        jPanel7.add(filler30);
+
+        NICS_Scan_dialog_clearParameterButton.setText("Clear");
         NICS_Scan_dialog_clearParameterButton.setEnabled(false);
+        NICS_Scan_dialog_clearParameterButton.setMaximumSize(new java.awt.Dimension(113, 23));
+        NICS_Scan_dialog_clearParameterButton.setMinimumSize(new java.awt.Dimension(113, 23));
+        NICS_Scan_dialog_clearParameterButton.setPreferredSize(new java.awt.Dimension(113, 23));
         NICS_Scan_dialog_clearParameterButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 NICS_Scan_dialog_clearParameterButtonActionPerformed(evt);
             }
         });
+        jPanel7.add(NICS_Scan_dialog_clearParameterButton);
+        jPanel7.add(filler29);
+
+        NICS_Scan_Quit_Button.setText("Quit");
+        NICS_Scan_Quit_Button.setMaximumSize(new java.awt.Dimension(113, 23));
+        NICS_Scan_Quit_Button.setMinimumSize(new java.awt.Dimension(113, 23));
+        NICS_Scan_Quit_Button.setPreferredSize(new java.awt.Dimension(113, 23));
+        NICS_Scan_Quit_Button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Scan_Quit_ButtonActionPerformed(evt);
+            }
+        });
+        jPanel7.add(NICS_Scan_Quit_Button);
+        jPanel7.add(filler27);
+
+        NICS_Scan_dialog_saveButton.setText("Save");
+        NICS_Scan_dialog_saveButton.setEnabled(false);
+        NICS_Scan_dialog_saveButton.setMaximumSize(new java.awt.Dimension(113, 23));
+        NICS_Scan_dialog_saveButton.setMinimumSize(new java.awt.Dimension(113, 23));
+        NICS_Scan_dialog_saveButton.setPreferredSize(new java.awt.Dimension(113, 23));
+        NICS_Scan_dialog_saveButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Scan_dialog_saveButtonActionPerformed(evt);
+            }
+        });
+        jPanel7.add(NICS_Scan_dialog_saveButton);
+        jPanel7.add(filler28);
 
         NICS_Scan_dialog_saveReturnButton.setText("Save and Return");
         NICS_Scan_dialog_saveReturnButton.setEnabled(false);
@@ -1019,71 +1129,46 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
                 NICS_Scan_dialog_saveReturnButtonActionPerformed(evt);
             }
         });
+        jPanel7.add(NICS_Scan_dialog_saveReturnButton);
+        jPanel7.add(filler31);
 
-        NICS_Scan_dialog_saveButton.setText("Save");
-        NICS_Scan_dialog_saveButton.setEnabled(false);
-        NICS_Scan_dialog_saveButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                NICS_Scan_dialog_saveButtonActionPerformed(evt);
-            }
-        });
+        jPanel12.add(jPanel7);
 
-        NICS_Scan_cancelButton.setText("Quit");
-        NICS_Scan_cancelButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                NICS_Scan_cancelButtonActionPerformed(evt);
-            }
-        });
+        jPanel13.add(jPanel12);
+        jPanel13.add(filler47);
 
-        javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
-        jPanel7.setLayout(jPanel7Layout);
-        jPanel7Layout.setHorizontalGroup(
-            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel7Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel7Layout.createSequentialGroup()
-                        .addComponent(NICS_Scan_dialog_saveButton)
-                        .addGap(18, 18, 18)
-                        .addComponent(NICS_Scan_dialog_saveReturnButton)
-                        .addGap(18, 18, 18)
-                        .addComponent(NICS_Scan_cancelButton))
-                    .addComponent(NICS_Scan_dialog_clearParameterButton, javax.swing.GroupLayout.PREFERRED_SIZE, 268, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap())
-        );
-        jPanel7Layout.setVerticalGroup(
-            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel7Layout.createSequentialGroup()
-                .addGap(23, 23, 23)
-                .addComponent(NICS_Scan_dialog_clearParameterButton)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(NICS_Scan_dialog_saveButton)
-                    .addComponent(NICS_Scan_dialog_saveReturnButton)
-                    .addComponent(NICS_Scan_cancelButton))
-                .addContainerGap())
-        );
+        jPanel11.add(jPanel13);
+        jPanel11.add(filler42);
 
-        NICS_Scan_dialog.getContentPane().add(jPanel7);
+        NICS_Scan_dialog.getContentPane().add(jPanel11);
+        NICS_Scan_dialog.getContentPane().add(filler19);
 
         NICS_Grid_dialog.setTitle("NICS Grid Calculation");
         NICS_Grid_dialog.setMaximumSize(new java.awt.Dimension(2000, 2000));
-        NICS_Grid_dialog.setMinimumSize(new java.awt.Dimension(610, 600));
-        NICS_Grid_dialog.setPreferredSize(new java.awt.Dimension(500, 600));
+        NICS_Grid_dialog.setMinimumSize(new java.awt.Dimension(530, 550));
+        NICS_Grid_dialog.setPreferredSize(new java.awt.Dimension(530, 550));
         NICS_Grid_dialog.setResizable(false);
-        NICS_Grid_dialog.getContentPane().setLayout(new javax.swing.BoxLayout(NICS_Grid_dialog.getContentPane(), javax.swing.BoxLayout.Y_AXIS));
+        NICS_Grid_dialog.getContentPane().setLayout(new javax.swing.BoxLayout(NICS_Grid_dialog.getContentPane(), javax.swing.BoxLayout.X_AXIS));
+        NICS_Grid_dialog.getContentPane().add(filler10);
+
+        jPanel14.setMinimumSize(new java.awt.Dimension(500, 600));
+        jPanel14.setOpaque(false);
+        jPanel14.setPreferredSize(new java.awt.Dimension(500, 600));
+        jPanel14.setLayout(new javax.swing.BoxLayout(jPanel14, javax.swing.BoxLayout.Y_AXIS));
+        jPanel14.add(filler41);
 
         GridCoordinateContainer.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Grid Dimensions", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION));
         GridCoordinateContainer.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        GridCoordinateContainer.setMinimumSize(new java.awt.Dimension(500, 230));
+        GridCoordinateContainer.setFocusCycleRoot(true);
+        GridCoordinateContainer.setMinimumSize(new java.awt.Dimension(500, 210));
         GridCoordinateContainer.setOpaque(false);
-        GridCoordinateContainer.setPreferredSize(new java.awt.Dimension(500, 230));
+        GridCoordinateContainer.setPreferredSize(new java.awt.Dimension(500, 210));
         GridCoordinateContainer.setLayout(new javax.swing.BoxLayout(GridCoordinateContainer, javax.swing.BoxLayout.Y_AXIS));
 
         XYZContainer.setMinimumSize(new java.awt.Dimension(470, 158));
         XYZContainer.setPreferredSize(new java.awt.Dimension(470, 170));
-        XYZContainer.setLayout(new javax.swing.BoxLayout(XYZContainer, javax.swing.BoxLayout.LINE_AXIS));
-        XYZContainer.add(filler11);
+        XYZContainer.setLayout(new javax.swing.BoxLayout(XYZContainer, javax.swing.BoxLayout.X_AXIS));
+        XYZContainer.add(filler7);
 
         XParameters.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "<html><font color=\"red\"><b>X</b></font> Parameters", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION));
         XParameters.setAlignmentX(0.25F);
@@ -1217,6 +1302,7 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         );
 
         XYZContainer.add(XParameters);
+        XYZContainer.add(filler5);
 
         YParameters.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "<html><font color=\"green\"><b>Y</b></font> Parameters", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION));
         YParameters.setMinimumSize(new java.awt.Dimension(148, 158));
@@ -1349,6 +1435,7 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         );
 
         XYZContainer.add(YParameters);
+        XYZContainer.add(filler3);
 
         ZParameters.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "<html><font color=\"blue\"><b>Z</b></font> Parameters", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION));
         ZParameters.setAlignmentX(0.75F);
@@ -1480,7 +1567,7 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         );
 
         XYZContainer.add(ZParameters);
-        XYZContainer.add(filler10);
+        XYZContainer.add(filler2);
 
         GridCoordinateContainer.add(XYZContainer);
 
@@ -1521,118 +1608,18 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
                 .addGroup(DeltaPointContainerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(NICS_Grid_ByPoints_RadioButton)
                     .addComponent(NICS_Grid_ByDelta_RadioButton))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(0, 0, 0))
         );
 
         GridCoordinateContainer.add(DeltaPointContainer);
-        GridCoordinateContainer.add(filler1);
+        GridCoordinateContainer.add(filler9);
 
-        NICS_Grid_dialog.getContentPane().add(GridCoordinateContainer);
-
-        PolarAngleContainer.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Grid Polar Angle", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION));
-        PolarAngleContainer.setMinimumSize(new java.awt.Dimension(500, 91));
-        PolarAngleContainer.setPreferredSize(new java.awt.Dimension(500, 91));
-
-        jPanel1.setMinimumSize(new java.awt.Dimension(480, 50));
-        jPanel1.setName(""); // NOI18N
-        jPanel1.setPreferredSize(new java.awt.Dimension(480, 50));
-        jPanel1.setVerifyInputWhenFocusTarget(false);
-        jPanel1.setLayout(new javax.swing.BoxLayout(jPanel1, javax.swing.BoxLayout.LINE_AXIS));
-        jPanel1.add(filler8);
-
-        PhiContainer.setAlignmentX(0.66F);
-        PhiContainer.setMinimumSize(new java.awt.Dimension(55, 53));
-        PhiContainer.setPreferredSize(new java.awt.Dimension(55, 53));
-        PhiContainer.setLayout(new javax.swing.BoxLayout(PhiContainer, javax.swing.BoxLayout.Y_AXIS));
-
-        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel2.setText("<html><center>&Phi<br><center>(degrees)");
-        jLabel2.setAlignmentX(0.5F);
-        PhiContainer.add(jLabel2);
-        PhiContainer.add(filler3);
-
-        NICS_Grid_Phi_textField.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        NICS_Grid_Phi_textField.setText("0.0");
-        NICS_Grid_Phi_textField.setAlignmentY(1.0F);
-        NICS_Grid_Phi_textField.setMinimumSize(new java.awt.Dimension(50, 20));
-        NICS_Grid_Phi_textField.setPreferredSize(new java.awt.Dimension(50, 20));
-        NICS_Grid_Phi_textField.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                NICS_Grid_Text_Focus_Lost(evt);
-            }
-        });
-        NICS_Grid_Phi_textField.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                NICS_Grid_Text_Action_Performed(evt);
-            }
-        });
-        PhiContainer.add(NICS_Grid_Phi_textField);
-        PhiContainer.add(filler9);
-
-        jPanel1.add(PhiContainer);
-        jPanel1.add(filler13);
-
-        jLabel13.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Icons/Y_50.png"))); // NOI18N
-        jPanel1.add(jLabel13);
-        jPanel1.add(filler6);
-
-        ThetaContainer.setAlignmentX(0.33F);
-        ThetaContainer.setMinimumSize(new java.awt.Dimension(55, 53));
-        ThetaContainer.setPreferredSize(new java.awt.Dimension(55, 53));
-        ThetaContainer.setLayout(new javax.swing.BoxLayout(ThetaContainer, javax.swing.BoxLayout.Y_AXIS));
-
-        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setText("<html><center>&Theta<br><center>(degrees)");
-        jLabel1.setToolTipText("");
-        jLabel1.setAlignmentX(0.5F);
-        ThetaContainer.add(jLabel1);
-        ThetaContainer.add(filler2);
-
-        NICS_Grid_Theta_textField.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        NICS_Grid_Theta_textField.setText("0.0");
-        NICS_Grid_Theta_textField.setAlignmentY(1.0F);
-        NICS_Grid_Theta_textField.setMinimumSize(new java.awt.Dimension(50, 20));
-        NICS_Grid_Theta_textField.setPreferredSize(new java.awt.Dimension(50, 20));
-        NICS_Grid_Theta_textField.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                NICS_Grid_Text_Focus_Lost(evt);
-            }
-        });
-        NICS_Grid_Theta_textField.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                NICS_Grid_Text_Action_Performed(evt);
-            }
-        });
-        ThetaContainer.add(NICS_Grid_Theta_textField);
-        ThetaContainer.add(filler5);
-
-        jPanel1.add(ThetaContainer);
-        jPanel1.add(filler12);
-
-        jLabel12.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel12.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Icons/Z_50.png"))); // NOI18N
-        jLabel12.setToolTipText("");
-        jPanel1.add(jLabel12);
-        jPanel1.add(filler7);
-
-        javax.swing.GroupLayout PolarAngleContainerLayout = new javax.swing.GroupLayout(PolarAngleContainer);
-        PolarAngleContainer.setLayout(PolarAngleContainerLayout);
-        PolarAngleContainerLayout.setHorizontalGroup(
-            PolarAngleContainerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(PolarAngleContainerLayout.createSequentialGroup()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(8, Short.MAX_VALUE))
-        );
-        PolarAngleContainerLayout.setVerticalGroup(
-            PolarAngleContainerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
-        );
-
-        NICS_Grid_dialog.getContentPane().add(PolarAngleContainer);
+        jPanel14.add(GridCoordinateContainer);
+        jPanel14.add(filler40);
 
         PlaneDefinitionContainer.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Plane Definition", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION));
         PlaneDefinitionContainer.setPreferredSize(new java.awt.Dimension(1186, 150));
-        PlaneDefinitionContainer.setLayout(new javax.swing.BoxLayout(PlaneDefinitionContainer, javax.swing.BoxLayout.LINE_AXIS));
+        PlaneDefinitionContainer.setLayout(new javax.swing.BoxLayout(PlaneDefinitionContainer, javax.swing.BoxLayout.Y_AXIS));
 
         jPanel4.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         jPanel4.setMinimumSize(new java.awt.Dimension(308, 84));
@@ -1659,12 +1646,6 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
             }
         });
 
-        jTextField4.setEditable(false);
-        jTextField4.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        jTextField4.setText("Z Center");
-        jTextField4.setBorder(null);
-        jTextField4.setPreferredSize(new java.awt.Dimension(58, 20));
-
         NICS_Grid_dialog_textField.setEditable(false);
         NICS_Grid_dialog_textField.setBackground(new java.awt.Color(255, 0, 0));
         NICS_Grid_dialog_textField.setHorizontalAlignment(javax.swing.JTextField.CENTER);
@@ -1672,17 +1653,23 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         NICS_Grid_dialog_textField.setMinimumSize(new java.awt.Dimension(100, 20));
         NICS_Grid_dialog_textField.setPreferredSize(new java.awt.Dimension(100, 20));
 
-        jTextField3.setEditable(false);
-        jTextField3.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        jTextField3.setText("Y Center");
-        jTextField3.setBorder(null);
-        jTextField3.setPreferredSize(new java.awt.Dimension(58, 20));
+        jLabel16.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel16.setText("<html><font color=\"red\"><b>X</b></font> Center");
+        jLabel16.setMinimumSize(new java.awt.Dimension(58, 20));
+        jLabel16.setName(""); // NOI18N
+        jLabel16.setPreferredSize(new java.awt.Dimension(58, 20));
 
-        jTextField2.setEditable(false);
-        jTextField2.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        jTextField2.setText("X Center");
-        jTextField2.setBorder(null);
-        jTextField2.setPreferredSize(new java.awt.Dimension(58, 20));
+        jLabel17.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel17.setText("<html><font color=\"green\"><b>Y</b></font> Center");
+        jLabel17.setMinimumSize(new java.awt.Dimension(58, 20));
+        jLabel17.setName(""); // NOI18N
+        jLabel17.setPreferredSize(new java.awt.Dimension(58, 20));
+
+        jLabel18.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel18.setText("<html><font color=\"green\"><b>Y</b></font> Center");
+        jLabel18.setMinimumSize(new java.awt.Dimension(58, 20));
+        jLabel18.setName(""); // NOI18N
+        jLabel18.setPreferredSize(new java.awt.Dimension(58, 20));
 
         NICS_Grid_AtomSelection_buttonGroup.add(NICS_Grid_By_Global_Coordinate_Plane_Radio);
         NICS_Grid_By_Global_Coordinate_Plane_Radio.setText("Global Coordinate Grid");
@@ -1754,34 +1741,32 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
                             .addComponent(NICS_Grid_dialog_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(NICS_Grid_dialog_clearAtomButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jTextField2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(NICS_Grid_XExternal_Text, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addGap(6, 6, 6)
+                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                            .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(NICS_Grid_XExternal_Text, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                            .addComponent(jLabel17, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(NICS_Grid_YExternal_Text, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel4Layout.createSequentialGroup()
-                                .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(jPanel4Layout.createSequentialGroup()
-                                .addComponent(NICS_Grid_YExternal_Text, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(NICS_Grid_ZExternal_Text, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addComponent(NICS_Grid_ZExternal_Text, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel18, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(jPanel4Layout.createSequentialGroup()
                         .addComponent(NICS_Grid_By_Atom_Specified_Plane_Radio)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(NICS_Grid_By_Global_Coordinate_Plane_Radio)))
-                .addContainerGap())
+                .addGap(10, 10, 10))
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(NICS_Grid_dialog_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(NICS_Grid_dialog_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel17, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel18, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(NICS_Grid_YExternal_Text, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1795,25 +1780,178 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         );
 
         PlaneDefinitionContainer.add(jPanel4);
+        PlaneDefinitionContainer.add(filler8);
 
-        NICS_Grid_dialog.getContentPane().add(PlaneDefinitionContainer);
+        jPanel14.add(PlaneDefinitionContainer);
+        jPanel14.add(filler39);
 
-        jPanel5.setMinimumSize(new java.awt.Dimension(259, 74));
+        PolarAngleContainer.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Grid Polar Angle", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION));
+        PolarAngleContainer.setMinimumSize(new java.awt.Dimension(500, 99));
+        PolarAngleContainer.setPreferredSize(new java.awt.Dimension(500, 99));
+        PolarAngleContainer.setLayout(new javax.swing.BoxLayout(PolarAngleContainer, javax.swing.BoxLayout.Y_AXIS));
+        PolarAngleContainer.add(filler6);
 
-        NICS_Grid_cancelButton.setText("Quit");
-        NICS_Grid_cancelButton.addActionListener(new java.awt.event.ActionListener() {
+        jPanel1.setMinimumSize(new java.awt.Dimension(128, 76));
+        jPanel1.setName(""); // NOI18N
+        jPanel1.setPreferredSize(new java.awt.Dimension(303, 98));
+        jPanel1.setVerifyInputWhenFocusTarget(false);
+        jPanel1.setLayout(new javax.swing.BoxLayout(jPanel1, javax.swing.BoxLayout.LINE_AXIS));
+        jPanel1.add(filler26);
+
+        PhiContainer.setMinimumSize(new java.awt.Dimension(78, 76));
+        PhiContainer.setPreferredSize(new java.awt.Dimension(78, 76));
+
+        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel2.setText("<html><center>&Phi<br><center>(degrees)");
+        jLabel2.setAlignmentX(0.5F);
+
+        NICS_Grid_Phi_textField.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Grid_Phi_textField.setText("0.0");
+        NICS_Grid_Phi_textField.setAlignmentY(1.0F);
+        NICS_Grid_Phi_textField.setMinimumSize(new java.awt.Dimension(58, 20));
+        NICS_Grid_Phi_textField.setName(""); // NOI18N
+        NICS_Grid_Phi_textField.setPreferredSize(new java.awt.Dimension(58, 20));
+        NICS_Grid_Phi_textField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                NICS_Grid_Text_Focus_Lost(evt);
+            }
+        });
+        NICS_Grid_Phi_textField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                NICS_Grid_cancelButtonActionPerformed(evt);
+                NICS_Grid_Text_Action_Performed(evt);
             }
         });
 
-        NICS_Grid_dialog_clearParameterButton.setText("Clear Parameters");
+        javax.swing.GroupLayout PhiContainerLayout = new javax.swing.GroupLayout(PhiContainer);
+        PhiContainer.setLayout(PhiContainerLayout);
+        PhiContainerLayout.setHorizontalGroup(
+            PhiContainerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(PhiContainerLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(PhiContainerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(NICS_Grid_Phi_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(10, 10, 10))
+        );
+        PhiContainerLayout.setVerticalGroup(
+            PhiContainerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(PhiContainerLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(NICS_Grid_Phi_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+
+        jPanel1.add(PhiContainer);
+
+        jLabel13.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Icons/Y_50.png"))); // NOI18N
+        jPanel1.add(jLabel13);
+        jPanel1.add(filler25);
+
+        ThetaContainer.setMinimumSize(new java.awt.Dimension(78, 76));
+        ThetaContainer.setOpaque(false);
+        ThetaContainer.setPreferredSize(new java.awt.Dimension(78, 76));
+
+        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel1.setText("<html><center>&Theta<br><center>(degrees)");
+        jLabel1.setToolTipText("");
+        jLabel1.setAlignmentX(0.5F);
+
+        NICS_Grid_Theta_textField.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        NICS_Grid_Theta_textField.setText("0.0");
+        NICS_Grid_Theta_textField.setAlignmentY(1.0F);
+        NICS_Grid_Theta_textField.setMinimumSize(new java.awt.Dimension(58, 20));
+        NICS_Grid_Theta_textField.setPreferredSize(new java.awt.Dimension(58, 20));
+        NICS_Grid_Theta_textField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                NICS_Grid_Text_Focus_Lost(evt);
+            }
+        });
+        NICS_Grid_Theta_textField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Grid_Text_Action_Performed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout ThetaContainerLayout = new javax.swing.GroupLayout(ThetaContainer);
+        ThetaContainer.setLayout(ThetaContainerLayout);
+        ThetaContainerLayout.setHorizontalGroup(
+            ThetaContainerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(ThetaContainerLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(ThetaContainerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(NICS_Grid_Theta_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
+        );
+        ThetaContainerLayout.setVerticalGroup(
+            ThetaContainerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(ThetaContainerLayout.createSequentialGroup()
+                .addGap(11, 11, 11)
+                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(NICS_Grid_Theta_textField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+
+        jPanel1.add(ThetaContainer);
+
+        jLabel12.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel12.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Icons/Z_50.png"))); // NOI18N
+        jLabel12.setToolTipText("");
+        jPanel1.add(jLabel12);
+        jPanel1.add(filler24);
+
+        PolarAngleContainer.add(jPanel1);
+
+        jPanel14.add(PolarAngleContainer);
+        jPanel14.add(filler38);
+
+        jPanel5.setMaximumSize(new java.awt.Dimension(500, 30));
+        jPanel5.setMinimumSize(new java.awt.Dimension(500, 30));
+        jPanel5.setPreferredSize(new java.awt.Dimension(500, 52));
+        jPanel5.setLayout(new javax.swing.BoxLayout(jPanel5, javax.swing.BoxLayout.LINE_AXIS));
+        jPanel5.add(filler36);
+
+        NICS_Grid_dialog_clearParameterButton.setText("Clear");
         NICS_Grid_dialog_clearParameterButton.setEnabled(false);
+        NICS_Grid_dialog_clearParameterButton.setMaximumSize(new java.awt.Dimension(113, 23));
+        NICS_Grid_dialog_clearParameterButton.setMinimumSize(new java.awt.Dimension(113, 23));
+        NICS_Grid_dialog_clearParameterButton.setPreferredSize(new java.awt.Dimension(113, 23));
         NICS_Grid_dialog_clearParameterButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 NICS_Grid_dialog_clearParameterButtonActionPerformed(evt);
             }
         });
+        jPanel5.add(NICS_Grid_dialog_clearParameterButton);
+        jPanel5.add(filler35);
+
+        NICS_Grid_Quit_Button.setText("Quit");
+        NICS_Grid_Quit_Button.setMaximumSize(new java.awt.Dimension(113, 23));
+        NICS_Grid_Quit_Button.setMinimumSize(new java.awt.Dimension(113, 23));
+        NICS_Grid_Quit_Button.setPreferredSize(new java.awt.Dimension(113, 23));
+        NICS_Grid_Quit_Button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Grid_Quit_ButtonActionPerformed(evt);
+            }
+        });
+        jPanel5.add(NICS_Grid_Quit_Button);
+        jPanel5.add(filler34);
+
+        NICS_Grid_dialog_saveButton.setText("Save");
+        NICS_Grid_dialog_saveButton.setEnabled(false);
+        NICS_Grid_dialog_saveButton.setMaximumSize(new java.awt.Dimension(113, 23));
+        NICS_Grid_dialog_saveButton.setMinimumSize(new java.awt.Dimension(113, 23));
+        NICS_Grid_dialog_saveButton.setName(""); // NOI18N
+        NICS_Grid_dialog_saveButton.setPreferredSize(new java.awt.Dimension(113, 23));
+        NICS_Grid_dialog_saveButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                NICS_Grid_dialog_saveButtonActionPerformed(evt);
+            }
+        });
+        jPanel5.add(NICS_Grid_dialog_saveButton);
+        jPanel5.add(filler33);
 
         NICS_Grid_dialog_saveReturnButton.setText("Save and Return");
         NICS_Grid_dialog_saveReturnButton.setEnabled(false);
@@ -1822,45 +1960,93 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
                 NICS_Grid_dialog_saveReturnButtonActionPerformed(evt);
             }
         });
+        jPanel5.add(NICS_Grid_dialog_saveReturnButton);
+        jPanel5.add(filler32);
 
-        NICS_Grid_dialog_saveButton.setText("Save");
-        NICS_Grid_dialog_saveButton.setEnabled(false);
-        NICS_Grid_dialog_saveButton.addActionListener(new java.awt.event.ActionListener() {
+        jPanel14.add(jPanel5);
+        jPanel14.add(filler37);
+
+        NICS_Grid_dialog.getContentPane().add(jPanel14);
+        NICS_Grid_dialog.getContentPane().add(filler11);
+
+        FileChooserSaveOptions.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Write Options", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION));
+        FileChooserSaveOptions.setMaximumSize(new java.awt.Dimension(140, 160));
+        FileChooserSaveOptions.setMinimumSize(new java.awt.Dimension(140, 160));
+        FileChooserSaveOptions.setOpaque(false);
+        FileChooserSaveOptions.setPreferredSize(new java.awt.Dimension(140, 160));
+        FileChooserSaveOptions.setLayout(new javax.swing.BoxLayout(FileChooserSaveOptions, javax.swing.BoxLayout.LINE_AXIS));
+        FileChooserSaveOptions.add(filler71);
+
+        jPanel21.setMaximumSize(new java.awt.Dimension(120, 130));
+        jPanel21.setMinimumSize(new java.awt.Dimension(120, 130));
+        jPanel21.setPreferredSize(new java.awt.Dimension(120, 130));
+        jPanel21.setLayout(new javax.swing.BoxLayout(jPanel21, javax.swing.BoxLayout.Y_AXIS));
+        jPanel21.add(filler69);
+
+        jLabel19.setText("Ghost Atom Label");
+        jLabel19.setAlignmentX(0.5F);
+        jPanel21.add(jLabel19);
+        jPanel21.add(filler68);
+
+        GhostAtomNameSelected.setText("Bq");
+        GhostAtomNameSelected.setMaximumSize(new java.awt.Dimension(75, 20));
+        GhostAtomNameSelected.setMinimumSize(new java.awt.Dimension(75, 20));
+        GhostAtomNameSelected.setPreferredSize(new java.awt.Dimension(75, 20));
+        jPanel21.add(GhostAtomNameSelected);
+        jPanel21.add(filler67);
+
+        jScrollPane2.setMaximumSize(new java.awt.Dimension(100, 35));
+        jScrollPane2.setMinimumSize(new java.awt.Dimension(100, 35));
+        jScrollPane2.setPreferredSize(new java.awt.Dimension(100, 35));
+
+        jList1.setModel(new javax.swing.AbstractListModel<String>() {
+            String[] strings = { "Bq", "q", "x" };
+            public int getSize() { return strings.length; }
+            public String getElementAt(int i) { return strings[i]; }
+        });
+        jList1.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        jList1.setToolTipText("");
+        jList1.setMaximumSize(new java.awt.Dimension(75, 70));
+        jList1.setMinimumSize(new java.awt.Dimension(75, 70));
+        jList1.setPreferredSize(new java.awt.Dimension(75, 70));
+        jScrollPane2.setViewportView(jList1);
+
+        jPanel21.add(jScrollPane2);
+        jPanel21.add(filler66);
+
+        IncludeMolecule.setText("<html>Include<br> Molecule");
+        IncludeMolecule.setAlignmentX(0.5F);
+        IncludeMolecule.setEnabled(false);
+        IncludeMolecule.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        IncludeMolecule.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+        IncludeMolecule.setMaximumSize(new java.awt.Dimension(70, 37));
+        IncludeMolecule.setMinimumSize(new java.awt.Dimension(70, 37));
+        IncludeMolecule.setName(""); // NOI18N
+        IncludeMolecule.setPreferredSize(new java.awt.Dimension(70, 37));
+        IncludeMolecule.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                NICS_Grid_dialog_saveButtonActionPerformed(evt);
+                IncludeMoleculeActionPerformed(evt);
             }
         });
+        jPanel21.add(IncludeMolecule);
+        jPanel21.add(filler72);
 
-        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
-        jPanel5.setLayout(jPanel5Layout);
-        jPanel5Layout.setHorizontalGroup(
-            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel5Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(NICS_Grid_dialog_clearParameterButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(jPanel5Layout.createSequentialGroup()
-                        .addComponent(NICS_Grid_dialog_saveButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(NICS_Grid_dialog_saveReturnButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(NICS_Grid_cancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap())
-        );
-        jPanel5Layout.setVerticalGroup(
-            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel5Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(NICS_Grid_dialog_clearParameterButton)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(NICS_Grid_dialog_saveButton)
-                    .addComponent(NICS_Grid_dialog_saveReturnButton)
-                    .addComponent(NICS_Grid_cancelButton))
-                .addContainerGap())
-        );
+        FileChooserSaveOptions.add(jPanel21);
+        FileChooserSaveOptions.add(filler70);
 
-        NICS_Grid_dialog.getContentPane().add(jPanel5);
+        BlankPanel.setMaximumSize(new java.awt.Dimension(0, 0));
+        BlankPanel.setPreferredSize(new java.awt.Dimension(0, 0));
+
+        javax.swing.GroupLayout BlankPanelLayout = new javax.swing.GroupLayout(BlankPanel);
+        BlankPanel.setLayout(BlankPanelLayout);
+        BlankPanelLayout.setHorizontalGroup(
+            BlankPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+        BlankPanelLayout.setVerticalGroup(
+            BlankPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Ghastly Version 0.1");
@@ -1953,14 +2139,19 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         FileChooser.addChoosableFileFilter(new FileNameExtensionFilter("mdl (.mol) file", "mol"));
         FileChooser.addChoosableFileFilter(new FileNameExtensionFilter("tripos (.mol2) file", "mol2"));
         FileChooser.addChoosableFileFilter(new FileNameExtensionFilter("protein databank (.pdb) file", "pdb"));
+        FileChooser.setAcceptAllFileFilterUsed(false);
         //setFileFilter(filter);
+        FileChooser.setAccessory(BlankPanel);
         
         int result = FileChooser.showOpenDialog(this);
 	if(result == JFileChooser.CANCEL_OPTION) return;
 	try {
 		File file = FileChooser.getSelectedFile();
 		//java.net.URL url = file.toURI().toURL();
-		moleculeData = new GaussFile(file, FileChooser.getTypeDescription(file));
+                
+               
+                
+		moleculeData = new FileReading(file, FileChooser.getTypeDescription(file));
 		if(moleculeData != null){
 			moleculeDataLoaded = true;
 			
@@ -2048,9 +2239,13 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
             if(NICSSCAN)NICS_Scan_dialog_textField.setText("Define Plane");
             if(NICSGRID)NICS_Grid_dialog_textField.setText("Define Plane");
             
-            if(NICS0)NICS0_dialog_calculateButton.setEnabled(false);
+            if(NICS0){
+                NICS_0_Calculate_Release();
+                NICS0_dialog_textField.setBackground(Color.RED);
+            }
             if(NICS1){
-                NICS1_dialog_calculateButton.setEnabled(false);
+                NICS_1_Calculate_Release();
+                NICS1_dialog_textField.setBackground(Color.RED);
                 NICS1_dialog_ChoosePlane.setEnabled(false);
             };
 
@@ -2059,13 +2254,7 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
                 if(!GlobalCoordinateScan)NICS_Scan_dialog_textField.setBackground(Color.RED);
             }                           
             if(NICSGRID){
-                NICS_Grid_Calculate_Release();
-                /*
-                synchronized(GhastlyLock){
-                    Ghastly.RenderSelectionCursorSolid = false;
-                    Ghastly.RenderHighlightCursorSolid = false;
-                }
-                */
+                NICS_Grid_Calculate_Release();              
                 if(!GlobalCoordinateGrid)NICS_Grid_dialog_textField.setBackground(Color.RED);                                
             }
        
@@ -2079,9 +2268,13 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
             if(NICSSCAN)NICS_Scan_dialog_textField.setText("Plane Defined");
             if(NICSGRID)NICS_Grid_dialog_textField.setText("Plane Defined");
             
-            if(NICS0)NICS0_dialog_calculateButton.setEnabled(true);
+            if(NICS0){
+                NICS_0_Calculate();
+                NICS0_dialog_textField.setBackground(Color.GREEN);
+            }
             if(NICS1){
-                NICS1_dialog_calculateButton.setEnabled(true);
+                NICS1_dialog_textField.setBackground(Color.GREEN);
+                NICS_1_Calculate();                
                 NICS1_dialog_ChoosePlane.setEnabled(true);
             };
             
@@ -2115,33 +2308,8 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         // TODO add your handling code here:
     }//GEN-LAST:event_ComboBoxGhostTypeActionPerformed
 
-    private void NICS0_dialog_calculateButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS0_dialog_calculateButtonActionPerformed
-        
-        // TODO add your handling code here:
-        // plane must be defined or button would be unavailable
-        // create a ghost atom, add it to the proposed list
-        // lock the atom selection so that it can't change during
-        // the decision
-        // display only the proposed ghost atom
-        // let the user have the option of clearing the choice 
-        // or saving the new ghost atom
-        // remove access to the calulate button
-        synchronized(GhastlyLock){
-            NICS_0 Temp = new NICS_0();
-            Temp.Define(0, Ghastly.GetPlane());
-            Ghastly.NewProposed(Temp);
-            Ghastly.LockSelection = true;
-            Ghastly.DisplayProposed = true;        
-            NICS0_dialog_clearButton.setEnabled(true);
-            NICS0_dialog_saveReturnButton.setEnabled(true);
-            NICS0_dialog_saveButton.setEnabled(true);
-            NICS0_dialog_calculateButton.setEnabled(false);
-        }
-    }//GEN-LAST:event_NICS0_dialog_calculateButtonActionPerformed
-
     private void NICS0_dialog_cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS0_dialog_cancelButtonActionPerformed
-        // TODO add your handling code here:
-        
+                
         // make sure no atoms are saved
         synchronized(GhastlyLock){
             Ghastly.DisplayProposed = false; 
@@ -2151,7 +2319,7 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
             NICS0_dialog_clearButton.setEnabled(false);
             NICS0_dialog_saveReturnButton.setEnabled(false);
             NICS0_dialog_saveButton.setEnabled(false);
-            NICS0_dialog_calculateButton.setEnabled(false);
+            
             Main_Menu_return_button.setEnabled(true);
             AddNewGhostAtomType.setEnabled(true);
             NICSO_dialog.setVisible(false);
@@ -2173,7 +2341,7 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
             Ghastly.LockSelection = true;
             Ghastly.DisplayProposed = false;
             Ghastly.UnselectAtoms = true;
-            NICS0_dialog_calculateButton.setEnabled(false);
+            
             NICS0_dialog_clearButton.setEnabled(false);
             NICS0_dialog_saveReturnButton.setEnabled(false);
             NICS0_dialog_saveButton.setEnabled(false);
@@ -2198,24 +2366,7 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
     }//GEN-LAST:event_NICS0_dialog_saveReturnButtonActionPerformed
 
     private void NICS0_dialog_clearButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS0_dialog_clearButtonActionPerformed
-        // TODO add your handling code here:
-        
-        // no longer display the proposed ghost atom
-        // unlock the selection 
-        // unselect selected atoms
-        // and remove the propsed atom from the list
-        // remove clear button and save button option
-        // and enable calculate button
-        synchronized(GhastlyLock){
-            Ghastly.DisplayProposed = false; 
-            Ghastly.LockSelection = false;
-            Ghastly.UnselectAtoms = true;
-            Ghastly.ExcludeProposed();       
-            NICS0_dialog_clearButton.setEnabled(false);
-            NICS0_dialog_saveReturnButton.setEnabled(false);
-            NICS0_dialog_saveButton.setEnabled(false);
-            NICS0_dialog_calculateButton.setEnabled(false);
-        }        
+        NICS_0_Calculate_Release();             
     }//GEN-LAST:event_NICS0_dialog_clearButtonActionPerformed
 
     private void ExitMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ExitMenuActionPerformed
@@ -2234,7 +2385,7 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
     }//GEN-LAST:event_GhostAtomTableMousePressed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        // TODO add your handling code here:
+        
         //go through the table, look for a row to delete
         // resetting the for loop for each deletion (table size decreases)
         synchronized(GhastlyLock){
@@ -2276,7 +2427,7 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
             Ghastly.LockSelection = false;
             Ghastly.DisplayProposed = false;
             Ghastly.UnselectAtoms = true;
-            NICS0_dialog_calculateButton.setEnabled(false);
+           
             NICS0_dialog_clearButton.setEnabled(false);
             NICS0_dialog_saveReturnButton.setEnabled(false);
             NICS0_dialog_saveButton.setEnabled(false);
@@ -2298,7 +2449,7 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
             NICS1_dialog_clearButton.setEnabled(false);
             NICS1_dialog_saveReturnButton.setEnabled(false);
             NICS1_dialog_saveButton.setEnabled(false);
-            NICS1_dialog_calculateButton.setEnabled(false);
+           
             NICS1_dialog_ChoosePlane.setEnabled(false);
             AddNewGhostAtomType.setEnabled(true);
             Main_Menu_return_button.setEnabled(true);
@@ -2306,43 +2457,6 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
             NICS1=false;
         }
     }//GEN-LAST:event_NICS1_dialog_cancelButtonActionPerformed
-
-    private void NICS1_dialog_calculateButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS1_dialog_calculateButtonActionPerformed
-      
-        // plane must be defined or button would be unavailable
-        // create a ghost atom, add it to the proposed list
-        // lock the atom selection so that it can't change during
-        // the decision
-        // display only the proposed ghost atom
-        // let the user have the option of clearing the choice 
-        // or saving the new ghost atom
-        // remove access to the calulate button
-        synchronized(GhastlyLock){
-            NICS_1 Temp = new NICS_1();
-
-            String PlaneType = (String)NICS1_dialog_ChoosePlane.getSelectedItem();
-            if(PlaneType.equals("Above Plane")){
-                Temp.Define(0, Ghastly.GetPlane(), 1);
-
-            }else if(PlaneType.equals("Below Plane")){
-                Temp.Define(0, Ghastly.GetPlane(), -1);
-
-            }else if(PlaneType.equals("Both")){
-                Temp.Define(0, Ghastly.GetPlane(), 0);
-
-            }else{
-                System.out.println("Shouldn't be here: NICS1_dialog_calculateButtonActionPerformed");
-                assert(false);
-            }        
-            Ghastly.NewProposed(Temp);
-            Ghastly.LockSelection = true;
-            Ghastly.DisplayProposed = true;        
-            NICS1_dialog_clearButton.setEnabled(true);
-            NICS1_dialog_saveReturnButton.setEnabled(true);
-            
-            NICS1_dialog_saveButton.setEnabled(true);
-        }     
-    }//GEN-LAST:event_NICS1_dialog_calculateButtonActionPerformed
 
     private void NICS1_dialog_saveReturnButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS1_dialog_saveReturnButtonActionPerformed
         // TODO add your handling code here:
@@ -2356,10 +2470,10 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         // finally quite whole dialog
         synchronized(GhastlyLock){
             TempIndex = Ghastly.AddProposed();        
-            Ghastly.LockSelection = false;
+            Ghastly.LockSelection = true;
             Ghastly.DisplayProposed = false;
             Ghastly.UnselectAtoms = true;
-            NICS1_dialog_calculateButton.setEnabled(false);
+            
             NICS1_dialog_ChoosePlane.setEnabled(false);
             NICS1_dialog_clearButton.setEnabled(false);
             NICS1_dialog_saveReturnButton.setEnabled(false);
@@ -2377,25 +2491,8 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
     }//GEN-LAST:event_NICS1_dialog_saveReturnButtonActionPerformed
 
     private void NICS1_dialog_clearButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS1_dialog_clearButtonActionPerformed
-        // TODO add your handling code here:
-         // TODO add your handling code here:        
-        // no longer display the proposed ghost atom
-        // unlock the selection 
-        // unselect selected atoms
-        // and remove the propsed atom from the list
-        // remove clear button and save button option
-        // and disable calculate button
-        synchronized(GhastlyLock){
-            Ghastly.DisplayProposed = false; 
-            Ghastly.LockSelection = false;
-            Ghastly.UnselectAtoms = true;
-            Ghastly.ExcludeProposed();       
-            NICS1_dialog_clearButton.setEnabled(false);
-            NICS1_dialog_saveReturnButton.setEnabled(false);
-            NICS1_dialog_saveButton.setEnabled(false);
-            NICS1_dialog_calculateButton.setEnabled(false);
-            NICS1_dialog_ChoosePlane.setEnabled(false);
-        }        
+        NICS_1_Calculate_Release();
+            
     }//GEN-LAST:event_NICS1_dialog_clearButtonActionPerformed
 
     private void NICS1_dialog_saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS1_dialog_saveButtonActionPerformed
@@ -2412,7 +2509,7 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
             Ghastly.LockSelection = false;
             Ghastly.DisplayProposed = false;
             Ghastly.UnselectAtoms = true;
-            NICS1_dialog_calculateButton.setEnabled(false);
+            
             NICS1_dialog_ChoosePlane.setEnabled(false);
             NICS1_dialog_clearButton.setEnabled(false);
             NICS1_dialog_saveReturnButton.setEnabled(false);
@@ -2451,7 +2548,7 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
     }//GEN-LAST:event_GhostAtomTableMouseReleased
 
     private void NICS1_dialog_ChoosePlaneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS1_dialog_ChoosePlaneActionPerformed
-        // TODO add your handling code here:
+        if(Ghastly.PlaneCalculated())NICS_1_Calculate();
     }//GEN-LAST:event_NICS1_dialog_ChoosePlaneActionPerformed
 
     private void NICS_Scan_dialog_saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Scan_dialog_saveButtonActionPerformed
@@ -2519,7 +2616,7 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         // TODO add your handling code here:
     }//GEN-LAST:event_NICS0_dialog_textFieldActionPerformed
 
-    private void NICS_Scan_cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Scan_cancelButtonActionPerformed
+    private void NICS_Scan_Quit_ButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Scan_Quit_ButtonActionPerformed
         // TODO add your handling code here:
         synchronized(GhastlyLock){
             Ghastly.DisplayProposed = false; 
@@ -2538,6 +2635,7 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
             NICS_Scan_By_Global_Coordinate_Plane_Radio.setSelected(false);
             NICS_Scan_By_Atom_Specified_Plane_Radio.setSelected(true);
             GlobalCoordinateScan = false;
+            if(Ghastly.PlaneCalculated())Ghastly.ClearPlanePoints();
             // setting associated with buttons in *this* window
             NICS_Scan_dialog_clearParameterButton.setEnabled(false);
             NICS_Scan_dialog_clearAtomButton.setEnabled(false);
@@ -2550,7 +2648,7 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
             Main_Menu_return_button.setEnabled(true);
             NICSSCAN=false;
         }
-    }//GEN-LAST:event_NICS_Scan_cancelButtonActionPerformed
+    }//GEN-LAST:event_NICS_Scan_Quit_ButtonActionPerformed
 
     private void NICS_Scan_dialog_clearAtomButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Scan_dialog_clearAtomButtonActionPerformed
         // TODO add your handling code here:
@@ -2626,16 +2724,67 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
     }//GEN-LAST:event_NICS_Scan_IntervelByDelta_Radio_Action
 
     private void SaveGhostAtomActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SaveGhostAtomActionPerformed
-        String FileTypeFilter;
-                
+        String FileTypeFilter;                
         
         FileChooser.setDialogTitle("Save Ghost Atoms");
-        FileChooser.resetChoosableFileFilters();        
-        FileNameExtensionFilter TextFile = new FileNameExtensionFilter("Text File (.txt)", "txt");
-        FileNameExtensionFilter CSVFile = new FileNameExtensionFilter("Comma Separated Value File (.csv) file", "csv"); 
+        // new files to read and write to
+        FileChooser.resetChoosableFileFilters();
+        // declare the new filters final so that a property change filter can read them
+        final FileNameExtensionFilter TextFile = new FileNameExtensionFilter("Text File (.txt)", "txt");        
+        final FileNameExtensionFilter CSVFile = new FileNameExtensionFilter("Comma Separated Value File (.csv) file", "csv");
+        final FileNameExtensionFilter GhastlyFile = new FileNameExtensionFilter("Ghastly File (.gst)", "gst");
+        final FileNameExtensionFilter Mol2File = new FileNameExtensionFilter("tripos (.mol2)", "mol2");
+        final FileNameExtensionFilter MolFile = new FileNameExtensionFilter("MDL File (.mol)", "mol");
+        final FileNameExtensionFilter PDBFile = new FileNameExtensionFilter("Protein Databank file (.pdb)", "pdb");
+        final FileNameExtensionFilter XYZFile = new FileNameExtensionFilter("XYZ file (.xyz)", "xyz");
+        // add new file filters
         FileChooser.addChoosableFileFilter(TextFile);  
         FileChooser.addChoosableFileFilter(CSVFile);
+        FileChooser.addChoosableFileFilter(GhastlyFile);
+        FileChooser.addChoosableFileFilter(Mol2File);
+        FileChooser.addChoosableFileFilter(MolFile);
+        FileChooser.addChoosableFileFilter(PDBFile);
+        FileChooser.addChoosableFileFilter(XYZFile);
         FileChooser.setAcceptAllFileFilterUsed(false);
+        
+        // for changing the state of the "include molecule" toggle button when the file type changes
+        PropertyChangeListener FileFilterListener = new PropertyChangeListener(){
+             
+             @Override
+            public void propertyChange(PropertyChangeEvent e) {
+                if(FileChooser.getFileFilter().equals(TextFile)){
+                    IncludeMolecule.setEnabled(false);
+                }else if(FileChooser.getFileFilter().equals(CSVFile)){
+                    IncludeMolecule.setEnabled(false);
+                }else if(FileChooser.getFileFilter().equals(GhastlyFile)){
+                    IncludeMolecule.setEnabled(false);
+                }else if(FileChooser.getFileFilter().equals(Mol2File)){
+                    IncludeMolecule.setEnabled(true);
+                }else if(FileChooser.getFileFilter().equals(MolFile)){
+                    IncludeMolecule.setEnabled(true);
+                }else if(FileChooser.getFileFilter().equals(PDBFile)){  
+                    IncludeMolecule.setEnabled(true);
+                }else if(FileChooser.getFileFilter().equals(XYZFile)){
+                    IncludeMolecule.setEnabled(true);
+                }else{
+                    
+                }
+            }
+            
+        };
+        
+        
+        
+        // when the file filter is changed, add a listener to grey out the "include molecule" section or not depending on the file
+        // selected
+        FileChooser.addPropertyChangeListener(JFileChooser.FILE_FILTER_CHANGED_PROPERTY, FileFilterListener);
+        
+
+        // add in the ghost atom properties panel        
+        FileChooser.setAccessory(FileChooserSaveOptions);
+        //FileChooser.addPropertyChangeListener(FileChooserSaveOptions);
+        
+        
         
         int result = FileChooser.showSaveDialog(this);
 	if(result == JFileChooser.CANCEL_OPTION) return;
@@ -2649,54 +2798,151 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
                 if(FileChooser.getFileFilter().equals(TextFile)){
                     FileTypeFilter = new String("txt");
                 }else if(FileChooser.getFileFilter().equals(CSVFile)){
-                    FileTypeFilter = new String("txt");
+                    FileTypeFilter = new String("csv");
+                }else if(FileChooser.getFileFilter().equals(GhastlyFile)){
+                    FileTypeFilter = new String("gst");
+                }else if(FileChooser.getFileFilter().equals(Mol2File)){
+                    FileTypeFilter = new String("mol2");                                        
+                }else if(FileChooser.getFileFilter().equals(MolFile)){
+                    FileTypeFilter = new String("mol");
+                }else if(FileChooser.getFileFilter().equals(PDBFile)){  
+                    FileTypeFilter = new String("pdb");
+                }else if(FileChooser.getFileFilter().equals(XYZFile)){
+                    FileTypeFilter = new String("xyz");                      
                 }else{
                     FileTypeFilter = new String("");
                 }
                 synchronized(GhastlyLock){
-                    Ghastly.WriteGhostAtomFile(NewFilePath, FileTypeFilter);
+                    FileWriting.WriteAtomsToFile(NewFilePath, moleculeData, Ghastly, FileTypeFilter, GhostAtomNameSelected.getText(), IncludeMolecule.isSelected());                                                                 
                 }
+                // reset parameters
+                IncludeMolecule.setEnabled(true);
+                IncludeMolecule.setSelected(false);
+                FileChooser.setAccessory(BlankPanel);
+                FileChooser.removePropertyChangeListener(JFileChooser.FILE_FILTER_CHANGED_PROPERTY, FileFilterListener);
+                FileChooser.resetChoosableFileFilters();
+                
  		return;
 		
 	}
 	catch (Exception e) {
-		System.out.println("Error Writing to File");
+		System.out.println("In GhastlyGUI file writing error: " + e.getMessage());
+                // reset parameters
+                IncludeMolecule.setEnabled(true);
+                IncludeMolecule.setSelected(false);                
+                FileChooser.setAccessory(BlankPanel);
+                FileChooser.removePropertyChangeListener(JFileChooser.FILE_FILTER_CHANGED_PROPERTY, FileFilterListener);
+                FileChooser.resetChoosableFileFilters();
+                
 		return;
 	}
     }//GEN-LAST:event_SaveGhostAtomActionPerformed
 
-    private void NICS_Grid_dialog_saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Grid_dialog_saveButtonActionPerformed
-        synchronized(GhastlyLock){
-            TempIndex = Ghastly.AddProposed();
-            Ghastly.ExcludeProposed();
-            Ghastly.LockSelection = false;
-            Ghastly.DisplayProposed = false;
-            Ghastly.UnselectAtoms = true;
-            if(!GlobalCoordinateGrid){
-                Ghastly.UnselectAtoms = true;
-                NICS_Grid_dialog_textField.setBackground(Color.RED);
-            } 
-            NICS_Grid_dialog_clearParameterButton.setEnabled(false);
-            NICS_Grid_dialog_clearAtomButton.setEnabled(false);
-            NICS_Grid_dialog_saveReturnButton.setEnabled(false);
-            NICS_Grid_dialog_saveButton.setEnabled(false);
-             
-            // Add to the Ghost Atom Table
+    
+    private void NICS_Scan_By_Global_Coordinate_Plane_RadioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Scan_By_Global_Coordinate_Plane_RadioActionPerformed
+        
+        if(NICS_Scan_By_Global_Coordinate_Plane_Radio.isSelected()){
+            // enable the center XYZ points to be selected by the user
+            NICS_Scan_XExternal_Text.setEnabled(true);
+            NICS_Scan_XExternal_Text.setEditable(true);
+            NICS_Scan_YExternal_Text.setEnabled(true);
+            NICS_Scan_YExternal_Text.setEditable(true);
+            NICS_Scan_ZExternal_Text.setEnabled(true);
+            NICS_Scan_ZExternal_Text.setEditable(true);
+            // turn off atom "Clear atom selection" button
+            NICS_Scan_dialog_clearAtomButton.setEnabled(false);
+            // gray out selection indicator
+            NICS_Scan_dialog_textField.setBackground(Color.GRAY);
 
-            Object[] NewRow = {TempIndex, "NICS GRID", Ghastly.GetAtomsInType(TempIndex),  new Boolean(false),  new Boolean (false)};
-            DefaultTableModel model = (DefaultTableModel) GhostAtomTable.getModel();
-            model.addRow(NewRow);
+            // get rid of previous grid
+            synchronized(GhastlyLock){
+                Ghastly.ExcludeProposed();
+                // flag to unselect selected atoms
+                Ghastly.UnselectAtoms = true;
+                // don't allow atom selection
+                Ghastly.LockSelection = true;
+            }
+            // flag that we are working from global coordinates
+            GlobalCoordinateScan = true;
+            // do a first pass calculation based on the user information already present
+            if(NICS_Scan_ByPoints_RadioButton.isSelected()){
+                NICS_Scan_NumberPoints_Calculate();
+            }else{
+                NICS_Scan_Delta_Calculate();
+            }
+
         }
-    }//GEN-LAST:event_NICS_Grid_dialog_saveButtonActionPerformed
+    }//GEN-LAST:event_NICS_Scan_By_Global_Coordinate_Plane_RadioActionPerformed
+
+    private void NICS_Scan_By_Atom_Specified_Plane_RadioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Scan_By_Atom_Specified_Plane_RadioActionPerformed
+       
+        if(NICS_Scan_By_Atom_Specified_Plane_Radio.isSelected()){
+
+            // disable the center XYZ points selected by the user
+            NICS_Scan_XExternal_Text.setEnabled(false);
+            NICS_Scan_YExternal_Text.setEnabled(false);
+            NICS_Scan_ZExternal_Text.setEnabled(false);
+            // don't need to enable the clear atom button, no grid should be selected
+            //NICS_Grid_dialog_clearAtomButton.setEnabled(true);
+
+            // flag that we are working from atomic coordinates
+            GlobalCoordinateScan = false;
+
+            synchronized(GhastlyLock){
+                // exclude global coordinate grid proposed atoms
+                Ghastly.ExcludeProposed();
+                // flag to unselect selected atoms (which shouldn't be selected anyways
+                    Ghastly.UnselectAtoms = true;
+                    // allow atom selection
+                    Ghastly.LockSelection = false;
+                    // remove the plane automatically calculated by the
+                    Ghastly.ClearPlanePoints();
+
+                    // set plane indicatoion to red
+                    NICS_Scan_dialog_textField.setBackground(Color.RED);
+
+                }
+
+                // do a first pass calculation based on the user information already present
+                if(NICS_Scan_ByPoints_RadioButton.isSelected()){
+                    NICS_Scan_NumberPoints_Calculate();
+                }else{
+                    NICS_Scan_Delta_Calculate();
+                }
+
+            }
+        
+        
+    }//GEN-LAST:event_NICS_Scan_By_Atom_Specified_Plane_RadioActionPerformed
+
+    private void NICS_Scan_External_Focus_Lost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_NICS_Scan_External_Focus_Lost
+        if(NICS_Scan_ByPoints_RadioButton.isSelected()){
+            NICS_Scan_NumberPoints_Calculate();
+        }else{
+            NICS_Scan_Delta_Calculate();
+        }
+    }//GEN-LAST:event_NICS_Scan_External_Focus_Lost
+
+    private void NICS_Scan_External_Action_Performed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Scan_External_Action_Performed
+        if(NICS_Scan_ByPoints_RadioButton.isSelected()){
+            NICS_Scan_NumberPoints_Calculate();
+        }else{
+            NICS_Scan_Delta_Calculate();
+        }
+    }//GEN-LAST:event_NICS_Scan_External_Action_Performed
+
+    private void NICS_Scan_dialog_textFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Scan_dialog_textFieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_NICS_Scan_dialog_textFieldActionPerformed
 
     private void NICS_Grid_dialog_saveReturnButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Grid_dialog_saveReturnButtonActionPerformed
         // TODO add your handling code here:
         synchronized(GhastlyLock){
             TempIndex = Ghastly.AddProposed();
             Ghastly.ExcludeProposed();
-                                    
+
             // settings associated with the plane to reset to default
-            NICS_Grid_dialog_textField.setBackground(Color.RED);              
+            NICS_Grid_dialog_textField.setBackground(Color.RED);
             NICS_Grid_XExternal_Text.setEnabled(false);
             NICS_Grid_XExternal_Text.setText("0.0");
             NICS_Grid_YExternal_Text.setEnabled(false);
@@ -2715,7 +2961,7 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
             NICS_Grid_dialog_clearAtomButton.setEnabled(false);
             NICS_Grid_dialog_saveReturnButton.setEnabled(false);
             NICS_Grid_dialog_saveButton.setEnabled(false);
-            
+
             // Add to the Ghost Atom Table
 
             Object[] NewRow = {TempIndex, "NICS GRID", Ghastly.GetAtomsInType(TempIndex),  new Boolean(false),  new Boolean (false)};
@@ -2727,6 +2973,61 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
             NICSGRID = false;
         }
     }//GEN-LAST:event_NICS_Grid_dialog_saveReturnButtonActionPerformed
+
+    private void NICS_Grid_dialog_saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Grid_dialog_saveButtonActionPerformed
+        synchronized(GhastlyLock){
+            TempIndex = Ghastly.AddProposed();
+            Ghastly.ExcludeProposed();
+            Ghastly.LockSelection = false;
+            Ghastly.DisplayProposed = false;
+            Ghastly.UnselectAtoms = true;
+            if(!GlobalCoordinateGrid){
+                Ghastly.UnselectAtoms = true;
+                NICS_Grid_dialog_textField.setBackground(Color.RED);
+            }
+            NICS_Grid_dialog_clearParameterButton.setEnabled(false);
+            NICS_Grid_dialog_clearAtomButton.setEnabled(false);
+            NICS_Grid_dialog_saveReturnButton.setEnabled(false);
+            NICS_Grid_dialog_saveButton.setEnabled(false);
+
+            // Add to the Ghost Atom Table
+
+            Object[] NewRow = {TempIndex, "NICS GRID", Ghastly.GetAtomsInType(TempIndex),  new Boolean(false),  new Boolean (false)};
+            DefaultTableModel model = (DefaultTableModel) GhostAtomTable.getModel();
+            model.addRow(NewRow);
+        }
+    }//GEN-LAST:event_NICS_Grid_dialog_saveButtonActionPerformed
+
+    private void NICS_Grid_Quit_ButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Grid_Quit_ButtonActionPerformed
+        // TODO add your handling code here:
+        synchronized(GhastlyLock){
+            Ghastly.DisplayProposed = false;
+            Ghastly.LockSelection = true;
+            Ghastly.UnselectAtoms = true;
+            Ghastly.ExcludeProposed();
+            // plane settings to reset when quitting
+            NICS_Grid_dialog_textField.setBackground(Color.RED);
+            NICS_Grid_XExternal_Text.setEnabled(false);
+            NICS_Grid_XExternal_Text.setText("0.0");
+            NICS_Grid_YExternal_Text.setEnabled(false);
+            NICS_Grid_YExternal_Text.setText("0.0");
+            NICS_Grid_ZExternal_Text.setEnabled(false);
+            NICS_Grid_ZExternal_Text.setText("0.0");
+            NICS_Grid_By_Global_Coordinate_Plane_Radio.setSelected(false);
+            NICS_Grid_By_Atom_Specified_Plane_Radio.setSelected(true);
+            GlobalCoordinateGrid = false;
+            if(Ghastly.PlaneCalculated())Ghastly.ClearPlanePoints();
+
+            NICS_Grid_dialog_clearParameterButton.setEnabled(false);
+            NICS_Grid_dialog_clearAtomButton.setEnabled(false);
+            NICS_Grid_dialog_saveReturnButton.setEnabled(false);
+            NICS_Grid_dialog_saveButton.setEnabled(false);
+            NICS_Grid_dialog.setVisible(false);
+            Main_Menu_return_button.setEnabled(true);
+            AddNewGhostAtomType.setEnabled(true);
+            NICSGRID=false;
+        }
+    }//GEN-LAST:event_NICS_Grid_Quit_ButtonActionPerformed
 
     private void NICS_Grid_dialog_clearParameterButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Grid_dialog_clearParameterButtonActionPerformed
         // TODO add your handling code here:
@@ -2747,47 +3048,16 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
             NICS_Grid_ZNumberPoints_textField.setText("");
             NICS_Grid_Theta_textField.setText("0.0");
             NICS_Grid_Phi_textField.setText("0.0");
-            Ghastly.ExcludeProposed();            
+            Ghastly.ExcludeProposed();
             if(!GlobalCoordinateGrid){
                 Ghastly.UnselectAtoms = true;
                 NICS_Grid_dialog_textField.setBackground(Color.RED);
-            } 
+            }
             NICS_Scan_dialog_clearParameterButton.setEnabled(false);
             NICS_Scan_dialog_saveReturnButton.setEnabled(false);
             NICS_Scan_dialog_saveButton.setEnabled(false);
         }
     }//GEN-LAST:event_NICS_Grid_dialog_clearParameterButtonActionPerformed
-
-    private void NICS_Grid_cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Grid_cancelButtonActionPerformed
-        // TODO add your handling code here:
-        synchronized(GhastlyLock){
-            Ghastly.DisplayProposed = false;
-            Ghastly.LockSelection = true;
-            Ghastly.UnselectAtoms = true;
-            Ghastly.ExcludeProposed();
-            // plane settings to reset when quitting
-            NICS_Grid_dialog_textField.setBackground(Color.RED);            
-            NICS_Grid_XExternal_Text.setEnabled(false);
-            NICS_Grid_XExternal_Text.setText("0.0");
-            NICS_Grid_YExternal_Text.setEnabled(false);
-            NICS_Grid_YExternal_Text.setText("0.0");
-            NICS_Grid_ZExternal_Text.setEnabled(false);
-            NICS_Grid_ZExternal_Text.setText("0.0");
-            GlobalCoordinateGrid = true;                        
-            NICS_Grid_By_Global_Coordinate_Plane_Radio.setSelected(false);
-            NICS_Grid_By_Atom_Specified_Plane_Radio.setSelected(true);
-            GlobalCoordinateGrid = false;    
-            
-            NICS_Grid_dialog_clearParameterButton.setEnabled(false);
-            NICS_Grid_dialog_clearAtomButton.setEnabled(false);
-            NICS_Grid_dialog_saveReturnButton.setEnabled(false);
-            NICS_Grid_dialog_saveButton.setEnabled(false);                        
-            NICS_Grid_dialog.setVisible(false);
-            Main_Menu_return_button.setEnabled(true);
-            AddNewGhostAtomType.setEnabled(true);
-            NICSGRID=false;
-        }
-    }//GEN-LAST:event_NICS_Grid_cancelButtonActionPerformed
 
     private void NICS_Grid_Text_Action_Performed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Grid_Text_Action_Performed
         // pick operation based on number of points or delta, can't operate with both simultaneously
@@ -2808,30 +3078,6 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
             NICS_Grid_Delta_Calculate();
         }
     }//GEN-LAST:event_NICS_Grid_Text_Focus_Lost
-
-    private void NICS_Grid_ByDelta_RadioButtonNICS_Scan_IntervelByDelta_Radio_Action(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Grid_ByDelta_RadioButtonNICS_Scan_IntervelByDelta_Radio_Action
-        // TODO add your handling code here:
-        if(NICS_Grid_ByDelta_RadioButton.isSelected()){
-            NICS_Grid_XDelta_textField.setEnabled(true);
-            NICS_Grid_YDelta_textField.setEnabled(true);
-            NICS_Grid_ZDelta_textField.setEnabled(true);
-            NICS_Grid_XNumberPoints_textField.setEnabled(false);
-            NICS_Grid_YNumberPoints_textField.setEnabled(false);
-            NICS_Grid_ZNumberPoints_textField.setEnabled(false);
-        }
-    }//GEN-LAST:event_NICS_Grid_ByDelta_RadioButtonNICS_Scan_IntervelByDelta_Radio_Action
-
-    private void NICS_Grid_ByPoints_RadioButtonNICS_Scan_IntervalByPoint_Radio_Action(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Grid_ByPoints_RadioButtonNICS_Scan_IntervalByPoint_Radio_Action
-        // TODO add your handling code here:
-        if(NICS_Grid_ByPoints_RadioButton.isSelected()){
-            NICS_Grid_XDelta_textField.setEnabled(false);
-            NICS_Grid_YDelta_textField.setEnabled(false);
-            NICS_Grid_ZDelta_textField.setEnabled(false);
-            NICS_Grid_XNumberPoints_textField.setEnabled(true);
-            NICS_Grid_YNumberPoints_textField.setEnabled(true);
-            NICS_Grid_ZNumberPoints_textField.setEnabled(true);
-        }
-    }//GEN-LAST:event_NICS_Grid_ByPoints_RadioButtonNICS_Scan_IntervalByPoint_Radio_Action
 
     private void NICS_Grid_External_Grid_Text_Action_Performed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Grid_External_Grid_Text_Action_Performed
         if(NICS_Scan_ByPoints_RadioButton.isSelected()){
@@ -2930,110 +3176,46 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
             Ghastly.LockSelection = false;
             Ghastly.UnselectAtoms = true;
             Ghastly.ExcludeProposed();
-            if(!GlobalCoordinateGrid){                
+            if(!GlobalCoordinateGrid){
                 NICS_Grid_dialog_textField.setBackground(Color.RED);
-            }             
+            }
             NICS_Grid_dialog_clearAtomButton.setEnabled(false);
             NICS_Grid_dialog_saveReturnButton.setEnabled(false);
             NICS_Grid_dialog_saveButton.setEnabled(false);
         }
     }//GEN-LAST:event_NICS_Grid_dialog_clearAtomButtonActionPerformed
 
-    private void NICS_Scan_By_Global_Coordinate_Plane_RadioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Scan_By_Global_Coordinate_Plane_RadioActionPerformed
-        
-        if(NICS_Scan_By_Global_Coordinate_Plane_Radio.isSelected()){
-            // enable the center XYZ points to be selected by the user
-            NICS_Scan_XExternal_Text.setEnabled(true);
-            NICS_Scan_XExternal_Text.setEditable(true);
-            NICS_Scan_YExternal_Text.setEnabled(true);
-            NICS_Scan_YExternal_Text.setEditable(true);
-            NICS_Scan_ZExternal_Text.setEnabled(true);
-            NICS_Scan_ZExternal_Text.setEditable(true);
-            // turn off atom "Clear atom selection" button
-            NICS_Scan_dialog_clearAtomButton.setEnabled(false);
-            // gray out selection indicator
-            NICS_Scan_dialog_textField.setBackground(Color.GRAY);
-
-            // get rid of previous grid
-            synchronized(GhastlyLock){
-                Ghastly.ExcludeProposed();
-                // flag to unselect selected atoms
-                Ghastly.UnselectAtoms = true;
-                // don't allow atom selection
-                Ghastly.LockSelection = true;
-            }
-            // flag that we are working from global coordinates
-            GlobalCoordinateScan = true;
-            // do a first pass calculation based on the user information already present
-            if(NICS_Scan_ByPoints_RadioButton.isSelected()){
-                NICS_Scan_NumberPoints_Calculate();
-            }else{
-                NICS_Scan_Delta_Calculate();
-            }
-
-        }
-    }//GEN-LAST:event_NICS_Scan_By_Global_Coordinate_Plane_RadioActionPerformed
-
-    private void NICS_Scan_By_Atom_Specified_Plane_RadioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Scan_By_Atom_Specified_Plane_RadioActionPerformed
-       
-        if(NICS_Scan_By_Atom_Specified_Plane_Radio.isSelected()){
-
-            // disable the center XYZ points selected by the user
-            NICS_Scan_XExternal_Text.setEnabled(false);
-            NICS_Scan_YExternal_Text.setEnabled(false);
-            NICS_Scan_ZExternal_Text.setEnabled(false);
-            // don't need to enable the clear atom button, no grid should be selected
-            //NICS_Grid_dialog_clearAtomButton.setEnabled(true);
-
-            // flag that we are working from atomic coordinates
-            GlobalCoordinateScan = false;
-
-            synchronized(GhastlyLock){
-                // exclude global coordinate grid proposed atoms
-                Ghastly.ExcludeProposed();
-                // flag to unselect selected atoms (which shouldn't be selected anyways
-                    Ghastly.UnselectAtoms = true;
-                    // allow atom selection
-                    Ghastly.LockSelection = false;
-                    // remove the plane automatically calculated by the
-                    Ghastly.ClearPlanePoints();
-
-                    // set plane indicatoion to red
-                    NICS_Scan_dialog_textField.setBackground(Color.RED);
-
-                }
-
-                // do a first pass calculation based on the user information already present
-                if(NICS_Scan_ByPoints_RadioButton.isSelected()){
-                    NICS_Scan_NumberPoints_Calculate();
-                }else{
-                    NICS_Scan_Delta_Calculate();
-                }
-
-            }
-        
-        
-    }//GEN-LAST:event_NICS_Scan_By_Atom_Specified_Plane_RadioActionPerformed
-
-    private void NICS_Scan_External_Focus_Lost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_NICS_Scan_External_Focus_Lost
-        if(NICS_Scan_ByPoints_RadioButton.isSelected()){
-            NICS_Scan_NumberPoints_Calculate();
-        }else{
-            NICS_Scan_Delta_Calculate();
-        }
-    }//GEN-LAST:event_NICS_Scan_External_Focus_Lost
-
-    private void NICS_Scan_External_Action_Performed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Scan_External_Action_Performed
-        if(NICS_Scan_ByPoints_RadioButton.isSelected()){
-            NICS_Scan_NumberPoints_Calculate();
-        }else{
-            NICS_Scan_Delta_Calculate();
-        }
-    }//GEN-LAST:event_NICS_Scan_External_Action_Performed
-
-    private void NICS_Scan_dialog_textFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Scan_dialog_textFieldActionPerformed
+    private void NICS_Grid_ByDelta_RadioButtonNICS_Scan_IntervelByDelta_Radio_Action(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Grid_ByDelta_RadioButtonNICS_Scan_IntervelByDelta_Radio_Action
         // TODO add your handling code here:
-    }//GEN-LAST:event_NICS_Scan_dialog_textFieldActionPerformed
+        if(NICS_Grid_ByDelta_RadioButton.isSelected()){
+            NICS_Grid_XDelta_textField.setEnabled(true);
+            NICS_Grid_YDelta_textField.setEnabled(true);
+            NICS_Grid_ZDelta_textField.setEnabled(true);
+            NICS_Grid_XNumberPoints_textField.setEnabled(false);
+            NICS_Grid_YNumberPoints_textField.setEnabled(false);
+            NICS_Grid_ZNumberPoints_textField.setEnabled(false);
+        }
+    }//GEN-LAST:event_NICS_Grid_ByDelta_RadioButtonNICS_Scan_IntervelByDelta_Radio_Action
+
+    private void NICS_Grid_ByPoints_RadioButtonNICS_Scan_IntervalByPoint_Radio_Action(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NICS_Grid_ByPoints_RadioButtonNICS_Scan_IntervalByPoint_Radio_Action
+        // TODO add your handling code here:
+        if(NICS_Grid_ByPoints_RadioButton.isSelected()){
+            NICS_Grid_XDelta_textField.setEnabled(false);
+            NICS_Grid_YDelta_textField.setEnabled(false);
+            NICS_Grid_ZDelta_textField.setEnabled(false);
+            NICS_Grid_XNumberPoints_textField.setEnabled(true);
+            NICS_Grid_YNumberPoints_textField.setEnabled(true);
+            NICS_Grid_ZNumberPoints_textField.setEnabled(true);
+        }
+    }//GEN-LAST:event_NICS_Grid_ByPoints_RadioButtonNICS_Scan_IntervalByPoint_Radio_Action
+
+    private void IncludeMoleculeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_IncludeMoleculeActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_IncludeMoleculeActionPerformed
+
+    private void FileChooserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_FileChooserActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_FileChooserActionPerformed
 
     private void NICS_Scan_Calculate_Release(){
         synchronized(GhastlyLock){            
@@ -3063,7 +3245,7 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         
         
         
-        
+      
         
         
         
@@ -4035,7 +4217,89 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
         }
     }
     
+    private void NICS_0_Calculate(){
+        synchronized(GhastlyLock){
+ 
+            NICS_0 Temp = new NICS_0();
+            Temp.Define(0, Ghastly.GetPlane());
+            Ghastly.NewProposed(Temp);
+            //Ghastly.LockSelection = true;
+            Ghastly.DisplayProposed = true;        
+            NICS0_dialog_clearButton.setEnabled(true);
+            NICS0_dialog_saveReturnButton.setEnabled(true);
+            NICS0_dialog_saveButton.setEnabled(true);
+            
+        }
+    }
     
+    private void NICS_0_Calculate_Release(){
+
+        synchronized(GhastlyLock){
+            Ghastly.DisplayProposed = false; 
+            Ghastly.LockSelection = false;
+            Ghastly.UnselectAtoms = true;
+            Ghastly.ExcludeProposed();       
+            NICS0_dialog_clearButton.setEnabled(false);
+            NICS0_dialog_saveReturnButton.setEnabled(false);
+            NICS0_dialog_saveButton.setEnabled(false);
+            
+        }        
+    }
+    private void NICS_1_Calculate(){
+         // plane must be defined or button would be unavailable
+        // create a ghost atom, add it to the proposed list
+        // lock the atom selection so that it can't change during
+        // the decision
+        // display only the proposed ghost atom
+        // let the user have the option of clearing the choice 
+        // or saving the new ghost atom
+        // remove access to the calulate button
+        synchronized(GhastlyLock){
+            NICS_1 Temp = new NICS_1();
+
+            String PlaneType = (String)NICS1_dialog_ChoosePlane.getSelectedItem();
+            if(PlaneType.equals("Above Plane")){
+                Temp.Define(0, Ghastly.GetPlane(), 1);
+
+            }else if(PlaneType.equals("Below Plane")){
+                Temp.Define(0, Ghastly.GetPlane(), -1);
+
+            }else if(PlaneType.equals("Both")){
+                Temp.Define(0, Ghastly.GetPlane(), 0);
+
+            }else{
+                System.out.println("Shouldn't be here: NICS1_dialog_calculateButtonActionPerformed");
+                assert(false);
+            }        
+            Ghastly.NewProposed(Temp);
+            //Ghastly.LockSelection = true;
+            Ghastly.DisplayProposed = true;        
+            NICS1_dialog_clearButton.setEnabled(true);
+            NICS1_dialog_saveReturnButton.setEnabled(true);
+            
+            NICS1_dialog_saveButton.setEnabled(true);
+        }    
+    }
+    
+    private void NICS_1_Calculate_Release(){
+         // no longer display the proposed ghost atom
+        // unlock the selection 
+        // unselect selected atoms
+        // and remove the propsed atom from the list
+        // remove clear button and save button option
+        // and disable calculate button
+        synchronized(GhastlyLock){
+            Ghastly.DisplayProposed = false; 
+            Ghastly.LockSelection = false;
+            Ghastly.UnselectAtoms = true;
+            Ghastly.ExcludeProposed();       
+            NICS1_dialog_clearButton.setEnabled(false);
+            NICS1_dialog_saveReturnButton.setEnabled(false);
+            NICS1_dialog_saveButton.setEnabled(false);
+           
+            NICS1_dialog_ChoosePlane.setEnabled(false);
+        }   
+    }
     
     /**
      * @param args the command line arguments
@@ -4045,21 +4309,24 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton AddNewGhostAtomType;
+    private javax.swing.JPanel BlankPanel;
     private javax.swing.JMenuItem ClearGhostAtom;
     private javax.swing.JMenuItem CloseMenu;
     private javax.swing.JComboBox<String> ComboBoxGhostType;
     private javax.swing.JPanel DeltaPointContainer;
     private javax.swing.JMenuItem ExitMenu;
     private javax.swing.JFileChooser FileChooser;
+    private javax.swing.JPanel FileChooserSaveOptions;
     private javax.swing.JMenu FileMenu;
     private javax.swing.JFrame GhostAtomForm;
     private javax.swing.JMenu GhostAtomMenu;
+    private javax.swing.JTextField GhostAtomNameSelected;
     private javax.swing.JTable GhostAtomTable;
     private javax.swing.JPanel GridCoordinateContainer;
+    private javax.swing.JCheckBox IncludeMolecule;
     private javax.swing.JPanel LengthDeltaContainer_Scan;
     private javax.swing.JMenuBar MainMenu;
     private javax.swing.JButton Main_Menu_return_button;
-    private javax.swing.JButton NICS0_dialog_calculateButton;
     private javax.swing.JButton NICS0_dialog_cancelButton;
     private javax.swing.JButton NICS0_dialog_clearButton;
     private javax.swing.JButton NICS0_dialog_saveButton;
@@ -4067,7 +4334,6 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
     private javax.swing.JTextField NICS0_dialog_textField;
     private javax.swing.JFrame NICS1_dialog;
     private javax.swing.JComboBox<String> NICS1_dialog_ChoosePlane;
-    private javax.swing.JButton NICS1_dialog_calculateButton;
     private javax.swing.JButton NICS1_dialog_cancelButton;
     private javax.swing.JButton NICS1_dialog_clearButton;
     private javax.swing.JButton NICS1_dialog_saveButton;
@@ -4092,6 +4358,7 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
     private javax.swing.JTextField NICS_Grid_Points_label;
     private javax.swing.JTextField NICS_Grid_Points_label1;
     private javax.swing.JTextField NICS_Grid_Points_label2;
+    private javax.swing.JButton NICS_Grid_Quit_Button;
     private javax.swing.JTextField NICS_Grid_Theta_textField;
     private javax.swing.JTextField NICS_Grid_XDelta_textField;
     private javax.swing.JTextField NICS_Grid_XExternal_Text;
@@ -4109,7 +4376,6 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
     private javax.swing.JTextField NICS_Grid_ZMinRange_textField;
     private javax.swing.JTextField NICS_Grid_ZNumberPoints_textField;
     private javax.swing.ButtonGroup NICS_Grid_buttonGroup;
-    private javax.swing.JButton NICS_Grid_cancelButton;
     private javax.swing.JFrame NICS_Grid_dialog;
     private javax.swing.JButton NICS_Grid_dialog_clearAtomButton;
     private javax.swing.JButton NICS_Grid_dialog_clearParameterButton;
@@ -4126,12 +4392,12 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
     private javax.swing.JTextField NICS_Scan_MinRange_textField;
     private javax.swing.JTextField NICS_Scan_NumberPoints_textField;
     private javax.swing.JTextField NICS_Scan_Phi_textField;
+    private javax.swing.JButton NICS_Scan_Quit_Button;
     private javax.swing.JTextField NICS_Scan_Theta_textField;
     private javax.swing.JTextField NICS_Scan_XExternal_Text;
     private javax.swing.JTextField NICS_Scan_YExternal_Text;
     private javax.swing.JTextField NICS_Scan_ZExternal_Text;
     private javax.swing.ButtonGroup NICS_Scan_buttonGroup;
-    private javax.swing.JButton NICS_Scan_cancelButton;
     private javax.swing.JFrame NICS_Scan_dialog;
     private javax.swing.JButton NICS_Scan_dialog_clearAtomButton;
     private javax.swing.JButton NICS_Scan_dialog_clearParameterButton;
@@ -4163,11 +4429,62 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
     private javax.swing.Box.Filler filler19;
     private javax.swing.Box.Filler filler2;
     private javax.swing.Box.Filler filler20;
+    private javax.swing.Box.Filler filler21;
+    private javax.swing.Box.Filler filler22;
+    private javax.swing.Box.Filler filler23;
+    private javax.swing.Box.Filler filler24;
+    private javax.swing.Box.Filler filler25;
+    private javax.swing.Box.Filler filler26;
+    private javax.swing.Box.Filler filler27;
+    private javax.swing.Box.Filler filler28;
+    private javax.swing.Box.Filler filler29;
     private javax.swing.Box.Filler filler3;
-    private javax.swing.Box.Filler filler4;
+    private javax.swing.Box.Filler filler30;
+    private javax.swing.Box.Filler filler31;
+    private javax.swing.Box.Filler filler32;
+    private javax.swing.Box.Filler filler33;
+    private javax.swing.Box.Filler filler34;
+    private javax.swing.Box.Filler filler35;
+    private javax.swing.Box.Filler filler36;
+    private javax.swing.Box.Filler filler37;
+    private javax.swing.Box.Filler filler38;
+    private javax.swing.Box.Filler filler39;
+    private javax.swing.Box.Filler filler40;
+    private javax.swing.Box.Filler filler41;
+    private javax.swing.Box.Filler filler42;
+    private javax.swing.Box.Filler filler43;
+    private javax.swing.Box.Filler filler44;
+    private javax.swing.Box.Filler filler45;
+    private javax.swing.Box.Filler filler46;
+    private javax.swing.Box.Filler filler47;
+    private javax.swing.Box.Filler filler48;
+    private javax.swing.Box.Filler filler49;
     private javax.swing.Box.Filler filler5;
+    private javax.swing.Box.Filler filler50;
+    private javax.swing.Box.Filler filler51;
+    private javax.swing.Box.Filler filler52;
+    private javax.swing.Box.Filler filler53;
+    private javax.swing.Box.Filler filler54;
+    private javax.swing.Box.Filler filler55;
+    private javax.swing.Box.Filler filler56;
+    private javax.swing.Box.Filler filler57;
+    private javax.swing.Box.Filler filler58;
+    private javax.swing.Box.Filler filler59;
     private javax.swing.Box.Filler filler6;
+    private javax.swing.Box.Filler filler60;
+    private javax.swing.Box.Filler filler61;
+    private javax.swing.Box.Filler filler62;
+    private javax.swing.Box.Filler filler63;
+    private javax.swing.Box.Filler filler64;
+    private javax.swing.Box.Filler filler65;
+    private javax.swing.Box.Filler filler66;
+    private javax.swing.Box.Filler filler67;
+    private javax.swing.Box.Filler filler68;
+    private javax.swing.Box.Filler filler69;
     private javax.swing.Box.Filler filler7;
+    private javax.swing.Box.Filler filler70;
+    private javax.swing.Box.Filler filler71;
+    private javax.swing.Box.Filler filler72;
     private javax.swing.Box.Filler filler8;
     private javax.swing.Box.Filler filler9;
     private javax.swing.JButton jButton2;
@@ -4178,6 +4495,10 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
+    private javax.swing.JLabel jLabel16;
+    private javax.swing.JLabel jLabel17;
+    private javax.swing.JLabel jLabel18;
+    private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -4186,23 +4507,32 @@ public class GhastlyGUI extends javax.swing.JFrame implements Observer{
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
+    private javax.swing.JList<String> jList1;
     private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel10;
+    private javax.swing.JPanel jPanel11;
+    private javax.swing.JPanel jPanel12;
+    private javax.swing.JPanel jPanel13;
+    private javax.swing.JPanel jPanel14;
+    private javax.swing.JPanel jPanel15;
+    private javax.swing.JPanel jPanel16;
+    private javax.swing.JPanel jPanel17;
+    private javax.swing.JPanel jPanel18;
+    private javax.swing.JPanel jPanel19;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel20;
+    private javax.swing.JPanel jPanel21;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
+    private javax.swing.JPanel jPanel6;
     private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
     private javax.swing.JPanel jPanel9;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
-    private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JSeparator jSeparator2;
     private javax.swing.JTextArea jTextAreaCompletedCalculation;
-    private javax.swing.JTextField jTextField2;
-    private javax.swing.JTextField jTextField3;
-    private javax.swing.JTextField jTextField4;
     // End of variables declaration//GEN-END:variables
 }

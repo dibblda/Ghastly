@@ -16,7 +16,8 @@ import org.joml.Vector4f;
  */
 public class NICS_Scan extends GhostAtomType{
 
-
+    public int Number_Of_Points = 0;
+    
     // using in the floating point loop check below
     private float AcceptableErrorPercent = .01f;
     // as more atoms are added into the grid they will overlap when displayed
@@ -54,6 +55,10 @@ public class NICS_Scan extends GhostAtomType{
             Atoms.get(index_itor).Identifier = Identity;
             Atoms.get(index_itor).AtomIndex = (index_itor++);            
         }
+        
+        // put in the number of atoms
+        Number_Of_Points = Atoms.size();
+        
         NormalToPlane = CurrentPlane.GetPlaneNormal();
         PlaneEquation = CurrentPlane.GetPlaneEquation();
         return;

@@ -344,8 +344,30 @@ public class GhostAtomSet extends Observable{
     }
 //section to write the calculated data to file (or return a formatted string
 // containing it
+// or return an array filled with the coordinates of all of the ghost atoms
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
+    
+    
+    // array is indexed from 0
+    public float [][] GetGhostAtomArray(){
+        ArrayList<GhostAtom> ToConvert =  GetAtoms();
+        if(ToConvert != null){
+            float [][] GhostAtomArray = new float[ToConvert.size()][4];
+
+            for(int itor = 0; itor < ToConvert.size(); itor++){
+                GhostAtomArray[itor][0] = 0;
+                GhostAtomArray[itor][1] = ToConvert.get(itor).x;
+                GhostAtomArray[itor][2] = ToConvert.get(itor).y;
+                GhostAtomArray[itor][3] = ToConvert.get(itor).z;
+            }
+            
+            return GhostAtomArray;
+        }else{
+            return null;
+        }
+    }
+    
     
     // write all of the current atoms into a string in xyz format 
     public String GetGhostAtomString(){
@@ -364,6 +386,7 @@ public class GhostAtomSet extends Observable{
         
         return GhostAtomString;
     }
+/*
 // write the atoms to file in a format specified by the user     
     public void WriteGhostAtomFile(Path FilePath, String FileType){
         
@@ -422,5 +445,5 @@ public class GhostAtomSet extends Observable{
             System.out.println("At end of WriteGhostAtomFile: " + e.getMessage());
         }
     }
-    
+    */
 }

@@ -20,6 +20,9 @@ public class NICS_Grid extends GhostAtomType{
     // as more atoms are added into the grid they will overlap when displayed
     // adjust the radius to a percentage of the delta so that they dont do that
     private float RadiusDeltaPercent = 20.0f;
+    
+    public int Number_Of_Points = 0;
+
     //faces points for a full cube: 1,2,3,4; 6,2,3,7; 5,6,7,8; 1,5,8,4; 1,2,6,5; 8,7,3,4; 
     // for only a z-plane: 8,7,3,4
     // for only a y plane: 1,5,8,4
@@ -523,7 +526,8 @@ public class NICS_Grid extends GhostAtomType{
             X_Plane = false;
         }
         
-        
+        // put in the number of atoms
+        Number_Of_Points = Atoms.size();
         
         NormalToPlane = CurrentPlane.GetPlaneNormal();
         PlaneEquation = CurrentPlane.GetPlaneEquation();

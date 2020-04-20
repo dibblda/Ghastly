@@ -16,7 +16,7 @@ import org.lwjgl.opengl.GL11;
  *  Grid functions for plotting were getting out of hand in the main MoleculeDisplay class, 
  *  pulled them out to simplify it there and make it easier to find here
  */
-public class RenderGrid {
+public class RenderNICSGrid {
     
     
     
@@ -64,7 +64,8 @@ public static void RenderGridProposedGhostAtoms(NICS_Grid GridToRender, Object G
                 
                                              
                 // render the grid points
-                if(!RenderSettings.RenderPointsAsQuad){ 
+                if(GridToRender.Number_Of_Points >= RenderSettings.GRID_NO_DISPLAY){
+                    // render the points as points -- low quality but maybe faster
                     GL11.glPointSize(RenderSettings.GridPointSize);
                     GL11.glColor4f(RenderSettings.GridSurfacePointSelectedColor.x, RenderSettings.GridSurfacePointSelectedColor.y, RenderSettings.GridSurfacePointSelectedColor.z, RenderSettings.GridOutlineSelectedColor.w);                
                     GL11.glBegin(GL11.GL_POINTS);             
@@ -79,7 +80,7 @@ public static void RenderGridProposedGhostAtoms(NICS_Grid GridToRender, Object G
                     }
                     GL11.glEnd ();
                     // render the points as a quad
-                }else if(GridToRender.QuadPoints.size() < RenderSettings.NO_DISPLAY){
+                }else if(GridToRender.Number_Of_Points < RenderSettings.GRID_NO_DISPLAY){
                     GL11.glColor4f(RenderSettings.GridSurfacePointSelectedColor.x, RenderSettings.GridSurfacePointSelectedColor.y, RenderSettings.GridSurfacePointSelectedColor.z, RenderSettings.GridOutlineSelectedColor.w);                
                      GL11.glBegin(GL11.GL_TRIANGLES);                
                     for(int itor = 0; itor < GridToRender.QuadPoints.size(); itor++){   
@@ -142,7 +143,8 @@ public static void RenderGridProposedGhostAtoms(NICS_Grid GridToRender, Object G
                 GL11.glEnd();
                                           
                 // render the grid points
-                if(!RenderSettings.RenderPointsAsQuad){ 
+                if(GridToRender.Number_Of_Points >= RenderSettings.GRID_NO_DISPLAY){
+                    // render the points as points -- low quality but maybe faster
                     GL11.glPointSize(RenderSettings.GridPointSize);
                     GL11.glColor4f(RenderSettings.GridSurfacePointSelectedColor.x, RenderSettings.GridSurfacePointSelectedColor.y, RenderSettings.GridSurfacePointSelectedColor.z, RenderSettings.GridOutlineSelectedColor.w);                
                     GL11.glBegin(GL11.GL_POINTS);             
@@ -157,7 +159,7 @@ public static void RenderGridProposedGhostAtoms(NICS_Grid GridToRender, Object G
                     }
                     GL11.glEnd ();
                     // render the points as a quad
-                }else if(GridToRender.QuadPoints.size() < RenderSettings.NO_DISPLAY){
+                }else if(GridToRender.Number_Of_Points < RenderSettings.GRID_NO_DISPLAY){
                     GL11.glColor4f(RenderSettings.GridSurfacePointSelectedColor.x, RenderSettings.GridSurfacePointSelectedColor.y, RenderSettings.GridSurfacePointSelectedColor.z, RenderSettings.GridOutlineSelectedColor.w);                
                      GL11.glBegin(GL11.GL_TRIANGLES);                
                     for(int itor = 0; itor < GridToRender.QuadPoints.size(); itor++){   
@@ -223,7 +225,8 @@ public static void RenderGridProposedGhostAtoms(NICS_Grid GridToRender, Object G
                 
                                        
                 // render the grid points
-                if(!RenderSettings.RenderPointsAsQuad){ 
+                if(GridToRender.Number_Of_Points >= RenderSettings.GRID_NO_DISPLAY){
+                    // render the points as points -- low quality but maybe faster
                     GL11.glPointSize(RenderSettings.GridPointSize);
                     GL11.glColor4f(RenderSettings.GridSurfacePointSelectedColor.x, RenderSettings.GridSurfacePointSelectedColor.y, RenderSettings.GridSurfacePointSelectedColor.z, RenderSettings.GridOutlineSelectedColor.w);                
                     GL11.glBegin(GL11.GL_POINTS);             
@@ -238,7 +241,7 @@ public static void RenderGridProposedGhostAtoms(NICS_Grid GridToRender, Object G
                     }
                     GL11.glEnd ();
                     // render the points as a quad
-                }else if(GridToRender.QuadPoints.size() < RenderSettings.NO_DISPLAY){
+                }else if(GridToRender.Number_Of_Points < RenderSettings.GRID_NO_DISPLAY){
                     GL11.glColor4f(RenderSettings.GridSurfacePointSelectedColor.x, RenderSettings.GridSurfacePointSelectedColor.y, RenderSettings.GridSurfacePointSelectedColor.z, RenderSettings.GridOutlineSelectedColor.w);                
                      GL11.glBegin(GL11.GL_TRIANGLES);                
                     for(int itor = 0; itor < GridToRender.QuadPoints.size(); itor++){   
@@ -383,7 +386,8 @@ public static void RenderGridProposedGhostAtoms(NICS_Grid GridToRender, Object G
                 
                                
                 // render the grid points
-                if(!RenderSettings.RenderPointsAsQuad){ 
+                if(GridToRender.Number_Of_Points >= RenderSettings.GRID_NO_DISPLAY){
+                    // render the points as points -- low quality but maybe faster
                     GL11.glPointSize(RenderSettings.GridPointSize);
                     GL11.glColor4f(RenderSettings.GridSurfacePointSelectedColor.x, RenderSettings.GridSurfacePointSelectedColor.y, RenderSettings.GridSurfacePointSelectedColor.z, RenderSettings.GridOutlineSelectedColor.w);                
                     GL11.glBegin(GL11.GL_POINTS);             
@@ -398,7 +402,7 @@ public static void RenderGridProposedGhostAtoms(NICS_Grid GridToRender, Object G
                     }
                     GL11.glEnd ();
                     // render the points as a quad
-                }else if(GridToRender.QuadPoints.size() < RenderSettings.NO_DISPLAY){
+                }else if(GridToRender.Number_Of_Points < RenderSettings.GRID_NO_DISPLAY){
                     GL11.glColor4f(RenderSettings.GridSurfacePointSelectedColor.x, RenderSettings.GridSurfacePointSelectedColor.y, RenderSettings.GridSurfacePointSelectedColor.z, RenderSettings.GridOutlineSelectedColor.w);                
                      GL11.glBegin(GL11.GL_TRIANGLES);                
                     for(int itor = 0; itor < GridToRender.QuadPoints.size(); itor++){   
@@ -466,7 +470,8 @@ public static void RenderGridProposedGhostAtoms(NICS_Grid GridToRender, Object G
                 
                             
                 // render the grid points
-                if(!RenderSettings.RenderPointsAsQuad){ 
+                if(GridToRender.Number_Of_Points >= RenderSettings.GRID_NO_DISPLAY){
+                    // render the points as points -- low quality but maybe faster
                     GL11.glPointSize(RenderSettings.GridPointSize);
                     GL11.glColor4f(RenderSettings.GridSurfacePointProposedColor.x, RenderSettings.GridSurfacePointProposedColor.y, RenderSettings.GridSurfacePointProposedColor.z, RenderSettings.GridOutlineProposedColor.w);                
                     GL11.glBegin(GL11.GL_POINTS);             
@@ -481,7 +486,7 @@ public static void RenderGridProposedGhostAtoms(NICS_Grid GridToRender, Object G
                     }
                     GL11.glEnd ();
                     // render the points as a quad
-                }else if(GridToRender.QuadPoints.size() < RenderSettings.NO_DISPLAY){
+                }else if(GridToRender.Number_Of_Points < RenderSettings.GRID_NO_DISPLAY){
                     GL11.glColor4f(RenderSettings.GridSurfacePointProposedColor.x, RenderSettings.GridSurfacePointProposedColor.y, RenderSettings.GridSurfacePointProposedColor.z, RenderSettings.GridOutlineProposedColor.w);                
                      GL11.glBegin(GL11.GL_TRIANGLES);                
                     for(int itor = 0; itor < GridToRender.QuadPoints.size(); itor++){   
@@ -545,7 +550,8 @@ public static void RenderGridProposedGhostAtoms(NICS_Grid GridToRender, Object G
                 
                 
                                // render the grid points
-                if(!RenderSettings.RenderPointsAsQuad){ 
+                if(GridToRender.Number_Of_Points >= RenderSettings.GRID_NO_DISPLAY){
+                    // render the points as points -- low quality but maybe faster
                     GL11.glPointSize(RenderSettings.GridPointSize);
                     GL11.glColor4f(RenderSettings.GridSurfacePointProposedColor.x, RenderSettings.GridSurfacePointProposedColor.y, RenderSettings.GridSurfacePointProposedColor.z, RenderSettings.GridOutlineProposedColor.w);                
                     GL11.glBegin(GL11.GL_POINTS);             
@@ -560,7 +566,7 @@ public static void RenderGridProposedGhostAtoms(NICS_Grid GridToRender, Object G
                     }
                     GL11.glEnd ();
                     // render the points as a quad
-                }else if(GridToRender.QuadPoints.size() < RenderSettings.NO_DISPLAY){
+                }else if(GridToRender.Number_Of_Points < RenderSettings.GRID_NO_DISPLAY){
                     GL11.glColor4f(RenderSettings.GridSurfacePointProposedColor.x, RenderSettings.GridSurfacePointProposedColor.y, RenderSettings.GridSurfacePointProposedColor.z, RenderSettings.GridOutlineProposedColor.w);                
                      GL11.glBegin(GL11.GL_TRIANGLES);                
                     for(int itor = 0; itor < GridToRender.QuadPoints.size(); itor++){   
@@ -622,7 +628,8 @@ public static void RenderGridProposedGhostAtoms(NICS_Grid GridToRender, Object G
                 
                 
                                // render the grid points
-                if(!RenderSettings.RenderPointsAsQuad){ 
+                if(GridToRender.Number_Of_Points >= RenderSettings.GRID_NO_DISPLAY){
+                    // render the points as points -- low quality but maybe faster
                     GL11.glPointSize(RenderSettings.GridPointSize);
                     GL11.glColor4f(RenderSettings.GridSurfacePointProposedColor.x, RenderSettings.GridSurfacePointProposedColor.y, RenderSettings.GridSurfacePointProposedColor.z, RenderSettings.GridOutlineProposedColor.w);                
                     GL11.glBegin(GL11.GL_POINTS);             
@@ -637,7 +644,7 @@ public static void RenderGridProposedGhostAtoms(NICS_Grid GridToRender, Object G
                     }
                     GL11.glEnd ();
                     // render the points as a quad
-                }else if(GridToRender.QuadPoints.size() < RenderSettings.NO_DISPLAY){
+                }else if(GridToRender.Number_Of_Points < RenderSettings.GRID_NO_DISPLAY){
                     GL11.glColor4f(RenderSettings.GridSurfacePointProposedColor.x, RenderSettings.GridSurfacePointProposedColor.y, RenderSettings.GridSurfacePointProposedColor.z, RenderSettings.GridOutlineProposedColor.w);                
                      GL11.glBegin(GL11.GL_TRIANGLES);                
                     for(int itor = 0; itor < GridToRender.QuadPoints.size(); itor++){   
@@ -743,7 +750,8 @@ public static void RenderGridProposedGhostAtoms(NICS_Grid GridToRender, Object G
                 
                 
                                // render the grid points
-                if(!RenderSettings.RenderPointsAsQuad){ 
+                if(GridToRender.Number_Of_Points >= RenderSettings.GRID_NO_DISPLAY){
+                    // render the points as points -- low quality but maybe faster
                     GL11.glPointSize(RenderSettings.GridPointSize);
                     GL11.glColor4f(RenderSettings.GridSurfacePointProposedColor.x, RenderSettings.GridSurfacePointProposedColor.y, RenderSettings.GridSurfacePointProposedColor.z, RenderSettings.GridOutlineProposedColor.w);                
                     GL11.glBegin(GL11.GL_POINTS);             
@@ -758,7 +766,7 @@ public static void RenderGridProposedGhostAtoms(NICS_Grid GridToRender, Object G
                     }
                     GL11.glEnd ();
                     // render the points as a quad
-                }else if(GridToRender.QuadPoints.size() < RenderSettings.NO_DISPLAY){
+                }else if(GridToRender.Number_Of_Points < RenderSettings.GRID_NO_DISPLAY){
                     GL11.glColor4f(RenderSettings.GridSurfacePointProposedColor.x, RenderSettings.GridSurfacePointProposedColor.y, RenderSettings.GridSurfacePointProposedColor.z, RenderSettings.GridOutlineProposedColor.w);                
                     GL11.glBegin(GL11.GL_TRIANGLES);                
                     for(int itor = 0; itor < GridToRender.QuadPoints.size(); itor++){   
@@ -853,7 +861,8 @@ public static void RenderGridGhostAtoms(NICS_Grid GridToRender, Object GhastlyLo
                 
                 // render grid points
                  
-                 if(!RenderSettings.RenderPointsAsQuad){ 
+                 if(GridToRender.Number_Of_Points >= RenderSettings.GRID_NO_DISPLAY){
+                     // render the points as points -- low quality but maybe faster
                     GL11.glPointSize(RenderSettings.GridPointSize);
                     GL11.glColor4f(RenderSettings.GridSurfacePointSelectedColor.x, RenderSettings.GridSurfacePointSelectedColor.y, RenderSettings.GridSurfacePointSelectedColor.z, RenderSettings.GridOutlineSelectedColor.w);                
                     GL11.glBegin(GL11.GL_POINTS);             
@@ -868,7 +877,7 @@ public static void RenderGridGhostAtoms(NICS_Grid GridToRender, Object GhastlyLo
                     }
                     GL11.glEnd ();
                     // render the points as a quad
-                }else if(GridToRender.QuadPoints.size() < RenderSettings.NO_DISPLAY){
+                }else if(GridToRender.Number_Of_Points < RenderSettings.GRID_NO_DISPLAY){
                     GL11.glColor4f(RenderSettings.GridSurfacePointSelectedColor.x, RenderSettings.GridSurfacePointSelectedColor.y, RenderSettings.GridSurfacePointSelectedColor.z, RenderSettings.GridOutlineSelectedColor.w);                
                      GL11.glBegin(GL11.GL_TRIANGLES);                
                     for(int itor = 0; itor < GridToRender.QuadPoints.size(); itor++){   
@@ -930,7 +939,8 @@ public static void RenderGridGhostAtoms(NICS_Grid GridToRender, Object GhastlyLo
                 GL11.glEnd();
                 
      
-                 if(!RenderSettings.RenderPointsAsQuad){ 
+                 if(GridToRender.Number_Of_Points >= RenderSettings.GRID_NO_DISPLAY){
+                     // render the points as points -- low quality but maybe faster
                     GL11.glPointSize(RenderSettings.GridPointSize);
                     GL11.glColor4f(RenderSettings.GridSurfacePointSelectedColor.x, RenderSettings.GridSurfacePointSelectedColor.y, RenderSettings.GridSurfacePointSelectedColor.z, RenderSettings.GridOutlineSelectedColor.w);                
                     GL11.glBegin(GL11.GL_POINTS);             
@@ -945,7 +955,7 @@ public static void RenderGridGhostAtoms(NICS_Grid GridToRender, Object GhastlyLo
                     }
                     GL11.glEnd ();
                     // render the points as a quad
-                }else if(GridToRender.QuadPoints.size() < RenderSettings.NO_DISPLAY){
+                }else if(GridToRender.Number_Of_Points < RenderSettings.GRID_NO_DISPLAY){
                     GL11.glColor4f(RenderSettings.GridSurfacePointSelectedColor.x, RenderSettings.GridSurfacePointSelectedColor.y, RenderSettings.GridSurfacePointSelectedColor.z, RenderSettings.GridOutlineSelectedColor.w);                
                     GL11.glBegin(GL11.GL_TRIANGLES);                
                     for(int itor = 0; itor < GridToRender.QuadPoints.size(); itor++){   
@@ -1006,7 +1016,8 @@ public static void RenderGridGhostAtoms(NICS_Grid GridToRender, Object GhastlyLo
                 GL11.glVertex3f(GridToRender.CubePoints[8].x, GridToRender.CubePoints[8].y, GridToRender.CubePoints[8].z);
                 GL11.glEnd();
                 
-                if(!RenderSettings.RenderPointsAsQuad){ 
+                if(GridToRender.Number_Of_Points >= RenderSettings.GRID_NO_DISPLAY){
+                    // render the points as points -- low quality but maybe faster
                     GL11.glPointSize(RenderSettings.GridPointSize);
                     GL11.glColor4f(RenderSettings.GridSurfacePointSelectedColor.x, RenderSettings.GridSurfacePointSelectedColor.y, RenderSettings.GridSurfacePointSelectedColor.z, RenderSettings.GridOutlineSelectedColor.w);                
                     GL11.glBegin(GL11.GL_POINTS);             
@@ -1021,7 +1032,7 @@ public static void RenderGridGhostAtoms(NICS_Grid GridToRender, Object GhastlyLo
                     }
                     GL11.glEnd ();
                     // render the points as a quad
-                }else if(GridToRender.QuadPoints.size() < RenderSettings.NO_DISPLAY){
+                }else if(GridToRender.Number_Of_Points < RenderSettings.GRID_NO_DISPLAY){
                     GL11.glColor4f(RenderSettings.GridSurfacePointSelectedColor.x, RenderSettings.GridSurfacePointSelectedColor.y, RenderSettings.GridSurfacePointSelectedColor.z, RenderSettings.GridOutlineSelectedColor.w);                
                      GL11.glBegin(GL11.GL_TRIANGLES);                
                     for(int itor = 0; itor < GridToRender.QuadPoints.size(); itor++){   
@@ -1169,7 +1180,8 @@ public static void RenderGridGhostAtoms(NICS_Grid GridToRender, Object GhastlyLo
                 
                 
                 
-                 if(!RenderSettings.RenderPointsAsQuad){ 
+                 if(GridToRender.Number_Of_Points >= RenderSettings.GRID_NO_DISPLAY){
+                     // render the points as points -- low quality but maybe faster
                     GL11.glPointSize(RenderSettings.GridPointSize);
                     GL11.glColor4f(RenderSettings.GridSurfacePointSelectedColor.x, RenderSettings.GridSurfacePointSelectedColor.y, RenderSettings.GridSurfacePointSelectedColor.z, RenderSettings.GridOutlineSelectedColor.w);                
                     GL11.glBegin(GL11.GL_POINTS);             
@@ -1184,7 +1196,7 @@ public static void RenderGridGhostAtoms(NICS_Grid GridToRender, Object GhastlyLo
                     }
                     GL11.glEnd ();
                     // render the points as a quad
-                }else if(GridToRender.QuadPoints.size() < RenderSettings.NO_DISPLAY){
+                }else if(GridToRender.Number_Of_Points < RenderSettings.GRID_NO_DISPLAY){
                     GL11.glColor4f(RenderSettings.GridSurfacePointSelectedColor.x, RenderSettings.GridSurfacePointSelectedColor.y, RenderSettings.GridSurfacePointSelectedColor.z, RenderSettings.GridOutlineSelectedColor.w);                
                      GL11.glBegin(GL11.GL_TRIANGLES);                
                     for(int itor = 0; itor < GridToRender.QuadPoints.size(); itor++){   
@@ -1248,7 +1260,8 @@ public static void RenderGridGhostAtoms(NICS_Grid GridToRender, Object GhastlyLo
                 GL11.glVertex3f(GridToRender.CubePoints[1].x, GridToRender.CubePoints[1].y, GridToRender.CubePoints[1].z);
                 GL11.glEnd();
                 
-                if(!RenderSettings.RenderPointsAsQuad){ 
+                if(GridToRender.Number_Of_Points >= RenderSettings.GRID_NO_DISPLAY){
+                    // render the points as points -- low quality but maybe faster
                     GL11.glPointSize(RenderSettings.GridPointSize);
                     GL11.glColor4f(RenderSettings.GridSurfacePointColor.x, RenderSettings.GridSurfacePointColor.y, RenderSettings.GridSurfacePointColor.z, RenderSettings.GridOutlineColor.w);                
                     GL11.glBegin(GL11.GL_POINTS);             
@@ -1263,7 +1276,7 @@ public static void RenderGridGhostAtoms(NICS_Grid GridToRender, Object GhastlyLo
                     }
                     GL11.glEnd ();
                     // render the points as a quad
-                }else if(GridToRender.QuadPoints.size() < RenderSettings.NO_DISPLAY){
+                }else if(GridToRender.Number_Of_Points < RenderSettings.GRID_NO_DISPLAY){
                     GL11.glColor4f(RenderSettings.GridSurfacePointColor.x, RenderSettings.GridSurfacePointColor.y, RenderSettings.GridSurfacePointColor.z, RenderSettings.GridOutlineColor.w);                
                      GL11.glBegin(GL11.GL_TRIANGLES);                
                     for(int itor = 0; itor < GridToRender.QuadPoints.size(); itor++){   
@@ -1323,7 +1336,8 @@ public static void RenderGridGhostAtoms(NICS_Grid GridToRender, Object GhastlyLo
                 GL11.glVertex3f(GridToRender.CubePoints[1].x, GridToRender.CubePoints[1].y, GridToRender.CubePoints[1].z);
                 GL11.glEnd();
                 
-                if(!RenderSettings.RenderPointsAsQuad){ 
+                if(GridToRender.Number_Of_Points >= RenderSettings.GRID_NO_DISPLAY){
+                    // render the points as points -- low quality but maybe faster
                     GL11.glPointSize(RenderSettings.GridPointSize);
                     GL11.glColor4f(RenderSettings.GridSurfacePointColor.x, RenderSettings.GridSurfacePointColor.y, RenderSettings.GridSurfacePointColor.z, RenderSettings.GridOutlineColor.w);                
                     GL11.glBegin(GL11.GL_POINTS);             
@@ -1338,7 +1352,7 @@ public static void RenderGridGhostAtoms(NICS_Grid GridToRender, Object GhastlyLo
                     }
                     GL11.glEnd ();
                     // render the points as a quad
-                }else if(GridToRender.QuadPoints.size() < RenderSettings.NO_DISPLAY){
+                }else if(GridToRender.Number_Of_Points < RenderSettings.GRID_NO_DISPLAY){
                     GL11.glColor4f(RenderSettings.GridSurfacePointColor.x, RenderSettings.GridSurfacePointColor.y, RenderSettings.GridSurfacePointColor.z, RenderSettings.GridOutlineColor.w);                
                      GL11.glBegin(GL11.GL_TRIANGLES);                
                     for(int itor = 0; itor < GridToRender.QuadPoints.size(); itor++){   
@@ -1402,7 +1416,8 @@ public static void RenderGridGhostAtoms(NICS_Grid GridToRender, Object GhastlyLo
                 GL11.glVertex3f(GridToRender.CubePoints[8].x, GridToRender.CubePoints[8].y, GridToRender.CubePoints[8].z);
                 GL11.glEnd();
                 
-                if(!RenderSettings.RenderPointsAsQuad){ 
+                if(GridToRender.Number_Of_Points >= RenderSettings.GRID_NO_DISPLAY){
+                    // render the points as points -- low quality but maybe faster
                     GL11.glPointSize(RenderSettings.GridPointSize);
                     GL11.glColor4f(RenderSettings.GridSurfacePointColor.x, RenderSettings.GridSurfacePointColor.y, RenderSettings.GridSurfacePointColor.z, RenderSettings.GridOutlineColor.w);                
                     GL11.glBegin(GL11.GL_POINTS);             
@@ -1417,7 +1432,7 @@ public static void RenderGridGhostAtoms(NICS_Grid GridToRender, Object GhastlyLo
                     }
                     GL11.glEnd ();
                     // render the points as a quad
-                }else if(GridToRender.QuadPoints.size() < RenderSettings.NO_DISPLAY){
+                }else if(GridToRender.Number_Of_Points < RenderSettings.GRID_NO_DISPLAY){
                     GL11.glColor4f(RenderSettings.GridSurfacePointColor.x, RenderSettings.GridSurfacePointColor.y, RenderSettings.GridSurfacePointColor.z, RenderSettings.GridOutlineColor.w);                
                      GL11.glBegin(GL11.GL_TRIANGLES);                
                     for(int itor = 0; itor < GridToRender.QuadPoints.size(); itor++){   
@@ -1515,7 +1530,8 @@ public static void RenderGridGhostAtoms(NICS_Grid GridToRender, Object GhastlyLo
                 GL11.glVertex3f(GridToRender.CubePoints[4].x, GridToRender.CubePoints[4].y, GridToRender.CubePoints[4].z);                             
                 GL11.glEnd();
                 
-                if(!RenderSettings.RenderPointsAsQuad){ 
+                if(GridToRender.Number_Of_Points >= RenderSettings.GRID_NO_DISPLAY){
+                    // render the points as points -- low quality but maybe faster
                     GL11.glPointSize(RenderSettings.GridPointSize);
                     GL11.glColor4f(RenderSettings.GridSurfacePointColor.x, RenderSettings.GridSurfacePointColor.y, RenderSettings.GridSurfacePointColor.z, RenderSettings.GridOutlineColor.w);                
                     GL11.glBegin(GL11.GL_POINTS);             
@@ -1529,8 +1545,8 @@ public static void RenderGridGhostAtoms(NICS_Grid GridToRender, Object GhastlyLo
                                         GridToRender.SurfaceAtomCoordinates.get(itor).z);
                     }
                     GL11.glEnd ();
-                    // render the points as a quad
-                }else if(GridToRender.QuadPoints.size() < RenderSettings.NO_DISPLAY){
+                    // render the points as a quad as long as less points than GRID_NO_DISPLAY
+                }else if(GridToRender.Number_Of_Points < RenderSettings.GRID_NO_DISPLAY){
                     GL11.glColor4f(RenderSettings.GridSurfacePointColor.x, RenderSettings.GridSurfacePointColor.y, RenderSettings.GridSurfacePointColor.z, RenderSettings.GridOutlineColor.w);                
                      GL11.glBegin(GL11.GL_TRIANGLES);                
                     for(int itor = 0; itor < GridToRender.QuadPoints.size(); itor++){   

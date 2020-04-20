@@ -347,8 +347,6 @@ public class Plane {
         XVectorAtom.z = XProjectionAtom.z;
         XVectorAtomDefined = true;
         
-        System.out.println("X Projection Atom: (X,Y,Z): "+XVectorAtom.x+""+XVectorAtom.y+""+XVectorAtom.z);
-        
     }
     
     public void RemoveCurrentXProjectionAtom(){
@@ -425,7 +423,11 @@ public class Plane {
        // https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=4&ved=0ahUKEwiC1tTNnv_QAhUGwFQKHX4QCYoQFggvMAM&url=http%3A%2F%2Fwww.math.tau.ac.il%2F~dcor%2FGraphics%2Fcg-slides%2Fgeom3d.pdf&usg=AFQjCNG0qhbk3E8jlw8ale28Wt9s_kUxUg&bvm=bv.142059868,d.cGw&cad=rja
         //transforming from XVector, YVector, ZVector defining plane coordinate system to global coordinate system
         
-
+        /*
+        [m00 m10 m20]
+        [m01 m11 m21]
+        [m02 m12 m22]
+         */
          Matrix3f TempRotation = new Matrix3f();
          TempRotation.m00 = XVector.x;
          TempRotation.m01 = XVector.y;
@@ -436,7 +438,11 @@ public class Plane {
          TempRotation.m20 = ZVector.x;
          TempRotation.m21 = ZVector.y;
          TempRotation.m22 = ZVector.z;
-                                                      
+        /*
+        [m00 m10 m20]
+        [m01 m11 m21]
+        [m02 m12 m22]
+         */
          //TempRotation.transpose();
          TempRotation.transform(PlaneCoordinate, FinalValue);
         
@@ -471,13 +477,9 @@ public class Plane {
         
         
         //http://www.songho.ca/math/plane/plane.html
-        // Edge Cases! 
-        // for the plane equation Ax + By + Cz + D = 0, D = A*(x1) + B*(Y1) + C*(Z1)
-        // where the plane is normal to the Z axis (A, B = 0, the parametric calculation fails (divides by zero)
-        // but the closest point to the X/Y plane is just the Z point
         
-        
-        
+        // for the plane equation Ax + By + Cz + D = 0, D = A*(x1) + B*(Y1) + C*(Z1)        
+                      
         
         A = PlaneEquation.x;
         B = PlaneEquation.y;
@@ -540,7 +542,13 @@ public class Plane {
       //  System.out.println("Y:x: " + YVector.x + "Y:y: " + YVector.y+ "Y:z: " + YVector.z);
       //  System.out.println("Z:x: " + ZVector.x + "Z:y: " + ZVector.y+ "Z:z: " + ZVector.z);
       //  DebugEigenvectors();
-
+      
+      
+        /*
+        [m00 m10 m20]
+        [m01 m11 m21]
+        [m02 m12 m22]
+         */
          Matrix3f TempRotation = new Matrix3f();
          TempRotation.m00 = XVector.x;
          TempRotation.m01 = XVector.y;
